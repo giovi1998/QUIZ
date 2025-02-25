@@ -1,7 +1,6 @@
 // SetupScreen.tsx
 import React from "react";
 import { RotateCcw, Info, Upload } from "lucide-react";
-import { FormatInfoModal } from "./FormatInfoModal.tsx";
 
 type SetupScreenProps = {
   quizName: string;
@@ -67,7 +66,7 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
               type="checkbox"
               checked={quizMode === "custom"}
               onChange={(e) => setQuizMode(e.target.checked ? "custom" : "default")}
-              className="form-checkbox h-5 w-5 text-blue-500"
+              className="h-5 w-5 text-blue-500"
             />
             <span className="ml-2 text-gray-700">
               Modalità Personalizzata
@@ -86,12 +85,12 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
         <label className="block text-gray-700 font-medium mb-2">
           Abilita Timer
         </label>
-        <div className="flex items-center">
+        <div className="flex items-center gap-2">
           <input
             type="checkbox"
             checked={timerEnabled}
             onChange={(e) => setTimerEnabled(e.target.checked)}
-            className="form-checkbox h-5 w-5 text-blue-500"
+            className="h-5 w-5 text-blue-500"
           />
           <span className="ml-2 text-gray-700">
             {timerEnabled ? "Attivo" : "Disattivato"}
@@ -161,11 +160,6 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
           Reset
         </button>
       </div>
-      
-      {/* Modal formato file */}
-      {showFormatInfo && (
-        <FormatInfoModal onClose={() => setShowFormatInfo(false)} />
-      )}
     </div>
   );
 };

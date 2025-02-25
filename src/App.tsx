@@ -15,6 +15,16 @@ export type Question = {
 
 type QuizStatus = "setup" | "active" | "completed" | "empty";
 
+// Helper function: Shuffle un array usando l'algoritmo Fisher–Yates
+function shuffleArray<T>(array: T[]): T[] {
+  const newArr = array.slice();
+  for (let i = newArr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+  }
+  return newArr;
+}
+
 function App() {
   // Setup state
   const [quizName, setQuizName] = useState("Visione Artificiale");
@@ -23,6 +33,7 @@ function App() {
   const [timerEnabled, setTimerEnabled] = useState(true);
   const [timerDuration, setTimerDuration] = useState(30);
   const [showFormatInfo, setShowFormatInfo] = useState(false);
+
   // Quiz state
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -36,7 +47,7 @@ function App() {
   const [alertMessage, setAlertMessage] = useState("");
   const [showAlert, setShowAlert] = useState(false);
 
-  // Default questions
+  // Default questions (modalità default)
   const defaultQuestions: Question[] = [
     {
       question: "Qual è l'obiettivo principale della visione artificiale?",
@@ -101,7 +112,12 @@ function App() {
     setAnswers((prevAnswers) => [...prevAnswers, selectedOption || ""]);
   };
 
+  // Aggiornamento della funzione nextQuestion per resettare il timer
   const nextQuestion = () => {
+    // Ripristina il timer per la nuova domanda
+    setTimeRemaining(timerDuration);
+    setTimerActive(timerEnabled);
+
     setSelectedAnswer(null);
     setShowExplanation(false);
     if (currentQuestionIndex < questions.length - 1) {
@@ -140,6 +156,7 @@ function App() {
     setTimeout(() => setShowAlert(false), 3000);
   };
 
+  // Gestione del caricamento del file JSON, con selezione casuale di 24 domande e mescolamento delle opzioni
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -147,10 +164,11 @@ function App() {
     reader.onload = (event) => {
       try {
         const content = event.target?.result as string;
-        const parsedData: Question[] = JSON.parse(content);
+        let parsedData: Question[] = JSON.parse(content);
         if (!Array.isArray(parsedData)) {
           throw new Error("Formato JSON non valido: deve essere un array");
         }
+        // Verifica e trasforma ogni domanda
         parsedData.forEach((q, i) => {
           if (!q.question || !Array.isArray(q.options) || !q.correctAnswer || !q.explanation) {
             throw new Error(`Domanda ${i + 1} manca dei campi obbligatori`);
@@ -158,10 +176,18 @@ function App() {
           if (q.correctAnswer.endsWith(" correct")) {
             q.correctAnswer = q.correctAnswer.replace(" correct", "").trim();
           }
+          // Mescola le opzioni per aumentare la difficoltà
+          q.options = shuffleArray(q.options);
           if (!q.options.includes(q.correctAnswer)) {
             throw new Error(`Domanda ${i + 1}: la risposta corretta non è presente tra le opzioni`);
           }
         });
+        // Mescola l'array completo di domande in modo casuale
+        parsedData = shuffleArray(parsedData);
+        // Se ci sono più di 24 domande, seleziona solo 24
+        if (parsedData.length > 24) {
+          parsedData = parsedData.slice(0, 24);
+        }
         setQuestions(parsedData);
         resetQuiz();
         showTemporaryAlert(`Caricate ${parsedData.length} domande con successo!`);
@@ -189,7 +215,8 @@ function App() {
   const generateReport = (): Report => {
     const totalQuestions = questions.length;
     const correctAnswers = score;
-    const percentage = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
+    const percentage =
+      totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
     const missed = questions
       .map((q, idx) => ({
         question: q.question,
@@ -253,6 +280,7 @@ function App() {
           nextQuestion={nextQuestion}
           timeRemaining={timeRemaining}
           timerActive={timerActive}
+          timerEnabled={timerEnabled}
         />
       )}
       {quizStatus === "completed" && (
