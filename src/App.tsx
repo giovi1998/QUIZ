@@ -13,7 +13,7 @@ export type Question = {
   explanation: string;
 };
 
-type QuizStatus = "setup" | "active" | "completed" | "empty";
+export type QuizStatus = "setup" | "active" | "completed" | "empty";
 
 function App() {
   // Setup state
@@ -85,7 +85,7 @@ function App() {
   }, [timerActive, timeRemaining]);
 
 // Nel useEffect del timer
-    useEffect(() => {
+useEffect(() => {
     if (quizStatus === "active") {
       setTimeRemaining(timerDuration);
       setTimerActive(timerEnabled); // Questa riga è già presente
