@@ -35,7 +35,7 @@ const ExplanationSection: React.FC<ExplanationSectionProps> = ({
                 strokeWidth={2} 
                 className="mr-1" 
               />
-              <span className="text-red-600 font-semibold">Corretto!</span>
+              <span className="text-green-600 font-semibold">Corretto!</span>
             </div>
           ) : (
             // Feedback risposta errata
