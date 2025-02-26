@@ -1,10 +1,10 @@
-// App.tsx
 import React, { useState, useEffect, useRef } from "react";
 import { SetupScreen } from "./components/SetupScreen.tsx";
 import { ActiveQuizScreen } from "./components/ActiveQuizScreen.tsx";
 import { CompletedScreen, Report } from "./components/CompletedScreen.tsx";
 import { EmptyScreen } from "./components/EmptyScreen.tsx";
 import { FormatInfoModal } from "./components/FormatInfoModal.tsx";
+import { extractFromPdf } from "./components/pdfExtractor.ts";
 
 // Tipo per rappresentare una domanda del quiz
 export type Question = {
@@ -14,10 +14,10 @@ export type Question = {
   explanation: string;
 };
 
-// Tipo per gli stati possibili del quiz
+// Stati possibili del quiz
 type QuizStatus = "setup" | "active" | "completed" | "empty";
 
-// Funzione helper: Mescola un array usando l'algoritmo Fisher-Yates
+// Funzione helper: mescola un array (algoritmo Fisher-Yates)
 function shuffleArray<T>(array: T[]): T[] {
   const newArr = array.slice();
   for (let i = newArr.length - 1; i > 0; i--) {
@@ -27,9 +27,8 @@ function shuffleArray<T>(array: T[]): T[] {
   return newArr;
 }
 
-// Componente principale dell'applicazione
 function App() {
-  // Stato per la configurazione del quiz
+  // Stato configurazione quiz
   const [quizName, setQuizName] = useState("Computer Vision");
   const [quizMode, setQuizMode] = useState<"default" | "custom">("default");
   const [quizStatus, setQuizStatus] = useState<QuizStatus>("setup");
@@ -37,7 +36,7 @@ function App() {
   const [timerDuration, setTimerDuration] = useState(30);
   const [showFormatInfo, setShowFormatInfo] = useState(false);
 
-  // Stato per la gestione del quiz
+  // Stato gestione quiz
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -47,10 +46,11 @@ function App() {
   const [timeRemaining, setTimeRemaining] = useState(timerDuration);
   const [timerActive, setTimerActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
   const [alertMessage, setAlertMessage] = useState("");
   const [showAlert, setShowAlert] = useState(false);
 
-  // Domande predefinite per la modalità default
+  // Domande predefinite (modalità default)
   const defaultQuestions: Question[] = [
     {
       question: "Qual è l'obiettivo principale della visione artificiale?",
@@ -64,32 +64,14 @@ function App() {
       explanation:
         "La visione artificiale ha lo scopo di abilitare i computer ad interpretare e comprendere informazioni visive dal mondo.",
     },
-    {
-      question: "Quale delle seguenti non è un'applicazione comune della visione artificiale?",
-      options: [
-        "Riconoscimento facciale",
-        "Riconoscimento vocale",
-        "Rilevamento oggetti",
-        "Segmentazione immagini",
-      ],
-      correctAnswer: "Riconoscimento vocale",
-      explanation:
-        "Il riconoscimento vocale non fa parte della visione artificiale; rientra nel campo del riconoscimento vocale.",
-    },
-    {
-      question: "Quale tecnica è fondamentale per il riconoscimento di oggetti nella visione artificiale?",
-      options: ["Data Warehousing", "Deep Learning", "Query Processing", "Network Routing"],
-      correctAnswer: "Deep Learning",
-      explanation:
-        "Il Deep Learning, in particolare le reti neurali convoluzionali (CNN), è diventato fondamentale per il riconoscimento di oggetti nella visione artificiale.",
-    },
+    // ...altri esempi se necessario
   ];
 
-  // Effetto per la gestione del timer
+  // Gestione del timer
   useEffect(() => {
     if (timerActive && timeRemaining > 0) {
       const timer = setTimeout(() => {
-        setTimeRemaining((prevTime) => prevTime - 1);
+        setTimeRemaining(prev => prev - 1);
       }, 1000);
       return () => clearTimeout(timer);
     } else if (timerActive && timeRemaining === 0) {
@@ -97,7 +79,6 @@ function App() {
     }
   }, [timerActive, timeRemaining]);
 
-  // Effetto per il reset del timer quando cambia domanda
   useEffect(() => {
     if (quizStatus === "active") {
       setTimeRemaining(timerDuration);
@@ -105,33 +86,32 @@ function App() {
     }
   }, [currentQuestionIndex, timerEnabled, timerDuration, quizStatus]);
 
-  // Gestisce la selezione di una risposta
+  // Gestione della risposta
   const handleAnswer = (selectedOption: string | null) => {
     setSelectedAnswer(selectedOption);
     setShowExplanation(true);
     setTimerActive(false);
-    const currentQuestion = questions[currentQuestionIndex];
-    if (selectedOption === currentQuestion?.correctAnswer) {
-      setScore((prevScore) => prevScore + 1);
+    const current = questions[currentQuestionIndex];
+    if (selectedOption === current?.correctAnswer) {
+      setScore(prev => prev + 1);
     }
-    setAnswers((prevAnswers) => [...prevAnswers, selectedOption || ""]);
+    setAnswers(prev => [...prev, selectedOption || ""]);
   };
 
-  // Passa alla prossima domanda o termina il quiz
+  // Passa alla prossima domanda o completa il quiz
   const nextQuestion = () => {
     setTimeRemaining(timerDuration);
     setTimerActive(timerEnabled);
     setSelectedAnswer(null);
     setShowExplanation(false);
-    
     if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex((prev) => prev + 1);
+      setCurrentQuestionIndex(prev => prev + 1);
     } else {
       setQuizStatus("completed");
     }
   };
 
-  // Resetta il quiz allo stato iniziale
+  // Reset del quiz
   const resetQuiz = () => {
     setCurrentQuestionIndex(0);
     setScore(0);
@@ -143,7 +123,7 @@ function App() {
     setQuizStatus("active");
   };
 
-  // Svuota tutte le domande e resetta lo stato
+  // Svuota le domande e resetta lo stato
   const clearQuestions = () => {
     setQuestions([]);
     setCurrentQuestionIndex(0);
@@ -156,14 +136,14 @@ function App() {
     setQuizStatus("empty");
   };
 
-  // Mostra un messaggio temporaneo di alert
+  // Mostra un alert temporaneo (accessibilità: role e aria-live)
   const showTemporaryAlert = (message: string) => {
     setAlertMessage(message);
     setShowAlert(true);
     setTimeout(() => setShowAlert(false), 3000);
   };
 
-  // Gestisce il caricamento del file JSON con le domande
+  // Gestione del caricamento del file JSON (domande personalizzate)
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -172,39 +152,20 @@ function App() {
       try {
         const content = event.target?.result as string;
         let parsedData: Question[] = JSON.parse(content);
-        
-        // Validazione struttura del JSON
         if (!Array.isArray(parsedData)) {
           throw new Error("Formato JSON non valido: deve essere un array");
         }
-
-        // Elaborazione delle domande
         parsedData.forEach((q, i) => {
-          // Verifica campi obbligatori
           if (!q.question || !Array.isArray(q.options) || !q.correctAnswer || !q.explanation) {
             throw new Error(`Domanda ${i + 1} manca dei campi obbligatori`);
           }
-
-          // Pulizia della risposta corretta
-          if (q.correctAnswer.endsWith(" correct")) {
-            q.correctAnswer = q.correctAnswer.replace(" correct", "").trim();
-          }
-
-          // Mescolamento delle opzioni
           q.options = shuffleArray(q.options);
-          
-          // Verifica consistenza risposta corretta
           if (!q.options.includes(q.correctAnswer)) {
             throw new Error(`Domanda ${i + 1}: la risposta corretta non è presente tra le opzioni`);
           }
         });
-
-        // Limita a 24 domande e mescola
         parsedData = shuffleArray(parsedData);
-        if (parsedData.length > 24) {
-          parsedData = parsedData.slice(0, 24);
-        }
-
+        if (parsedData.length > 24) parsedData = parsedData.slice(0, 24);
         setQuestions(parsedData);
         resetQuiz();
         showTemporaryAlert(`Caricate ${parsedData.length} domande con successo!`);
@@ -218,7 +179,32 @@ function App() {
     reader.readAsText(file);
   };
 
-  // Gestisce il completamento della configurazione
+  // Gestione del caricamento del file PDF usando extractFromPdf
+  const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const extractedQuestions = await extractFromPdf(file);
+      extractedQuestions.forEach((q: Question, i: number) => {
+        if (q.options.length === 0 && q.question.toLowerCase().includes("scelta multipla")) {
+          throw new Error(`Domanda ${i + 1} manca delle opzioni attese per una domanda a scelta multipla`);
+        }
+        q.options = shuffleArray(q.options);
+      });
+      let parsedData = shuffleArray(extractedQuestions);
+      if (parsedData.length > 24) parsedData = parsedData.slice(0, 24);
+      setQuestions(parsedData);
+      resetQuiz();
+      showTemporaryAlert(`Caricate ${parsedData.length} domande da PDF con successo!`);
+      if (pdfInputRef.current) pdfInputRef.current.value = "";
+    } catch (error) {
+      console.error("Errore di caricamento PDF:", error);
+      showTemporaryAlert(`Errore: ${(error as Error).message}`);
+      if (pdfInputRef.current) pdfInputRef.current.value = "";
+    }
+  };
+
+  // Completamento della configurazione
   const handleSetupComplete = () => {
     if (quizMode === "default") {
       setQuestions(defaultQuestions);
@@ -234,8 +220,7 @@ function App() {
   const generateReport = (): Report => {
     const totalQuestions = questions.length;
     const correctAnswers = score;
-    const percentage =
-      totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
+    const percentage = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
     const missed = questions
       .map((q, idx) => ({
         question: q.question,
@@ -252,15 +237,18 @@ function App() {
     setQuizStatus("setup");
   };
 
-  // Renderizzazione principale
   return (
     <div className="max-w-4xl mx-auto p-4 bg-white rounded-lg shadow-lg min-h-screen">
       {showAlert && (
-        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-red-500 text-white px-4 py-2 rounded transition-opacity duration-300">
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-red-500 text-white px-4 py-2 rounded transition-opacity duration-300"
+        >
           {alertMessage}
         </div>
       )}
-      
+
       {quizStatus === "setup" && (
         <SetupScreen
           quizName={quizName}
@@ -277,9 +265,11 @@ function App() {
           onSetupComplete={handleSetupComplete}
           showFormatInfo={showFormatInfo}
           setShowFormatInfo={setShowFormatInfo}
+          pdfInputRef={pdfInputRef}
+          handlePdfUpload={handlePdfUpload}
         />
       )}
-      
+
       {quizStatus === "empty" && (
         <EmptyScreen
           quizName={quizName}
@@ -289,7 +279,7 @@ function App() {
           setShowFormatInfo={setShowFormatInfo}
         />
       )}
-      
+
       {quizStatus === "active" && questions.length > 0 && (
         <ActiveQuizScreen
           quizName={quizName}
@@ -307,7 +297,7 @@ function App() {
           timerEnabled={timerEnabled}
         />
       )}
-      
+
       {quizStatus === "completed" && (
         <CompletedScreen
           quizName={quizName}
@@ -316,7 +306,7 @@ function App() {
           backToSetup={backToSetup}
         />
       )}
-      
+
       {showFormatInfo && (
         <FormatInfoModal onClose={() => setShowFormatInfo(false)} />
       )}

@@ -1,98 +1,76 @@
-// Aggiungi questo nuovo file in src/utils/pdfExtractor.ts
+// pdfExtractor.tsx
 import * as pdfjsLib from 'pdfjs-dist';
-
-// Inizializzazione della libreria PDF.js
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
-// Interfaccia per i pattern di estrazione
-interface ExtractionPattern {
-  questionPattern: RegExp;
-  optionPattern: RegExp;
-  correctAnswerPattern: RegExp;
+interface Question {
+  question: string;
+  options: string[];
+  lecture: string;
+  type: 'multiple-choice' | 'open';
 }
 
-// Pattern per riconoscere le domande, opzioni e risposte nel testo
-const defaultPattern: ExtractionPattern = {
-  questionPattern: /Domanda\s+\d+:?\s+(.*?)(?=\n|$)/gi,
-  optionPattern: /[◦•○]\s+(.*?)(?=\n|$)/gi,
-  correctAnswerPattern: /Risposta\s+corretta:?\s+(.*?)(?=\n|$)/gi,
-};
+const LEC_PATTERN = /Lezione\s+\d+/gi;
+const QUEST_PATTERN = /\*\*(\d+)\.\*\*\s*(.+?)(?=\n\*\*|\n\s*$|\nLezione|$)/gis;
+const OPTION_PATTERN = /^(\d+\.\s*|◦|•|○|—|\))\s*(.+)/gm;
 
-export async function extractFromPdf(file: File): Promise<any[]> {
+export async function extractFromPdf(file: File): Promise<Question[]> {
   try {
-    // Carica il file PDF
     const arrayBuffer = await file.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-    
-    // Estrai il testo da tutte le pagine
     let fullText = '';
+    
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i);
       const textContent = await page.getTextContent();
-      const pageText = textContent.items
-        .map((item: any) => item.str)
-        .join(' ');
-      fullText += pageText + '\n';
+      fullText += textContent.items.map(item => item.str).join('\n') + '\n\n';
     }
-    
-    return processExtractedText(fullText, defaultPattern);
+
+    return processPdfText(fullText);
   } catch (error) {
-    console.error('Errore durante l\'estrazione dal PDF:', error);
-    throw new Error(`Errore nell'elaborazione del PDF: ${error}`);
+    throw new Error(`Extraction failed: ${error}`);
   }
 }
 
-function processExtractedText(text: string, pattern: ExtractionPattern): any[] {
-  const questions: any[] = [];
-  
-  // Dividi il testo in blocchi di domande
-  const blocks = text.split(/Domanda\s+\d+:/i);
-  
-  // Salta il primo elemento se è vuoto
-  blocks.shift();
-  
-  blocks.forEach((block, index) => {
-    try {
-      const questionMatch = block.match(/^(.*?)(?=\n|$)/);
-      if (!questionMatch) return;
+function processPdfText(text: string): Question[] {
+  const questions: Question[] = [];
+  const cleanedText = text
+    .replace(/(\r\n|\n|\r)/gm, '\n')
+    .replace(/\s{2,}/g, ' ')
+    .replace(/(\d+)\.(\D)/g, '$1. $2');
+
+  const lectures = cleanedText.split(LEC_PATTERN).slice(1);
+  lectures.forEach((lectureContent, index) => {
+    const lecture = `Lezione ${index + 1}`;
+    const questionBlocks = [...lectureContent.matchAll(QUEST_PATTERN)];
+    
+    questionBlocks.forEach((match) => {
+      const qNumber = match[1];
+      const qText = match[2].trim();
+      const isMultipleChoice = qText.toLowerCase().includes('scelta multipla');
+      const options: string[] = [];
+      let currentLine = qText;
+      let remainingText = lectureContent.split(qText)[1] || '';
       
-      const question = questionMatch[1].trim();
-      
-      // Estrai le opzioni
-      const optionsMatches = [...block.matchAll(/[◦•○]\s+(.*?)(?=\n|$|\[◦•○])/gi)];
-      const options = optionsMatches.map(match => match[1].trim());
-      
-      // Estrai la risposta corretta
-      const correctAnswerMatch = block.match(/Risposta\s+corretta:?\s+(.*?)(?=\n|$)/i);
-      if (!correctAnswerMatch) return;
-      
-      const correctAnswer = correctAnswerMatch[1].trim();
-      
-      // Crea la spiegazione (usando la risposta come spiegazione base se non c'è altro)
-      let explanation = `La risposta corretta è: ${correctAnswer}`;
-      const explanationMatch = block.match(/Spiegazione:?\s+(.*?)(?=\n\n|$)/i);
-      if (explanationMatch) {
-        explanation = explanationMatch[1].trim();
-      }
-      
-      if (question && options.length > 0 && correctAnswer) {
-        // Verifica che la risposta corretta sia presente nelle opzioni
-        if (!options.includes(correctAnswer)) {
-          // Se non è presente, aggiungila alle opzioni
-          options.push(correctAnswer);
-        }
+      // Collect options until next question or end
+      while (remainingText && options.length < 4) {
+        const optionMatch = remainingText.match(OPTION_PATTERN);
+        if (!optionMatch) break;
         
-        questions.push({
-          question,
-          options,
-          correctAnswer,
-          explanation
-        });
+        const [, prefix, text] = optionMatch[0].match(OPTION_PATTERN)!;
+        options.push(text.trim());
+        remainingText = remainingText.slice(optionMatch[0].length);
       }
-    } catch (error) {
-      console.error(`Errore nell'elaborazione del blocco ${index}:`, error);
-    }
+
+      questions.push({
+        question: `${qNumber}. ${qText}`,
+        options: options.length > 0 ? options : [''],
+        lecture,
+        type: isMultipleChoice ? 'multiple-choice' : 'open'
+      });
+    });
   });
+
+  return questions.filter(q => q.question && q.options.length > 0);
   
-  return questions;
 }
+
