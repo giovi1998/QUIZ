@@ -1,25 +1,29 @@
-// components/AnswerButton.tsx
-import React from "react";
+// AnswerButton.tsx
+import React from 'react';
+
 type AnswerButtonProps = {
   selectedAnswer: string | null;
   handleAnswer: (answer: string | null) => void;
+  className?: string;
 };
 
-const AnswerButton: React.FC<AnswerButtonProps> = ({
-  selectedAnswer,
-  handleAnswer,
-}) => {
+const AnswerButton: React.FC<AnswerButtonProps> = ({ selectedAnswer, handleAnswer, className }) => {
   return (
     <button
-      className={`w-full py-3 rounded-lg text-white font-semibold 
-        ${selectedAnswer ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-300 cursor-not-allowed"}`}
-      onClick={() => handleAnswer(selectedAnswer)}
+      className={`w-full sm:w-auto px-6 py-3 text-sm sm:text-base rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-all ${
+        selectedAnswer ? '' : 'opacity-50 cursor-not-allowed'
+      } ${className}`}
+      onClick={() => {
+        if (selectedAnswer) {
+          handleAnswer(selectedAnswer);
+        }
+      }}
       disabled={!selectedAnswer}
-      style={{ boxShadow: selectedAnswer ? "0 8px 15px rgba(0, 100, 255, 0.1)" : "none" }}
     >
-      Invia Risposta
+      Conferma Risposta
     </button>
   );
 };
 
 export default AnswerButton;
+

@@ -1,0 +1,345 @@
+[
+    {
+      "question": "La visione è il senso che consente all'essere umano di:",
+      "options": [
+        "studiare il mondo 3D, di localizzare senza riconoscere gli oggetti presenti in una scena e di percepire i rapidi mutamenti dell’ambiente",
+        "studiare il mondo 2D, di localizzare e riconoscere gli oggetti presenti in una scena e di percepire i rapidi mutamenti dell’ambiente",
+        "studiare il mondo 3D, di localizzare e riconoscere gli oggetti presenti in una scena senza percepire i rapidi mutamenti dell’ambiente",
+        "studiare il mondo 3D, di localizzare e riconoscere gli oggetti presenti in una scena e di percepire i rapidi mutamenti dell’ambiente"
+      ],
+      "correctAnswer": "studiare il mondo 3D, di localizzare e riconoscere gli oggetti presenti in una scena e di percepire i rapidi mutamenti dell’ambiente",
+      "explanation": "La visione umana permette di interpretare il mondo in tre dimensioni, riconoscere oggetti e percepire rapidi cambiamenti nell'ambiente circostante."
+    },
+    {
+      "question": "La pattern recognition si occupa:",
+      "options": [
+        "del miglioramento, restauro e compressione di immagini, ovvero, si elabora una immagine per ottenerne un’altra in qualche senso 'migliore'",
+        "dell'(estrazione), identificazione, classificazione di caratteristiche presenti all’interno delle immagini",
+        "dell’analisi di immagini numeriche al calcolatore con il fine di scoprire cosa è presente nella scena e dove si trova all’interno di essa",
+        "nessuno dei casi precedenti"
+      ],
+      "correctAnswer": "dell'(estrazione), identificazione, classificazione di caratteristiche presenti all’interno delle immagini",
+      "explanation": "La pattern recognition si concentra sull'estrazione, identificazione e classificazione delle caratteristiche visive presenti nelle immagini."
+    },
+    {
+      "question": "Cosa s'intende per visione di alto livello nella computer vision?",
+      "options": [
+        "Esalta alcune caratteristiche visuali tipo il contorno degli oggetti",
+        "L'analisi della scena da un punto di vista sementico",
+        "il reprimento di informazioni sulla struttura dell'immagine",
+        "L'analisi della scena da un punto di vista sintattico"
+      ],
+      "correctAnswer": "L'analisi della scena da un punto di vista sementico",
+      "explanation": "La visione di alto livello riguarda l'interpretazione semantica della scena, ovvero comprendere il significato degli oggetti e delle relazioni tra di essi."
+    },
+    {
+      "question": "La differenza tra Digital Image Processing e Computer Vision sta:",
+      "options": [
+        "non vi è alcuna differenza",
+        "negli obiettivi e non nei metodi",
+        "nessuno dei casi precedenti",
+        "nei metodi e non negli obiettivi"
+      ],
+      "correctAnswer": "negli obiettivi e non nei metodi",
+      "explanation": "Il Digital Image Processing si concentra sulla manipolazione delle immagini per migliorarle, mentre la Computer Vision mira a estrarre informazioni significative dalle immagini per comprendere il contenuto."
+    },
+      {
+      "question": "A quanto risale l'utilizzo delle prime immagini digitali?",
+      "options": [
+        "Anni '20",
+        "Anni '40",
+        "Anni '30",
+        "Anni '10"
+      ],
+      "correctAnswer": "Anni '40",
+      "explanation": "Le prime immagini digitali sono state utilizzate negli anni '40, principalmente in ambito scientifico e militare, prima dello sviluppo dei computer moderni."
+    },
+    {
+      "question": "Quando è stato introdotto per la prima volta il concetto di Computer Vision?",
+      "options": [
+        "Nel 1966 presso il Massachusetts Institute of Technology (MIT)",
+        "Nel 1990 grazie all'Intelligenza Artificiale",
+        "Da David Marr nel 1982",
+        "Negli Anni '90 dalla Berkely University"
+      ],
+      "correctAnswer": "Nel 1966 presso il Massachusetts Institute of Technology (MIT)",
+      "explanation": "Il concetto di Computer Vision è stato formalizzato nel 1966 al MIT con un progetto pionieristico che mirava a far 'vedere' i computer."
+    },
+    {
+      "question": "Cosa percepiscono i bastoncelli?",
+      "options": [
+        "Percepiscono i dettagli e i rapidi cambi di immagine",
+        "Sensibili alle condizioni di elevata illuminazione (fotopica)",
+        "Forniscono una visione di insieme della scena",
+        "Sensibili ai colori"
+      ],
+      "correctAnswer": "Forniscono una visione di insieme della scena",
+      "explanation": "I bastoncelli sono fotorecettori nella retina specializzati nella visione in condizioni di scarsa luce e nella percezione dell'insieme della scena."
+    },
+    {
+      "question": "Come si ottiene la messa a fuoco dell'immagine sull'occhio umano?",
+      "options": [
+        "Allontanandosi dall'immagine",
+        "Deformando il cristallino con appositi muscoli",
+        "Avvicinandosi all'immagine",
+        "Deformando la cornea"
+      ],
+      "correctAnswer": "Deformando il cristallino con appositi muscoli",
+      "explanation": "La messa a fuoco avviene grazie ai muscoli ciliari che modificano la forma del cristallino (processo chiamato accomodazione)."
+    },
+    {
+      "question": "La percezione visiva umana è il risultato di:",
+      "options": [
+        "Una semplice sequenza di elaborazioni che avvengono in alternanza ad altre attività celebrali percettive",
+        "Una complessa sequenza di elaborazioni che avvengono in concomitanza ad altre attività celebrali percettive",
+        "Una complessa sequenza di elaborazioni che avvengono in alternanza ad altre attività celebrali percettive",
+        "Una singola sequenza di elaborazioni che avvengono in concomitanza ad altre attività celebrali percettive"
+      ],
+      "correctAnswer": "Una complessa sequenza di elaborazioni che avvengono in concomitanza ad altre attività celebrali percettive",
+      "explanation": "La percezione visiva coinvolge processi cerebrali paralleli che integrano informazioni visive con altri input sensoriali e cognitivi."
+    },
+    {
+      "question": "La luce, oltre alla frequenza, è caratterizzata dalle seguenti grandezze:",
+      "options": [
+        "radianza, luminanza, luminosità",
+        "radianza, contrasto, colore",
+        "nessuna delle precedenti",
+        "luminanza, saturazione, luminosità"
+      ],
+      "correctAnswer": "luminanza, saturazione, luminosità",
+      "explanation": "Queste tre grandezze descrivono rispettivamente l'intensità luminosa, la purezza del colore e la percezione soggettiva della luce."
+    },
+    {
+      "question": "Cosa s'intende per risoluzione di un'immagine?",
+      "options": [
+        "La saturazione di un'immagine",
+        "Il numero e la dimensione dei pixel di un'immagine",
+        "La scala di grigi di un'immagine",
+        "Il colore di un'immagine"
+      ],
+      "correctAnswer": "Il numero e la dimensione dei pixel di un'immagine",
+      "explanation": "La risoluzione determina il dettaglio visibile ed è data dalla densità dei pixel (elementi immagine) per unità di misura."
+    },
+    {
+      "question": "Cosa s'intende per quantizzazione di un'immagine?",
+      "options": [
+        "E' l'operazione di digitalizzazione dei valori delle coordinate di un’immagine",
+        "nessuna delle precedenti",
+        "E' l'operazione di digitalizzazione dei valori dell’ampiezza di una immagine",
+        "E' l'operazione di digitalizzazione sia dei valori dell’ampiezza che delle coordinate di una immagine"
+      ],
+      "correctAnswer": "E' l'operazione di digitalizzazione dei valori dell’ampiezza di una immagine",
+      "explanation": "La quantizzazione converte i valori continui di intensità luminosa in un insieme discreto di livelli digitali."
+    },
+    {
+      "question": "Come si definisce il concetto di saturazione di un'immagine?",
+      "options": [
+        "E' il fenomeno per il quale tutte le intensità superiori ad una certa soglia vengono rappresentate come bianco",
+        "E' il fenomeno per il quale tutte le intensità inferiori ad una certa soglia vengono rappresentate come bianco",
+        "E' il fenomeno per il quale tutte le intensità comprese in un intervallo di soglia vengono rappresentate come bianco",
+        "nessuna delle precedenti"
+      ],
+      "correctAnswer": "E' il fenomeno per il quale tutte le intensità superiori ad una certa soglia vengono rappresentate come bianco",
+      "explanation": "La saturazione determina la purezza del colore, ma in questo contesto specifico si riferisce alla soglia di intensità massima registrabile."
+    },
+    {
+      "question": "Quando due regioni si definiscono disgiunte?",
+      "options": [
+        "Quando la loro unione non è connessa",
+        "Quando non sono adiacenti",
+        "Quando le due regioni sono adiacenti e connesse",
+        "Nessuno delle precedenti"
+      ],
+      "correctAnswer": "Quando non sono adiacenti",
+      "explanation": "Due regioni sono disgiunte quando non condividono alcun confine comune né pixel adiacenti."
+    },
+    {
+      "question": "Quando un path tra pixel è definito chiuso?",
+      "options": [
+        "Quando (x₀, y₀) è diverso (xₙ, yₙ)",
+        "Quando (x₀, y₀) = (xₙ, yₙ)",
+        "Quando due percorsi aperti s'intersecano",
+        "Nessuno delle precedenti"
+      ],
+      "correctAnswer": "Quando (x₀, y₀) = (xₙ, yₙ)",
+      "explanation": "Un path è chiuso se il pixel iniziale e finale coincidono, formando un circuito continuo."
+    },
+    {
+      "question": "Il dominio spaziale di un'immagine è",
+      "options": [
+        "Il piano che contiene i pixel dell'immagine",
+        "Lo sfondo di un'immagine",
+        "Il negativo di un'immagine",
+        "La proiezione di un'immagine su un piano"
+      ],
+      "correctAnswer": "Il piano che contiene i pixel dell'immagine",
+      "explanation": "Rappresenta l'insieme delle coordinate (x,y) dei pixel che compongono l'immagine digitale."
+    },
+    {
+      "question": "Il negativo di un’immagine con livelli d’intensità [0,L-1] si ottiene per:",
+      "options": [
+        "s = L + 1 − r",
+        "s = L − 1 − r",
+        "s = L − 1 + r",
+        "s = L − 1 − r²"
+      ],
+      "correctAnswer": "s = L − 1 − r",
+      "explanation": "Trasformazione che inverte i valori di intensità: il bianco diventa nero e viceversa."
+    },
+    {
+      "question": "Nella selezione mediante piani di bit l'immagine è vista come",
+      "options": [
+        "Composta da strati di grigio",
+        "Composta da regioni",
+        "Somma di immagini di diverso colore",
+        "Composta da strati di bit"
+      ],
+      "correctAnswer": "Composta da strati di bit",
+      "explanation": "Ogni bit rappresenta un piano separato, permettendo di analizzare singoli livelli binari dell'immagine."
+    },
+    {
+      "question": "Se consideriamo i livelli d'intensità come variabili casuali si dimostra che",
+      "options": [
+        "solo per alcuni livelli di intensità di r prossimi al valore 255, le intensità risultanti s hanno PDF uniforme",
+        "solo per alcuni livelli di intensità di r prossimi al valore 0, le intensità risultanti s hanno PDF uniforme",
+        "a tutti i livelli di intensità r, le intensità risultanti s hanno PDF uniforme",
+        "solo per alcuni livelli di intensità r, le intensità risultanti s hanno PDF uniforme"
+      ],
+      "correctAnswer": "solo per alcuni livelli di intensità r, le intensità risultanti s hanno PDF uniforme",
+      "explanation": "La distribuzione uniforme si ottiene solo per specifici intervalli di intensità dopo la trasformazione."
+    },
+    {
+      "question": "Una funzione monotona crescente",
+      "options": [
+        "non permette di ottenere una trasformazione inversa",
+        "permette di ottenere una trasformazione inversa definita in tutti i punti",
+        "permette di ottenere una trasformazione inversa solo in pochi punti",
+        "nessuna delle precedenti"
+      ],
+      "correctAnswer": "permette di ottenere una trasformazione inversa definita in tutti i punti",
+      "explanation": "Le funzioni monotone crescenti strettamente sono invertibili su tutto il loro dominio."
+    },
+    {
+      "question": "Una funzione T(r) è detta monotona non decrescente quando",
+      "options": [
+        "T(r₂) = T(r₁)/2 con r₂ > r₁",
+        "T(r₂) = T(r₁) con r₂ > r₁",
+        "T(r₂) ≥ T(r₁) con r₂ > r₁",
+        "T(r₂) < T(r₁) con r₂ > r₁"
+      ],
+      "correctAnswer": "T(r₂) ≥ T(r₁) con r₂ > r₁",
+      "explanation": "Definizione matematica standard di funzione monotona non decrescente."
+    },
+    {
+      "question": "Un'immagine ad elevato contrasto presenterà un istogramma",
+      "options": [
+        "con valori distribuiti in tutto il range d'intensità",
+        "con valori distribuiti solo nei valori prossimi allo 0",
+        "con valori distribuiti solo nei valori prossimi al 255",
+        "con valori distribuiti nella parte centrale del range"
+      ],
+      "correctAnswer": "con valori distribuiti in tutto il range d'intensità",
+      "explanation": "Alto contrasto implica utilizzo completo della gamma dinamica disponibile."
+    },
+    {
+      "question": "L’operazione di filtraggio si riduce all’attenuazione o all’amplificazione di",
+      "options": [
+        "tutte le componenti determinate da intervalli di frequenza ben precisi",
+        "alcune componenti determinate da intervalli di frequenza ben precisi",
+        "tutte le componenti ad alta frequenza",
+        "tutte le componenti a bassa frequenza"
+      ],
+      "correctAnswer": "alcune componenti determinate da intervalli di frequenza ben precisi",
+      "explanation": "Il filtraggio opera selettivamente su specifiche bande di frequenza."
+    },
+    {
+      "question": "Se consideriamo i livelli d'intensità come variabili casuali si dimostra che",
+      "options": [
+        "solo per alcuni livelli di intensità di r prossimi al valore 255, le intensità risultanti s hanno PDF uniforme",
+        "solo per alcuni livelli di intensità di r prossimi al valore 0, le intensità risultanti s hanno PDF uniforme",
+        "a tutti i livelli di intensità r, le intensità risultanti s hanno PDF uniforme",
+        "solo per alcuni livelli di intensità r, le intensità risultanti s hanno PDF uniforme"
+      ],
+      "correctAnswer": "solo per alcuni livelli di intensità r, le intensità risultanti s hanno PDF uniforme",
+      "explanation": "La distribuzione uniforme si ottiene solo per specifici intervalli di intensità dopo la trasformazione."
+    },
+    {
+      "question": "Una funzione monotona crescente",
+      "options": [
+        "non permette di ottenere una trasformazione inversa",
+        "permette di ottenere una trasformazione inversa definita in tutti i punti",
+        "permette di ottenere una trasformazione inversa solo in pochi punti",
+        "nessuna delle precedenti"
+      ],
+      "correctAnswer": "permette di ottenere una trasformazione inversa definita in tutti i punti",
+      "explanation": "Le funzioni monotone crescenti strettamente sono invertibili su tutto il loro dominio."
+    },
+    {
+      "question": "Una funzione T(r) è detta monotona non decrescente quando",
+      "options": [
+        "T(r₂) = T(r₁)/2 con r₂ > r₁",
+        "T(r₂) = T(r₁) con r₂ > r₁",
+        "T(r₂) ≥ T(r₁) con r₂ > r₁",
+        "T(r₂) < T(r₁) con r₂ > r₁"
+      ],
+      "correctAnswer": "T(r₂) ≥ T(r₁) con r₂ > r₁",
+      "explanation": "Definizione matematica standard di funzione monotona non decrescente."
+    },
+    {
+      "question": "Un'immagine ad elevato contrasto presenterà un istogramma",
+      "options": [
+        "con valori distribuiti in tutto il range d'intensità",
+        "con valori distribuiti solo nei valori prossimi allo 0",
+        "con valori distribuiti solo nei valori prossimi al 255",
+        "con valori distribuiti nella parte centrale del range"
+      ],
+      "correctAnswer": "con valori distribuiti in tutto il range d'intensità",
+      "explanation": "Alto contrasto implica utilizzo completo della gamma dinamica disponibile."
+    },
+    {
+      "question": "L’operazione di filtraggio si riduce all’attenuazione o all’amplificazione di",
+      "options": [
+        "tutte le componenti determinate da intervalli di frequenza ben precisi",
+        "alcune componenti determinate da intervalli di frequenza ben precisi",
+        "tutte le componenti ad alta frequenza",
+        "tutte le componenti a bassa frequenza"
+      ],
+      "correctAnswer": "alcune componenti determinate da intervalli di frequenza ben precisi",
+      "explanation": "Il filtraggio opera selettivamente su specifiche bande di frequenza."
+    },
+    {
+      "question": "L’operazione di filtraggio si riduce all’attenuazione o all’amplificazione di",
+      "options": [
+        "di alcune componenti determinate da intervalli spaziali ben precisi",
+        "di tutte le componenti determinate da intervalli di frequenza non ben definiti",
+        "di alcune componenti determinate da intervalli di frequenza ben precisi",
+        "di tutte le componenti determinate da intervalli di frequenza ben precisi"
+      ],
+      "correctAnswer": "di alcune componenti determinate da intervalli di frequenza ben precisi",
+      "explanation": "Il filtraggio opera selettivamente su bande di frequenza specifiche, amplificando o attenuando componenti mirate."
+    },
+    {
+      "question": "La tecnica di filtraggio spaziale di definisce lineare",
+      "options": [
+        "quando la regola di trasformazione è una funzione lineare dei valori di intensità rispetto a tutta l'immagine",
+        "quando la regola di trasformazione è una funzione non lineare dei valori di intensità dell’intorno considerato",
+        "quando la regola di trasformazione è una funzione discreta dei valori di intensità dell’intorno considerato",
+        "quando la regola di trasformazione è una funzione lineare dei valori di intensità dell’intorno considerato"
+      ],
+      "correctAnswer": "quando la regola di trasformazione è una funzione lineare dei valori di intensità dell’intorno considerato",
+      "explanation": "Il filtraggio lineare applica operatori come la media pesata o la convoluzione su un intorno del pixel."
+    },
+    {
+      "question": "Col termine zero padding si ci riferisce all'operazione per cui",
+      "options": [
+        "si inseriscono zeri solo sulle colonne quando le funzioni non combaciano",
+        "si inseriscono zeri su entrambi i lati quando le funzioni non combaciano",
+        "si inseriscono uni su entrambi i lati quando le funzioni non combaciano",
+        "si inseriscono zeri solo sulle righe quando le funzioni non combaciano"
+      ],
+      "correctAnswer": "si inseriscono zeri su entrambi i lati quando le funzioni non combaciano",
+      "explanation": "Tecnica usata per mantenere le dimensioni dell'immagine durante operazioni di convoluzione."
+    }
+  ]
+  
+  

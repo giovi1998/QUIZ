@@ -1,5 +1,6 @@
 // components/QuestionInfo.tsx
-import React from "react";
+import React, { useEffect } from "react";
+
 type QuestionInfoProps = {
   currentQuestionIndex: number;
   totalQuestions: number;
@@ -7,11 +8,19 @@ type QuestionInfoProps = {
 };
 
 const QuestionInfo: React.FC<QuestionInfoProps> = ({
+
+
   currentQuestionIndex,
   totalQuestions,
   score,
 }) => {
-  return (
+  useEffect(() => {
+    console.log("Current question index:", currentQuestionIndex);
+    console.log("Current score:", score);
+  }, [currentQuestionIndex, score]);
+
+  return (  
+
     <div className="flex justify-between items-center">
       <div>
         <span className="text-gray-600 font-medium">

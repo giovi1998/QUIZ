@@ -4,11 +4,12 @@ import { FileQuestion } from "lucide-react";
 
 // Tipo delle props per il componente EmptyScreen
 type EmptyScreenProps = {
-  quizName: string;                                      // Nome corrente del quiz
-  fileInputRef: React.RefObject<HTMLInputElement>;      // Riferimento per l'input file
+  quizName: string; // Nome corrente del quiz
+  fileInputRef: React.RefObject<HTMLInputElement>; // Riferimento per l'input file
   handleFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void; // Gestore caricamento file
-  setQuizStatus: (status: string) => void;              // Funzione per cambiare lo stato del quiz
-  setShowFormatInfo: (show: boolean) => void;           // Funzione per mostrare info formato file
+  setQuizStatus: (status: "setup" | "active" | "completed" | "empty") => void; // Funzione per cambiare lo stato del quiz
+  setShowFormatInfo: (show: boolean) => void; // Funzione per mostrare info formato file
+  backToSetup: () => void;
 };
 
 // Componente visualizzato quando non ci sono domande disponibili
@@ -18,13 +19,16 @@ export const EmptyScreen: React.FC<EmptyScreenProps> = ({
   handleFileUpload,
   setQuizStatus,
   setShowFormatInfo,
+  backToSetup,
 }) => {
   return (
     <div className="empty-screen p-6 bg-white rounded-lg shadow-md mt-8">
       <div className="max-w-md mx-auto">
         {/* Titolo del quiz */}
-        <h1 className="text-2xl font-bold text-center text-gray-800 mb-4">{quizName}</h1>
-        
+        <h1 className="text-2xl font-bold text-center text-gray-800 mb-4">
+          {quizName}
+        </h1>
+
         {/* Icona indicativa stato vuoto */}
         <div className="flex items-center justify-center mb-4">
           <FileQuestion size={64} className="text-gray-300" />
@@ -44,7 +48,7 @@ export const EmptyScreen: React.FC<EmptyScreenProps> = ({
           >
             Carica Domande
           </button>
-          
+
           {/* Input file nascosto */}
           <input
             type="file"
@@ -56,15 +60,15 @@ export const EmptyScreen: React.FC<EmptyScreenProps> = ({
           {/* Pulsante ritorno al setup */}
           <button
             className="px-6 py-3 bg-gray-200 rounded-lg hover:bg-gray-300 transition-all"
-            onClick={() => setQuizStatus("setup")}
+            onClick={backToSetup} // Changed this line
           >
             Torna al Setup
           </button>
         </div>
 
         {/* Link informazioni formato file */}
-        <p 
-          className="text-right text-blue-500 text-sm cursor-pointer mt-2" 
+        <p
+          className="text-right text-blue-500 text-sm cursor-pointer mt-2"
           onClick={() => setShowFormatInfo(true)}
         >
           Formato file richiesto

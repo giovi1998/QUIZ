@@ -1,5 +1,6 @@
 // components/TimerDisplay.tsx
-import React from "react";
+import React, { useEffect } from "react";
+
 import { Clock } from "lucide-react";
 
 type TimerDisplayProps = {
@@ -9,11 +10,20 @@ type TimerDisplayProps = {
 };
 
 const TimerDisplay: React.FC<TimerDisplayProps> = ({
+  useEffect,
+
   timerEnabled,
   timerActive,
   timeRemaining,
 }) => {
-  if (!timerEnabled || !timerActive) return null;
+  useEffect(() => {
+    if (timerEnabled && timerActive) {
+      console.log("Timer started with duration:", timeRemaining);
+    }
+  }, [timerEnabled, timerActive, timeRemaining]);
+
+  if (!timerEnabled || !timerActive) return null;  
+
 
   return (
     <div className="flex items-center text-blue-600">
