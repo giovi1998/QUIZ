@@ -9,6 +9,8 @@ type FormatInfoModalProps = {
 
 // Componente per visualizzare le informazioni sul formato JSON richiesto
 export const FormatInfoModal: React.FC<FormatInfoModalProps> = ({ onClose }) => {
+  console.log("FormatInfoModal opened");
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50">
       {/* Contenitore principale del modal */}
@@ -16,9 +18,12 @@ export const FormatInfoModal: React.FC<FormatInfoModalProps> = ({ onClose }) => 
         {/* Header con pulsante di chiusura */}
         <div className="flex justify-end">
           <X
+            onClick={() => {
+              console.log("Close button clicked");
+              onClose();
+            }}
             size={24}
             className="cursor-pointer text-gray-500 hover:text-gray-700 transition"
-            onClick={onClose}
           />
         </div>
 
@@ -36,10 +41,18 @@ export const FormatInfoModal: React.FC<FormatInfoModalProps> = ({ onClose }) => 
 
           {/* Lista dei campi obbligatori */}
           <ul className="list-disc pl-6 text-gray-600">
-            <li><strong>question:</strong> Testo della domanda (stringa)</li>
-            <li><strong>options:</strong> Array di opzioni di risposta (string[])</li>
-            <li><strong>correctAnswer:</strong> Risposta corretta (stringa)</li>
-            <li><strong>explanation:</strong> Spiegazione della risposta (stringa)</li>
+            <li>
+              <strong>question:</strong> Testo della domanda (stringa)
+            </li>
+            <li>
+              <strong>options:</strong> Array di opzioni di risposta (string[])
+            </li>
+            <li>
+              <strong>correctAnswer:</strong> Risposta corretta (stringa)
+            </li>
+            <li>
+              <strong>explanation:</strong> Spiegazione della risposta (stringa)
+            </li>
           </ul>
 
           {/* Esempio di JSON corretto */}

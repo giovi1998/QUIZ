@@ -40,7 +40,43 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
   showFormatInfo,
   setShowFormatInfo,
 }) => {
+  const handleQuizNameChange = (name: string) => {
+    console.log("Quiz name changed to:", name);
+    setQuizName(name);
+  };
+
+  const handleQuizModeChange = (mode: "default" | "custom") => {
+    console.log("Quiz mode changed to:", mode);
+    setQuizMode(mode);
+  };
+
+  const handleTimerEnabledChange = (enabled: boolean) => {
+    console.log("Timer enabled:", enabled);
+    setTimerEnabled(enabled);
+  };
+
+  const handleTimerDurationChange = (duration: number) => {
+    console.log("Timer duration changed to:", duration);
+    setTimerDuration(duration);
+  };
+
+  const handleFileUploadChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log("File uploaded:", e.target.files);
+    handleFileUpload(e);
+  };
+
+  const handlePdfUploadChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log("PDF uploaded:", e.target.files);
+    handlePdfUpload(e);
+  };
+
+  const handleSetupComplete = () => {
+    console.log("Setup complete, starting quiz...");
+    onSetupComplete();
+  };
+
   return (
+
     <div className="setup-container p-4 md:p-6 bg-white rounded-lg shadow-lg mt-4 md:mt-8 space-y-4 md:space-y-6 max-w-md mx-auto">
       {/* Titolo principale */}
       <h1 className="text-xl md:text-2xl font-bold text-center text-gray-800">

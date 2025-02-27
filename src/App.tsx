@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { SetupScreen } from "./components/SetupScreen.tsx";
 import { ActiveQuizScreen } from "./components/ActiveQuizScreen.tsx";
 import { CompletedScreen, Report } from "./components/CompletedScreen.tsx";
 import { EmptyScreen } from "./components/EmptyScreen.tsx";
 import { FormatInfoModal } from "./components/FormatInfoModal.tsx";
-import { extractFromPdf } from "./components/pdfExtractor.ts";
+import { extractFromPdf } from "./components/pdfExtractor.tsx";
 
 // Tipo per rappresentare una domanda del quiz
 export type Question = {
@@ -60,11 +60,11 @@ function App() {
         "Progettare hardware computer",
         "Sviluppare algoritmi software",
       ],
-      correctAnswer: "Abilitare i computer ad interpretare e comprendere informazioni visive",
+      correctAnswer:
+        "Abilitare i computer ad interpretare e comprendere informazioni visive",
       explanation:
         "La visione artificiale ha lo scopo di abilitare i computer ad interpretare e comprendere informazioni visive dal mondo.",
-    },
-    // ...altri esempi se necessario
+    }
   ];
 
   // Gestione del timer
@@ -77,7 +77,7 @@ function App() {
     } else if (timerActive && timeRemaining === 0) {
       handleAnswer(null);
     }
-  }, [timerActive, timeRemaining]);
+  }, [timerActive, timeRemaining]); // Removed handleAnswer from dependency array. is now called inside the function
 
   useEffect(() => {
     if (quizStatus === "active") {
@@ -85,18 +85,6 @@ function App() {
       setTimerActive(timerEnabled);
     }
   }, [currentQuestionIndex, timerEnabled, timerDuration, quizStatus]);
-
-  // Gestione della risposta
-  const handleAnswer = (selectedOption: string | null) => {
-    setSelectedAnswer(selectedOption);
-    setShowExplanation(true);
-    setTimerActive(false);
-    const current = questions[currentQuestionIndex];
-    if (selectedOption === current?.correctAnswer) {
-      setScore(prev => prev + 1);
-    }
-    setAnswers(prev => [...prev, selectedOption || ""]);
-  };
 
   // Passa alla prossima domanda o completa il quiz
   const nextQuestion = () => {
@@ -112,7 +100,7 @@ function App() {
   };
 
   // Reset del quiz
-  const resetQuiz = () => {
+  const resetQuiz = useCallback(() => {
     setCurrentQuestionIndex(0);
     setScore(0);
     setAnswers([]);
@@ -121,7 +109,7 @@ function App() {
     setTimeRemaining(timerDuration);
     setTimerActive(timerEnabled);
     setQuizStatus("active");
-  };
+  }, [timerDuration, timerEnabled]);
 
   // Svuota le domande e resetta lo stato
   const clearQuestions = () => {
@@ -156,12 +144,19 @@ function App() {
           throw new Error("Formato JSON non valido: deve essere un array");
         }
         parsedData.forEach((q, i) => {
-          if (!q.question || !Array.isArray(q.options) || !q.correctAnswer || !q.explanation) {
+          if (
+            !q.question ||
+            !Array.isArray(q.options) ||
+            !q.correctAnswer ||
+            !q.explanation
+          ) {
             throw new Error(`Domanda ${i + 1} manca dei campi obbligatori`);
           }
           q.options = shuffleArray(q.options);
           if (!q.options.includes(q.correctAnswer)) {
-            throw new Error(`Domanda ${i + 1}: la risposta corretta non è presente tra le opzioni`);
+            throw new Error(
+              `Domanda ${i + 1}: la risposta corretta non è presente tra le opzioni`
+            );
           }
         });
         parsedData = shuffleArray(parsedData);
@@ -179,30 +174,35 @@ function App() {
     reader.readAsText(file);
   };
 
-  // Gestione del caricamento del file PDF usando extractFromPdf
-  const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    try {
-      const extractedQuestions = await extractFromPdf(file);
-      extractedQuestions.forEach((q: Question, i: number) => {
-        if (q.options.length === 0 && q.question.toLowerCase().includes("scelta multipla")) {
-          throw new Error(`Domanda ${i + 1} manca delle opzioni attese per una domanda a scelta multipla`);
-        }
-        q.options = shuffleArray(q.options);
-      });
-      let parsedData = shuffleArray(extractedQuestions);
-      if (parsedData.length > 24) parsedData = parsedData.slice(0, 24);
-      setQuestions(parsedData);
-      resetQuiz();
-      showTemporaryAlert(`Caricate ${parsedData.length} domande da PDF con successo!`);
-      if (pdfInputRef.current) pdfInputRef.current.value = "";
-    } catch (error) {
-      console.error("Errore di caricamento PDF:", error);
-      showTemporaryAlert(`Errore: ${(error as Error).message}`);
-      if (pdfInputRef.current) pdfInputRef.current.value = "";
-    }
-  };
+  // // Gestione del caricamento del file PDF usando extractFromPdf
+  // const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files?.[0];
+  //   if (!file) return;
+  //   try {
+  //     const extractedQuestions = await extractFromPdf(file);
+  //     extractedQuestions.forEach((q: Question, i: number) => {
+  //       if (
+  //         q.options.length === 0 &&
+  //         q.question.toLowerCase().includes("scelta multipla")
+  //       ) {
+  //         throw new Error(
+  //           `Domanda ${i + 1} manca delle opzioni attese per una domanda a scelta multipla`
+  //         );
+  //       }
+  //       q.options = shuffleArray(q.options);
+  //     });
+  //     let parsedData = shuffleArray(extractedQuestions);
+  //     if (parsedData.length > 24) parsedData = parsedData.slice(0, 24);
+  //     setQuestions(parsedData);
+  //     resetQuiz();
+  //     showTemporaryAlert(`Caricate ${parsedData.length} domande da PDF con successo!`);
+  //     if (pdfInputRef.current) pdfInputRef.current.value = "";
+  //   } catch (error) {
+  //     console.error("Errore di caricamento PDF:", error);
+  //     showTemporaryAlert(`Errore: ${(error as Error).message}`);
+  //     if (pdfInputRef.current) pdfInputRef.current.value = "";
+  //   }
+  // };
 
   // Completamento della configurazione
   const handleSetupComplete = () => {
@@ -220,14 +220,15 @@ function App() {
   const generateReport = (): Report => {
     const totalQuestions = questions.length;
     const correctAnswers = score;
-    const percentage = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
+    const percentage =
+      totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
     const missed = questions
       .map((q, idx) => ({
         question: q.question,
         yourAnswer: answers[idx] || "Nessuna risposta",
         correctAnswer: q.correctAnswer,
       }))
-      .filter((item, idx) => answers[idx] !== questions[idx].correctAnswer);
+      .filter((_, idx) => answers[idx] !== questions[idx].correctAnswer);
     return { totalQuestions, correctAnswers, percentage, missed };
   };
 
@@ -235,6 +236,25 @@ function App() {
   const backToSetup = () => {
     clearQuestions();
     setQuizStatus("setup");
+  };
+
+  // NEW: The proper handleAnswer function
+  const handleAnswer = (answer: string | null) => {
+    setTimerActive(false);
+    setShowExplanation(true);
+
+    const currentQuestion = questions[currentQuestionIndex];
+    const isCorrect = answer === currentQuestion.correctAnswer;
+
+    if (isCorrect) {
+      setScore((prevScore) => prevScore + 1);
+    }
+
+    setAnswers((prevAnswers) => {
+      const newAnswers = [...prevAnswers];
+      newAnswers[currentQuestionIndex] = answer || "Nessuna risposta"; // Handle null answer
+      return newAnswers;
+    });
   };
 
   return (
@@ -266,7 +286,7 @@ function App() {
           showFormatInfo={showFormatInfo}
           setShowFormatInfo={setShowFormatInfo}
           pdfInputRef={pdfInputRef}
-          handlePdfUpload={handlePdfUpload}
+          // handlePdfUpload={handlePdfUpload}
         />
       )}
 
