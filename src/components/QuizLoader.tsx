@@ -5,6 +5,7 @@ import React, {
     useRef,
     useCallback,
     useEffect,
+    useState,
   } from "react";
   import { Question } from "../App.tsx";
   import { extractFromPdf } from "./pdfExtractor.tsx";
@@ -14,6 +15,7 @@ import React, {
     setQuestions: Dispatch<SetStateAction<Question[]>>;
     showTemporaryAlert: (message: string) => void;
     questions: Question[];
+    setLoading: Dispatch<SetStateAction<boolean>>;
   };
   
   function shuffleArray<T>(array: T[]): T[] {
@@ -29,10 +31,13 @@ import React, {
     setQuestions,
     showTemporaryAlert,
     questions,
+    setLoading,
   }) => {
     console.log("QuizLoader rendered"); // Added log
     const fileInputRef = useRef<HTMLInputElement>(null);
     const pdfInputRef = useRef<HTMLInputElement>(null);
+    const [jsonLoading, setJsonLoading] = useState(false);
+    const [pdfLoading, setPdfLoading] = useState(false);
   
     useEffect(() => {
       // Load default questions on initial render
@@ -48,6 +53,7 @@ import React, {
         const file = e.target.files?.[0];
         if (!file) return;
         setQuestions([]); // Clear existing questions
+        setJsonLoading(true); // Start loading
         const reader = new FileReader();
         reader.onload = (event) => {
           try {
@@ -88,6 +94,8 @@ import React, {
             console.error("Errore di caricamento:", error);
             showTemporaryAlert(`Errore: ${(error as Error).message}`);
             if (fileInputRef.current) fileInputRef.current.value = "";
+          } finally {
+            setJsonLoading(false); // End loading, whether success or failure
           }
         };
         reader.readAsText(file);
@@ -102,6 +110,7 @@ import React, {
         const file = e.target.files?.[0];
         if (!file) return;
         setQuestions([]); // Clear existing questions
+        setPdfLoading(true); // Start loading
         try {
           const extractedQuestions = await extractFromPdf(file);
           console.log(
@@ -131,10 +140,16 @@ import React, {
           console.error("Errore di caricamento PDF:", error);
           showTemporaryAlert(`Errore: ${(error as Error).message}`);
           if (pdfInputRef.current) pdfInputRef.current.value = "";
+        } finally {
+          setPdfLoading(false); // End loading, whether success or failure
         }
       },
       [setQuestions, showTemporaryAlert]
     );
+  
+    useEffect(() => {
+      setLoading(jsonLoading || pdfLoading);
+    }, [jsonLoading, pdfLoading, setLoading]);
   
     return (
       <>

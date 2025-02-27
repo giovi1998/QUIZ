@@ -31,12 +31,12 @@ export type Report = {
 };
 
 function shuffleArray<T>(array: T[]): T[] {
-    const newArr = array.slice();
-    for (let i = newArr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
-    }
-    return newArr;
+  const newArr = array.slice();
+  for (let i = newArr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+  }
+  return newArr;
 }
 
 function App() {
@@ -50,6 +50,7 @@ function App() {
   const [showFormatInfo, setShowFormatInfo] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [showAlert, setShowAlert] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Stato gestione quiz
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -68,13 +69,14 @@ function App() {
       setQuestions,
       showTemporaryAlert,
       questions,
+      setLoading,
     });
 
   // Handler per il completamento della configurazione
   const handleSetupComplete = useCallback(() => {
     console.log("App - handleSetupComplete called"); // Added log
     if (quizMode === "default") {
-        setQuestions(shuffleArray(questionsDefaults));
+      setQuestions(shuffleArray(questionsDefaults));
       console.log("App - Using default questions"); // Added log
     } else if (questions.length === 0) {
       showTemporaryAlert(
@@ -138,6 +140,7 @@ function App() {
           pdfInputRef={pdfInputRef}
           handlePdfUpload={handlePdfUpload}
           questions={questions}
+          loading={loading}
         />
       )}
 
