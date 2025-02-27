@@ -1,9 +1,9 @@
 // components/ActiveQuizScreen.tsx
 import React from "react";
-import ProgressBar from "./ProgressBar.tsx";
-import TimerDisplay from "./TimerDisplay.tsx";
-import QuestionInfo from "./QuestionInfo.tsx";
-import ExplanationSection from "./ExplanationSection.tsx";
+import ProgressBar from "../components/common/ProgressBar.tsx";
+import TimerDisplay from "../components/common/TimerDisplay.tsx";
+import QuestionInfo from "../components/common/QuestionInfo.tsx";
+import ExplanationSection from "../components/ExplanationSection.tsx";
 import type { Question } from "../App.tsx";
 
 const styles = `

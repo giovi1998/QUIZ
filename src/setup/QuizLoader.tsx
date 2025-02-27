@@ -7,7 +7,7 @@ import React, {
   useState,
 } from "react";
 import { Question } from "../App.tsx";
-import { extractFromPdf } from "./pdfExtractor.tsx";
+import { extractFromPdf } from "../components/pdfExtractor.tsx";
 import questionsDefaults from "../Data/questionsDefaults.json";
 
 type QuizLoaderProps = {

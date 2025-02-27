@@ -1,10 +1,10 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
-import { SetupScreen } from "./components/SetupScreen.tsx";
-import { FormatInfoModal } from "./components/FormatInfoModal.tsx";
-import QuizManager from "./components/QuizManager.tsx";
+import { SetupScreen } from "./setup/SetupScreen.tsx";
+import { FormatInfoModal } from "./setup/FormatInfoModal.tsx";
+import QuizManager from "./quiz/QuizManager.tsx";
 import { extractFromPdf } from "./components/pdfExtractor.tsx";
 import questionsDefaults from "./Data/questionsDefaults.json";
-import { EmptyScreen } from "./components/EmptyScreen.tsx";
+import { EmptyScreen } from "./setup/EmptyScreen.tsx";
 
 export type QuizStatus = "setup" | "active" | "completed" | "empty";
 
