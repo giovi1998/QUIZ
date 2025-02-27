@@ -3,7 +3,6 @@ import React from "react";
 import ProgressBar from "./ProgressBar.tsx";
 import TimerDisplay from "./TimerDisplay.tsx";
 import QuestionInfo from "./QuestionInfo.tsx";
-import AnswerButton from "./AnswerButton.tsx";
 import ExplanationSection from "./ExplanationSection.tsx";
 import type { Question } from "../App.tsx";
 
@@ -34,18 +33,26 @@ type OptionSquareProps = {
   onSelect: () => void;
 };
 
-const OptionSquare: React.FC<OptionSquareProps> = ({ option, selected, onSelect }) => {
+const OptionSquare: React.FC<OptionSquareProps> = ({
+  option,
+  selected,
+  onSelect,
+}) => {
   return (
-    <div 
+    <div
       className="flex items-center cursor-pointer group w-full"
       onClick={onSelect}
     >
-      <div className={`flex items-center w-full p-2 sm:p-3 rounded-md transition-all duration-200
-        ${selected 
-          ? "highlighted border-yellow-400" 
-          : "hover:bg-gray-50"}`}
+      <div
+        className={`flex items-center w-full p-2 sm:p-3 rounded-md transition-all duration-200
+        ${
+          selected
+            ? "highlighted border-yellow-400"
+            : "hover:bg-gray-50"
+        }`}
       >
-        <span className={`text-base sm:text-lg relative z-10 flex-1
+        <span
+          className={`text-base sm:text-lg relative z-10 flex-1
           ${selected ? "text-gray-800 font-medium" : "text-gray-700"}`}
         >
           {option}
@@ -59,28 +66,24 @@ type ActiveQuizScreenProps = {
   quizName: string;
   currentQuestionIndex: number;
   totalQuestions: number;
-  score: number;
   question: Question;
   selectedAnswer: string | null;
-  setSelectedAnswer: (answer: string | null) => void;
-  showExplanation: boolean;
   handleAnswer: (answer: string | null) => void;
+  showExplanation: boolean;
   nextQuestion: () => void;
   timeRemaining: number;
   timerActive: boolean;
   timerEnabled: boolean;
 };
 
-export const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
+const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
   quizName,
   currentQuestionIndex,
   totalQuestions,
-  score,
   question,
   selectedAnswer,
-  setSelectedAnswer,
-  showExplanation,
   handleAnswer,
+  showExplanation,
   nextQuestion,
   timeRemaining,
   timerActive,
@@ -91,7 +94,7 @@ export const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
   return (
     <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 max-w-2xl mx-4 sm:mx-auto">
       <style>{styles}</style>
-      
+
       <ProgressBar progress={progress} />
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
@@ -99,7 +102,7 @@ export const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
           {quizName}
         </h1>
         {timerEnabled && timerActive && (
-          <TimerDisplay 
+          <TimerDisplay
             timerEnabled={timerEnabled}
             timerActive={timerActive}
             timeRemaining={timeRemaining}
@@ -108,10 +111,9 @@ export const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
         )}
       </div>
 
-      <QuestionInfo 
+      <QuestionInfo
         currentQuestionIndex={currentQuestionIndex}
         totalQuestions={totalQuestions}
-        score={score}
         className="flex-col sm:flex-row items-start sm:items-center"
       />
 
@@ -126,22 +128,27 @@ export const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
             option={option}
             selected={selectedAnswer === option}
             onSelect={() => {
-              if (!showExplanation) {
-                setSelectedAnswer(option);
-              }
+                if (!showExplanation) {
+                  handleAnswer(option);
+                }
             }}
           />
         ))}
       </div>
 
       {!showExplanation ? (
-        <AnswerButton 
-          selectedAnswer={selectedAnswer}
-          handleAnswer={handleAnswer}
-          className="w-full sm:w-auto px-6 py-3 text-sm sm:text-base"
-        />
+        <button
+          onClick={() => handleAnswer(selectedAnswer)}
+          disabled={selectedAnswer === null}
+          className={`w-full sm:w-auto px-6 py-3 text-sm sm:text-base rounded-lg transition-all duration-200 
+                ${selectedAnswer === null
+            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+            : "bg-blue-600 text-white hover:bg-blue-700"}`}
+        >
+          Invia Risposta
+        </button>
       ) : (
-        <ExplanationSection 
+        <ExplanationSection
           selectedAnswer={selectedAnswer}
           correctAnswer={question.correctAnswer}
           explanation={question.explanation}

@@ -1,10 +1,13 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+// App.tsx
+import React, { useState, useCallback, useEffect } from "react";
 import { SetupScreen } from "./components/SetupScreen.tsx";
-import { ActiveQuizScreen } from "./components/ActiveQuizScreen.tsx";
-import { CompletedScreen, Report } from "./components/CompletedScreen.tsx";
 import { EmptyScreen } from "./components/EmptyScreen.tsx";
 import { FormatInfoModal } from "./components/FormatInfoModal.tsx";
-import { extractFromPdf } from "./components/pdfExtractor.tsx";
+import QuizManager, {QuizManagerType} from "./components/QuizManager.tsx";
+import QuizLoader from "./components/QuizLoader.tsx";
+
+// Stato per gestire la vista da visualizzare
+export type QuizStatus = "setup" | "active" | "completed" | "empty";
 
 // Tipo per rappresentare una domanda del quiz
 export type Question = {
@@ -14,20 +17,20 @@ export type Question = {
   explanation: string;
 };
 
-// Stati possibili del quiz
-type QuizStatus = "setup" | "active" | "completed" | "empty";
-
-// Funzione helper: mescola un array (algoritmo Fisher-Yates)
-function shuffleArray<T>(array: T[]): T[] {
-  const newArr = array.slice();
-  for (let i = newArr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
-  }
-  return newArr;
-}
+// Tipo per il report finale
+export type Report = {
+  totalQuestions: number;
+  correctAnswers: number;
+  percentage: number;
+  missed: {
+    question: string;
+    yourAnswer: string;
+    correctAnswer: string;
+  }[];
+};
 
 function App() {
+  console.log("App rendered"); // Added log
   // Stato configurazione quiz
   const [quizName, setQuizName] = useState("Computer Vision");
   const [quizMode, setQuizMode] = useState<"default" | "custom">("default");
@@ -35,230 +38,66 @@ function App() {
   const [timerEnabled, setTimerEnabled] = useState(true);
   const [timerDuration, setTimerDuration] = useState(30);
   const [showFormatInfo, setShowFormatInfo] = useState(false);
-
-  // Stato gestione quiz
-  const [questions, setQuestions] = useState<Question[]>([]);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
-  const [showExplanation, setShowExplanation] = useState(false);
-  const [score, setScore] = useState(0);
-  const [answers, setAnswers] = useState<string[]>([]);
-  const [timeRemaining, setTimeRemaining] = useState(timerDuration);
-  const [timerActive, setTimerActive] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const pdfInputRef = useRef<HTMLInputElement>(null);
   const [alertMessage, setAlertMessage] = useState("");
   const [showAlert, setShowAlert] = useState(false);
 
-  // Domande predefinite (modalità default)
-  const defaultQuestions: Question[] = [
-    {
-      question: "Qual è l'obiettivo principale della visione artificiale?",
-      options: [
-        "Creare programmi computer",
-        "Abilitare i computer ad interpretare e comprendere informazioni visive",
-        "Progettare hardware computer",
-        "Sviluppare algoritmi software",
-      ],
-      correctAnswer:
-        "Abilitare i computer ad interpretare e comprendere informazioni visive",
-      explanation:
-        "La visione artificiale ha lo scopo di abilitare i computer ad interpretare e comprendere informazioni visive dal mondo.",
-    }
-  ];
+  // Stato gestione quiz
+  const [questions, setQuestions] = useState<Question[]>([]);
 
-  // Gestione del timer
-  useEffect(() => {
-    if (timerActive && timeRemaining > 0) {
-      const timer = setTimeout(() => {
-        setTimeRemaining(prev => prev - 1);
-      }, 1000);
-      return () => clearTimeout(timer);
-    } else if (timerActive && timeRemaining === 0) {
-      handleAnswer(null);
-    }
-  }, [timerActive, timeRemaining]); // Removed handleAnswer from dependency array. is now called inside the function
-
-  useEffect(() => {
-    if (quizStatus === "active") {
-      setTimeRemaining(timerDuration);
-      setTimerActive(timerEnabled);
-    }
-  }, [currentQuestionIndex, timerEnabled, timerDuration, quizStatus]);
-
-  // Passa alla prossima domanda o completa il quiz
-  const nextQuestion = () => {
-    setTimeRemaining(timerDuration);
-    setTimerActive(timerEnabled);
-    setSelectedAnswer(null);
-    setShowExplanation(false);
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(prev => prev + 1);
-    } else {
-      setQuizStatus("completed");
-    }
-  };
-
-  // Reset del quiz
-  const resetQuiz = useCallback(() => {
-    setCurrentQuestionIndex(0);
-    setScore(0);
-    setAnswers([]);
-    setShowExplanation(false);
-    setSelectedAnswer(null);
-    setTimeRemaining(timerDuration);
-    setTimerActive(timerEnabled);
-    setQuizStatus("active");
-  }, [timerDuration, timerEnabled]);
-
-  // Svuota le domande e resetta lo stato
-  const clearQuestions = () => {
-    setQuestions([]);
-    setCurrentQuestionIndex(0);
-    setScore(0);
-    setAnswers([]);
-    setShowExplanation(false);
-    setSelectedAnswer(null);
-    setTimeRemaining(timerDuration);
-    setTimerActive(false);
-    setQuizStatus("empty");
-  };
-
-  // Mostra un alert temporaneo (accessibilità: role e aria-live)
-  const showTemporaryAlert = (message: string) => {
+  // Helper per mostrare un alert temporaneo
+  const showTemporaryAlert = useCallback((message: string) => {
+    console.log("App - showTemporaryAlert called with:", message); // Added log
     setAlertMessage(message);
     setShowAlert(true);
     setTimeout(() => setShowAlert(false), 3000);
-  };
+  }, []);
 
-  // Gestione del caricamento del file JSON (domande personalizzate)
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const content = event.target?.result as string;
-        let parsedData: Question[] = JSON.parse(content);
-        if (!Array.isArray(parsedData)) {
-          throw new Error("Formato JSON non valido: deve essere un array");
-        }
-        parsedData.forEach((q, i) => {
-          if (
-            !q.question ||
-            !Array.isArray(q.options) ||
-            !q.correctAnswer ||
-            !q.explanation
-          ) {
-            throw new Error(`Domanda ${i + 1} manca dei campi obbligatori`);
-          }
-          q.options = shuffleArray(q.options);
-          if (!q.options.includes(q.correctAnswer)) {
-            throw new Error(
-              `Domanda ${i + 1}: la risposta corretta non è presente tra le opzioni`
-            );
-          }
-        });
-        parsedData = shuffleArray(parsedData);
-        if (parsedData.length > 24) parsedData = parsedData.slice(0, 24);
-        setQuestions(parsedData);
-        resetQuiz();
-        showTemporaryAlert(`Caricate ${parsedData.length} domande con successo!`);
-        if (fileInputRef.current) fileInputRef.current.value = "";
-      } catch (error) {
-        console.error("Errore di caricamento:", error);
-        showTemporaryAlert(`Errore: ${(error as Error).message}`);
-        if (fileInputRef.current) fileInputRef.current.value = "";
-      }
-    };
-    reader.readAsText(file);
-  };
+  // QuizLoader Hook
+  const {
+    handleFileUpload,
+    handlePdfUpload,
+    fileInputRef,
+    pdfInputRef,
+  } = QuizLoader({
+    setQuestions,
+    showTemporaryAlert,
+  });
 
-  // // Gestione del caricamento del file PDF usando extractFromPdf
-  // const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const file = e.target.files?.[0];
-  //   if (!file) return;
-  //   try {
-  //     const extractedQuestions = await extractFromPdf(file);
-  //     extractedQuestions.forEach((q: Question, i: number) => {
-  //       if (
-  //         q.options.length === 0 &&
-  //         q.question.toLowerCase().includes("scelta multipla")
-  //       ) {
-  //         throw new Error(
-  //           `Domanda ${i + 1} manca delle opzioni attese per una domanda a scelta multipla`
-  //         );
-  //       }
-  //       q.options = shuffleArray(q.options);
-  //     });
-  //     let parsedData = shuffleArray(extractedQuestions);
-  //     if (parsedData.length > 24) parsedData = parsedData.slice(0, 24);
-  //     setQuestions(parsedData);
-  //     resetQuiz();
-  //     showTemporaryAlert(`Caricate ${parsedData.length} domande da PDF con successo!`);
-  //     if (pdfInputRef.current) pdfInputRef.current.value = "";
-  //   } catch (error) {
-  //     console.error("Errore di caricamento PDF:", error);
-  //     showTemporaryAlert(`Errore: ${(error as Error).message}`);
-  //     if (pdfInputRef.current) pdfInputRef.current.value = "";
-  //   }
-  // };
-
-  // Completamento della configurazione
-  const handleSetupComplete = () => {
+  // Handler per il completamento della configurazione
+  const handleSetupComplete = useCallback(() => {
+    console.log("App - handleSetupComplete called"); // Added log
     if (quizMode === "default") {
-      setQuestions(defaultQuestions);
+      console.log("App - Using default questions"); // Added log
     } else if (questions.length === 0) {
-      showTemporaryAlert("Nessuna domanda caricata per la modalità personalizzata");
+      showTemporaryAlert(
+        "Nessuna domanda caricata per la modalità personalizzata"
+      );
+      console.log("App - handleSetupComplete: No custom questions loaded");
       return;
     }
     setQuizStatus("active");
-    setTimerActive(timerEnabled);
-  };
+    console.log("App - Setup complete, quiz status set to active"); // Added log
+  }, [quizMode, questions, setQuizStatus, showTemporaryAlert]);
 
-  // Genera il report finale del quiz
-  const generateReport = (): Report => {
-    const totalQuestions = questions.length;
-    const correctAnswers = score;
-    const percentage =
-      totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
-    const missed = questions
-      .map((q, idx) => ({
-        question: q.question,
-        yourAnswer: answers[idx] || "Nessuna risposta",
-        correctAnswer: q.correctAnswer,
-      }))
-      .filter((_, idx) => answers[idx] !== questions[idx].correctAnswer);
-    return { totalQuestions, correctAnswers, percentage, missed };
-  };
+  useEffect(() => {
+    console.log("App - quizStatus Changed:", quizStatus);
+  }, [quizStatus]);
 
-  // Torna alla schermata di configurazione
-  const backToSetup = () => {
-    clearQuestions();
-    setQuizStatus("setup");
-  };
-
-  // NEW: The proper handleAnswer function
-  const handleAnswer = (answer: string | null) => {
-    setTimerActive(false);
-    setShowExplanation(true);
-
-    const currentQuestion = questions[currentQuestionIndex];
-    const isCorrect = answer === currentQuestion.correctAnswer;
-
-    if (isCorrect) {
-      setScore((prevScore) => prevScore + 1);
-    }
-
-    setAnswers((prevAnswers) => {
-      const newAnswers = [...prevAnswers];
-      newAnswers[currentQuestionIndex] = answer || "Nessuna risposta"; // Handle null answer
-      return newAnswers;
-    });
+  //use QuizManager
+  const quizManagerProps: Omit<QuizManagerType & {showTemporaryAlert:(message:string)=>void}, never> = {
+    quizName,
+    questions,
+    setQuestions,
+    quizStatus,
+    setQuizStatus,
+    timerEnabled,
+    timerDuration,
+    showTemporaryAlert,
   };
 
   return (
     <div className="max-w-4xl mx-auto p-4 bg-white rounded-lg shadow-lg min-h-screen">
+      {/* Alert temporaneo */}
       {showAlert && (
         <div
           role="alert"
@@ -269,6 +108,7 @@ function App() {
         </div>
       )}
 
+      {/* Schermata di configurazione */}
       {quizStatus === "setup" && (
         <SetupScreen
           quizName={quizName}
@@ -279,17 +119,17 @@ function App() {
           setTimerEnabled={setTimerEnabled}
           timerDuration={timerDuration}
           setTimerDuration={setTimerDuration}
-          questions={questions}
           fileInputRef={fileInputRef}
           handleFileUpload={handleFileUpload}
           onSetupComplete={handleSetupComplete}
           showFormatInfo={showFormatInfo}
           setShowFormatInfo={setShowFormatInfo}
           pdfInputRef={pdfInputRef}
-          // handlePdfUpload={handlePdfUpload}
+          handlePdfUpload={handlePdfUpload}
         />
       )}
 
+      {/* Schermata vuota */}
       {quizStatus === "empty" && (
         <EmptyScreen
           quizName={quizName}
@@ -300,33 +140,12 @@ function App() {
         />
       )}
 
-      {quizStatus === "active" && questions.length > 0 && (
-        <ActiveQuizScreen
-          quizName={quizName}
-          currentQuestionIndex={currentQuestionIndex}
-          totalQuestions={questions.length}
-          score={score}
-          question={questions[currentQuestionIndex]}
-          selectedAnswer={selectedAnswer}
-          setSelectedAnswer={setSelectedAnswer}
-          showExplanation={showExplanation}
-          handleAnswer={handleAnswer}
-          nextQuestion={nextQuestion}
-          timeRemaining={timeRemaining}
-          timerActive={timerActive}
-          timerEnabled={timerEnabled}
-        />
+      {/* Gestione del quiz */}
+      {quizStatus !== "setup" && quizStatus !== "empty" && (
+        <QuizManager {...quizManagerProps}/>
       )}
 
-      {quizStatus === "completed" && (
-        <CompletedScreen
-          quizName={quizName}
-          report={generateReport()}
-          resetQuiz={resetQuiz}
-          backToSetup={backToSetup}
-        />
-      )}
-
+      {/* Modal per informazioni sul formato del file */}
       {showFormatInfo && (
         <FormatInfoModal onClose={() => setShowFormatInfo(false)} />
       )}
