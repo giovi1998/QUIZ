@@ -186,7 +186,7 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
             <div className="mt-3 bg-green-50 p-2 rounded-lg">
               <span className="flex items-center justify-center text-green-600 text-sm font-medium">
                 <CheckCircle size={16} className="mr-1" />
-                {questions.length} domande caricate con successo
+                {questions.length} {questions.length == 1 ? "domanda" : "domande"} caricate con successo
               </span>
             </div>
           )}

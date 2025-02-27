@@ -21,15 +21,6 @@ interface QuizManagerProps {
   showTemporaryAlert: (message: string) => void;
 }
 
-function shuffleArray<T>(array: T[]): T[] {
-  const newArr = array.slice();
-  for (let i = newArr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
-  }
-  return newArr;
-}
-
 const QuizManager = ({
   quizName,
   questions,
@@ -109,30 +100,27 @@ const QuizManager = ({
 
   const nextQuestion = useCallback(() => {
     console.log("QuizManager - nextQuestion called");
+    // Reset degli stati per la nuova domanda
     setTimeRemaining(timerDuration);
     setTimerActive(timerEnabled);
     setSelectedAnswer(null);
     setShowExplanation(false);
-    if (showExplanation){
-        if (currentQuestionIndex < questions.length - 1) {
-          setCurrentQuestionIndex((prev) => prev + 1);
-          console.log(
-            "QuizManager - Moving to next question, index:",
-            currentQuestionIndex + 1
-          );
-        } else {
-          setQuizStatus("completed");
-          console.log("QuizManager - Quiz completed, status:", quizStatus);
-        }
+  
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex((prevIndex) => {
+        const newIndex = prevIndex + 1;
+        console.log("QuizManager - Moving to next question, index:", newIndex);
+        return newIndex;
+      });
+    } else {
+      console.log("QuizManager - Last question reached. Completing quiz.");
+      // Usa setTimeout per spostare l'aggiornamento di quizStatus fuori dal render
+      setTimeout(() => {
+        setQuizStatus("completed");
+      }, 0);
     }
-  }, [
-    currentQuestionIndex,
-    questions.length,
-    timerDuration,
-    timerEnabled,
-    setQuizStatus,
-    showExplanation,
-  ]);
+  }, [currentQuestionIndex, questions.length, timerDuration, timerEnabled, setQuizStatus]);
+  
 
   const resetQuiz = useCallback(() => {
     console.log("QuizManager - resetQuiz called");
@@ -143,8 +131,10 @@ const QuizManager = ({
     setTimeRemaining(timerDuration);
     setTimerActive(timerEnabled);
     setQuizStatus("active");
+    setQuestions([]);
     console.log("QuizManager - Quiz reset");
-  }, [timerDuration, timerEnabled, setQuizStatus]);
+  }, [timerDuration, timerEnabled, setQuizStatus, setQuestions]);
+
 
   const clearQuestions = useCallback(() => {
     console.log("QuizManager - clearQuestions called");

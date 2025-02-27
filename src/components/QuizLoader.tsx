@@ -1,178 +1,177 @@
-// components/QuizLoader.tsx
 import React, {
-    Dispatch,
-    SetStateAction,
-    useRef,
-    useCallback,
-    useEffect,
-    useState,
-  } from "react";
-  import { Question } from "../App.tsx";
-  import { extractFromPdf } from "./pdfExtractor.tsx";
-  import questionsDefaults from "../Data/questionsDefaults.json";
-  
-  type QuizLoaderProps = {
-    setQuestions: Dispatch<SetStateAction<Question[]>>;
-    showTemporaryAlert: (message: string) => void;
-    questions: Question[];
-    setLoading: Dispatch<SetStateAction<boolean>>;
-  };
-  
-  function shuffleArray<T>(array: T[]): T[] {
-    const newArr = array.slice();
-    for (let i = newArr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+  Dispatch,
+  SetStateAction,
+  useRef,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
+import { Question } from "../App.tsx";
+import { extractFromPdf } from "./pdfExtractor.tsx";
+import questionsDefaults from "../Data/questionsDefaults.json";
+
+type QuizLoaderProps = {
+  setQuestions: Dispatch<SetStateAction<Question[]>>;
+  showTemporaryAlert: (message: string) => void;
+  questions: Question[];
+  setLoading: Dispatch<SetStateAction<boolean>>;
+};
+
+function shuffleArray<T>(array: T[]): T[] {
+  console.log(`Shuffling ${array.length} questions`);
+  return array.sort(() => Math.random() - 0.5);
+}
+
+const QuizLoader: React.FC<QuizLoaderProps> = ({
+  setQuestions,
+  showTemporaryAlert,
+  questions,
+  setLoading,
+}) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
+  const [jsonLoading, setJsonLoading] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const [externalLoaded, setExternalLoaded] = useState(false);
+
+  // Caricamento domande predefinite solo se non sono state caricate domande esterne
+  useEffect(() => {
+    if (!externalLoaded && questions.length === 0) {
+      console.log("No external questions loaded. Loading default questions.");
+      const defaultQuestions = shuffleArray(questionsDefaults).slice(0, 24);
+      console.log(`Default questions loaded: ${defaultQuestions.length}`);
+      setQuestions(defaultQuestions);
     }
-    return newArr;
-  }
-  
-  const QuizLoader: React.FC<QuizLoaderProps> = ({
-    setQuestions,
-    showTemporaryAlert,
-    questions,
-    setLoading,
-  }) => {
-    console.log("QuizLoader rendered"); // Added log
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    const pdfInputRef = useRef<HTMLInputElement>(null);
-    const [jsonLoading, setJsonLoading] = useState(false);
-    const [pdfLoading, setPdfLoading] = useState(false);
-  
-    useEffect(() => {
-      // Load default questions on initial render
-      if (questions && questions.length == 0) {
-        setQuestions(shuffleArray(questionsDefaults));
-        console.log("QuizLoader - Default questions loaded");
+  }, [externalLoaded, questions, setQuestions]);
+
+  // Gestione file JSON
+  const handleFileUpload = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) {
+        console.log("No JSON file selected.");
+        return;
       }
-    }, [questions, setQuestions]);
-  
-    const handleFileUpload = useCallback(
-      (e: React.ChangeEvent<HTMLInputElement>) => {
-        console.log("QuizLoader - handleFileUpload called"); // Added log
-        const file = e.target.files?.[0];
-        if (!file) return;
-        setQuestions([]); // Clear existing questions
-        setJsonLoading(true); // Start loading
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          try {
-            const content = event.target?.result as string;
-            console.log(
-              "QuizLoader - File content loaded:",
-              content.substring(0, 100) + "..."
-            );
-            let parsedData: Question[] = JSON.parse(content);
-            if (!Array.isArray(parsedData)) {
-              throw new Error("Formato JSON non valido: deve essere un array");
-            }
-            parsedData.forEach((q, i) => {
-              if (
-                !q.question ||
-                !Array.isArray(q.options) ||
-                !q.correctAnswer ||
-                !q.explanation
-              ) {
-                throw new Error(`Domanda ${i + 1} manca dei campi obbligatori`);
-              }
-              q.options = shuffleArray(q.options);
-              if (!q.options.includes(q.correctAnswer)) {
-                throw new Error(
-                  `Domanda ${i + 1}: la risposta corretta non è presente tra le opzioni`
-                );
-              }
-            });
-            parsedData = shuffleArray(parsedData);
-            if (parsedData.length > 24) parsedData = parsedData.slice(0, 24);
-            setQuestions(parsedData);
-            showTemporaryAlert(
-              `Caricate ${parsedData.length} domande con successo!`
-            );
-            console.log("QuizLoader - Questions loaded:", parsedData.length);
-            if (fileInputRef.current) fileInputRef.current.value = "";
-          } catch (error) {
-            console.error("Errore di caricamento:", error);
-            showTemporaryAlert(`Errore: ${(error as Error).message}`);
-            if (fileInputRef.current) fileInputRef.current.value = "";
-          } finally {
-            setJsonLoading(false); // End loading, whether success or failure
-          }
-        };
-        reader.readAsText(file);
-      },
-      [setQuestions, showTemporaryAlert]
-    );
-  
-    // Gestione del caricamento del file PDF usando extractFromPdf
-    const handlePdfUpload = useCallback(
-      async (e: React.ChangeEvent<HTMLInputElement>) => {
-        console.log("QuizLoader - handlePdfUpload called");
-        const file = e.target.files?.[0];
-        if (!file) return;
-        setQuestions([]); // Clear existing questions
-        setPdfLoading(true); // Start loading
+      console.log(`Starting JSON upload. File: ${file.name}`);
+      setJsonLoading(true);
+      setQuestions([]); // Puliamo le domande correnti
+
+      const reader = new FileReader();
+      reader.onload = async (event) => {
         try {
-          const extractedQuestions = await extractFromPdf(file);
-          console.log(
-            "QuizLoader - Questions extracted from PDF:",
-            extractedQuestions.length
-          );
-          extractedQuestions.forEach((q: Question, i: number) => {
-            if (
-              q.options.length === 0 &&
-              q.question.toLowerCase().includes("scelta multipla")
-            ) {
-              throw new Error(
-                `Domanda ${i + 1} manca delle opzioni attese per una domanda a scelta multipla`
-              );
+          const content = event.target?.result as string;
+          console.log("JSON file content loaded.");
+          let parsedData: Question[] = JSON.parse(content);
+          console.log(`Found ${parsedData.length} questions in JSON file.`);
+
+          if (!Array.isArray(parsedData)) {
+            throw new Error("Formato file non valido: il file JSON non contiene un array.");
+          }
+
+          // Selezione massimo 24 domande
+          const MAX_QUESTIONS = 24;
+          parsedData = shuffleArray(parsedData).slice(0, MAX_QUESTIONS);
+          console.log(`After shuffling, selected ${parsedData.length} questions.`);
+
+          // Validazione
+          parsedData.forEach((q, i) => {
+            if (!q.options.includes(q.correctAnswer)) {
+              throw new Error(`Domanda ${i + 1}: Risposta corretta mancante nei dati.`);
             }
-            q.options = shuffleArray(q.options);
           });
-          let parsedData = shuffleArray(extractedQuestions);
-          if (parsedData.length > 24) parsedData = parsedData.slice(0, 24);
+
           setQuestions(parsedData);
-          showTemporaryAlert(
-            `Caricate ${parsedData.length} domande da PDF con successo!`
-          );
-          console.log("QuizLoader - Questions set:", parsedData.length);
-          if (pdfInputRef.current) pdfInputRef.current.value = "";
+          setExternalLoaded(true);
+          console.log("JSON upload successful. Questions set.");
+          showTemporaryAlert(`Caricate ${parsedData.length} domande dal file JSON.`);
+          if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+            console.log("Reset JSON file input.");
+          }
         } catch (error) {
-          console.error("Errore di caricamento PDF:", error);
-          showTemporaryAlert(`Errore: ${(error as Error).message}`);
-          if (pdfInputRef.current) pdfInputRef.current.value = "";
+          console.error("Errore durante il caricamento del file JSON:", error);
+          showTemporaryAlert(`Errore JSON: ${(error as Error).message}`);
         } finally {
-          setPdfLoading(false); // End loading, whether success or failure
+          setJsonLoading(false);
+          console.log("JSON loading state set to false.");
         }
-      },
-      [setQuestions, showTemporaryAlert]
-    );
-  
-    useEffect(() => {
-      setLoading(jsonLoading || pdfLoading);
-    }, [jsonLoading, pdfLoading, setLoading]);
-  
-    return (
-      <>
-        <input
-          id="json-upload"
-          type="file"
-          accept=".json"
-          ref={fileInputRef}
-          onChange={handleFileUpload}
-          className="hidden"
-        />
-  
-        {/* Upload file PDF */}
-        <input
-          id="pdf-upload"
-          type="file"
-          accept=".pdf"
-          ref={pdfInputRef}
-          onChange={handlePdfUpload}
-          className="hidden"
-        />
-      </>
-    );
-  };
-  export default QuizLoader;
-  
+      };
+      reader.onerror = (error) => {
+        console.error("FileReader encountered an error:", error);
+        showTemporaryAlert("Errore durante la lettura del file JSON.");
+        setJsonLoading(false);
+      };
+      reader.readAsText(file);
+    },
+    [setQuestions, showTemporaryAlert]
+  );
+
+  // Gestione file PDF
+  const handlePdfUpload = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) {
+        console.log("No PDF file selected.");
+        return;
+      }
+      console.log(`Starting PDF upload. File: ${file.name}`);
+      setPdfLoading(true);
+      setQuestions([]);
+
+      try {
+        let parsedData = await extractFromPdf(file);
+        console.log(`Extracted ${parsedData.length} questions from PDF file.`);
+
+        // Limite dinamico per PDF
+        const MAX_QUESTIONS = parsedData.length > 50 ? 24 : parsedData.length;
+        parsedData = shuffleArray(parsedData).slice(0, MAX_QUESTIONS);
+        console.log(`After shuffling, selected ${parsedData.length} questions from PDF.`);
+
+        setQuestions(parsedData);
+        setExternalLoaded(true);
+        console.log("PDF upload successful. Questions set.");
+        showTemporaryAlert(`Caricate ${parsedData.length} domande dal file PDF.`);
+        if (pdfInputRef.current) {
+          pdfInputRef.current.value = "";
+          console.log("Reset PDF file input.");
+        }
+      } catch (error) {
+        console.error("Errore durante il caricamento del file PDF:", error);
+        showTemporaryAlert(`Errore PDF: ${(error as Error).message}`);
+      } finally {
+        setPdfLoading(false);
+        console.log("PDF loading state set to false.");
+      }
+    },
+    [setQuestions, showTemporaryAlert]
+  );
+
+  // Gestione stato loading
+  useEffect(() => {
+    console.log(`Loading state updated - JSON: ${jsonLoading}, PDF: ${pdfLoading}`);
+    setLoading(jsonLoading || pdfLoading);
+  }, [jsonLoading, pdfLoading, setLoading]);
+
+  return (
+    <>
+      <input
+        id="json-upload"
+        type="file"
+        accept=".json"
+        ref={fileInputRef}
+        onChange={handleFileUpload}
+        className="hidden"
+      />
+      <input
+        id="pdf-upload"
+        type="file"
+        accept=".pdf"
+        ref={pdfInputRef}
+        onChange={handlePdfUpload}
+        className="hidden"
+      />
+    </>
+  );
+};
+
+export default QuizLoader;
