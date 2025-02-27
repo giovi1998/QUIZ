@@ -3,8 +3,9 @@ import React, { useState, useCallback, useEffect } from "react";
 import { SetupScreen } from "./components/SetupScreen.tsx";
 import { EmptyScreen } from "./components/EmptyScreen.tsx";
 import { FormatInfoModal } from "./components/FormatInfoModal.tsx";
-import QuizManager, {QuizManagerType} from "./components/QuizManager.tsx";
+import QuizManager, { QuizManagerType } from "./components/QuizManager.tsx";
 import QuizLoader from "./components/QuizLoader.tsx";
+import questionsDefaults from "./Data/questionsDefaults.json";
 
 // Stato per gestire la vista da visualizzare
 export type QuizStatus = "setup" | "active" | "completed" | "empty";
@@ -28,6 +29,15 @@ export type Report = {
     correctAnswer: string;
   }[];
 };
+
+function shuffleArray<T>(array: T[]): T[] {
+    const newArr = array.slice();
+    for (let i = newArr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+    }
+    return newArr;
+}
 
 function App() {
   console.log("App rendered"); // Added log
@@ -53,20 +63,18 @@ function App() {
   }, []);
 
   // QuizLoader Hook
-  const {
-    handleFileUpload,
-    handlePdfUpload,
-    fileInputRef,
-    pdfInputRef,
-  } = QuizLoader({
-    setQuestions,
-    showTemporaryAlert,
-  });
+  const { handleFileUpload, handlePdfUpload, fileInputRef, pdfInputRef } =
+    QuizLoader({
+      setQuestions,
+      showTemporaryAlert,
+      questions,
+    });
 
   // Handler per il completamento della configurazione
   const handleSetupComplete = useCallback(() => {
     console.log("App - handleSetupComplete called"); // Added log
     if (quizMode === "default") {
+        setQuestions(shuffleArray(questionsDefaults));
       console.log("App - Using default questions"); // Added log
     } else if (questions.length === 0) {
       showTemporaryAlert(
@@ -84,7 +92,10 @@ function App() {
   }, [quizStatus]);
 
   //use QuizManager
-  const quizManagerProps: Omit<QuizManagerType & {showTemporaryAlert:(message:string)=>void}, never> = {
+  const quizManagerProps: Omit<
+    QuizManagerType & { showTemporaryAlert: (message: string) => void },
+    never
+  > = {
     quizName,
     questions,
     setQuestions,
@@ -126,6 +137,7 @@ function App() {
           setShowFormatInfo={setShowFormatInfo}
           pdfInputRef={pdfInputRef}
           handlePdfUpload={handlePdfUpload}
+          questions={questions}
         />
       )}
 
@@ -142,7 +154,7 @@ function App() {
 
       {/* Gestione del quiz */}
       {quizStatus !== "setup" && quizStatus !== "empty" && (
-        <QuizManager {...quizManagerProps}/>
+        <QuizManager {...quizManagerProps} />
       )}
 
       {/* Modal per informazioni sul formato del file */}
