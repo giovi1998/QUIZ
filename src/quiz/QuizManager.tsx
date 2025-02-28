@@ -31,7 +31,7 @@ const QuizManager = ({
   timerDuration,
   showTemporaryAlert,
 }: QuizManagerProps) => {
-  console.log("QuizManager rendered");
+  console.log("[QuizManager] Component rendered");
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -39,58 +39,60 @@ const QuizManager = ({
   const [answers, setAnswers] = useState<string[]>([]);
   const [timeRemaining, setTimeRemaining] = useState(timerDuration);
   const [timerActive, setTimerActive] = useState(false);
+  const [score, setScore] = useState(0); // Added score state
 
   useEffect(() => {
-    console.log("QuizManager useEffect - timerActive or timeRemaining changed");
+    console.log("[QuizManager] useEffect - timerActive or timeRemaining changed");
     if (timerActive && timeRemaining > 0) {
       const timer = setTimeout(() => {
         setTimeRemaining((prev) => prev - 1);
-        console.log("QuizManager - Time remaining:", timeRemaining - 1);
+        console.log("[QuizManager] Time remaining:", timeRemaining - 1);
       }, 1000);
       return () => {
-        console.log("QuizManager - Clearing timer");
+        console.log("[QuizManager] Clearing timer");
         clearTimeout(timer);
       };
     } else if (timerActive && timeRemaining === 0) {
-      console.log("QuizManager - Timer reached 0, calling handleAnswer");
+      console.log("[QuizManager] Timer reached 0, calling handleAnswer");
       handleAnswer(null);
     }
   }, [timerActive, timeRemaining]);
 
   const handleAnswer = useCallback((answer: string | null) => {
-    console.log("QuizManager - handleAnswer called with:", answer);
+    console.log("[QuizManager] handleAnswer called with:", answer);
     if (!showExplanation) {
-        setSelectedAnswer(answer);
-        setShowExplanation(true);
-        if (answer && questions[currentQuestionIndex].correctAnswer === answer) {
-            console.log("QuizManager - correct answer!");
-            setAnswers((prev) => {
-                const newAnswers = [...prev];
-                newAnswers[currentQuestionIndex] = answer;
-                return newAnswers;
-            });
-        } else {
-            console.log("QuizManager - incorrect answer");
-            setAnswers((prev) => {
-                const newAnswers = [...prev];
-                newAnswers[currentQuestionIndex] = answer || "Nessuna risposta";
-                return newAnswers;
-            });
-        }
+      setSelectedAnswer(answer);
+      setShowExplanation(true);
+      if (answer && questions[currentQuestionIndex].correctAnswer === answer) {
+        console.log("[QuizManager] Correct answer!");
+        setScore((prevScore) => {
+          const newScore = prevScore + 1;
+          console.log("[QuizManager] Score updated:", newScore);
+          return newScore;
+        });
+        setAnswers((prev) => {
+          const newAnswers = [...prev];
+          newAnswers[currentQuestionIndex] = answer;
+          return newAnswers;
+        });
+      } else {
+        console.log("[QuizManager] Incorrect answer");
+        setAnswers((prev) => {
+          const newAnswers = [...prev];
+          newAnswers[currentQuestionIndex] = answer || "Nessuna risposta";
+          return newAnswers;
+        });
+      }
     }
-}, [
-    showExplanation,
-    currentQuestionIndex,
-    questions,
-]);
+  }, [showExplanation, currentQuestionIndex, questions]);
 
   useEffect(() => {
-    console.log("QuizManager useEffect - quizStatus changed to:", quizStatus);
+    console.log("[QuizManager] useEffect - quizStatus changed to:", quizStatus);
     if (quizStatus === "active" && questions.length > 0) {
       setTimeRemaining(timerDuration);
       setTimerActive(timerEnabled);
       console.log(
-        "QuizManager - Timer reset to:",
+        "[QuizManager] Timer reset to:",
         timerDuration,
         "and set to:",
         timerEnabled
@@ -99,31 +101,34 @@ const QuizManager = ({
   }, [currentQuestionIndex, timerEnabled, timerDuration, quizStatus, questions]);
 
   const nextQuestion = useCallback(() => {
-    console.log("QuizManager - nextQuestion called");
-    // Reset degli stati per la nuova domanda
+    console.log("[QuizManager] nextQuestion called");
     setTimeRemaining(timerDuration);
     setTimerActive(timerEnabled);
     setSelectedAnswer(null);
     setShowExplanation(false);
-  
+
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex((prevIndex) => {
         const newIndex = prevIndex + 1;
-        console.log("QuizManager - Moving to next question, index:", newIndex);
+        console.log("[QuizManager] Moving to next question, index:", newIndex);
         return newIndex;
       });
     } else {
-      console.log("QuizManager - Last question reached. Completing quiz.");
-      // Usa setTimeout per spostare l'aggiornamento di quizStatus fuori dal render
+      console.log("[QuizManager] Last question reached. Completing quiz.");
       setTimeout(() => {
         setQuizStatus("completed");
       }, 0);
     }
-  }, [currentQuestionIndex, questions.length, timerDuration, timerEnabled, setQuizStatus]);
-  
+  }, [
+    currentQuestionIndex,
+    questions.length,
+    timerDuration,
+    timerEnabled,
+    setQuizStatus,
+  ]);
 
   const resetQuiz = useCallback(() => {
-    console.log("QuizManager - resetQuiz called");
+    console.log("[QuizManager] resetQuiz called");
     setCurrentQuestionIndex(0);
     setAnswers([]);
     setShowExplanation(false);
@@ -132,12 +137,12 @@ const QuizManager = ({
     setTimerActive(timerEnabled);
     setQuizStatus("active");
     setQuestions([]);
-    console.log("QuizManager - Quiz reset");
+    setScore(0); // Reset score on quiz reset
+    console.log("[QuizManager] Quiz reset");
   }, [timerDuration, timerEnabled, setQuizStatus, setQuestions]);
 
-
   const clearQuestions = useCallback(() => {
-    console.log("QuizManager - clearQuestions called");
+    console.log("[QuizManager] clearQuestions called");
     setQuestions([]);
     setCurrentQuestionIndex(0);
     setAnswers([]);
@@ -146,11 +151,12 @@ const QuizManager = ({
     setTimeRemaining(timerDuration);
     setTimerActive(false);
     setQuizStatus("empty");
-    console.log("QuizManager - Questions cleared, status:", quizStatus);
+    setScore(0);
+    console.log("[QuizManager] Questions cleared, status:", quizStatus);
   }, [setQuestions, setQuizStatus, timerDuration]);
 
   const generateReport = useCallback((): Report => {
-    console.log("QuizManager - generateReport called");
+    console.log("[QuizManager] generateReport called");
     const totalQuestions = questions.length;
     const correctAnswers = answers.filter((answer, index) => {
       return answer === questions[index].correctAnswer;
@@ -162,27 +168,30 @@ const QuizManager = ({
     const missed =
       questions.length > 0
         ? questions
-          .map((q, idx) => ({
-            question: q.question,
-            yourAnswer: answers[idx] || "Nessuna risposta",
-            correctAnswer: q.correctAnswer,
-          }))
-          .filter(
-            (_, idx) => answers[idx] && answers[idx] !== questions[idx].correctAnswer
-          )
+            .map((q, idx) => ({
+              question: q.question,
+              yourAnswer: answers[idx] || "Nessuna risposta",
+              correctAnswer: q.correctAnswer,
+            }))
+            .filter(
+              (_, idx) =>
+                answers[idx] && answers[idx] !== questions[idx].correctAnswer
+            )
         : [];
-    console.log("QuizManager - Report generated");
+    console.log("[QuizManager] Report generated");
     return { totalQuestions, correctAnswers, percentage, missed };
   }, [questions, answers]);
 
   const backToSetup = useCallback(() => {
-    console.log("QuizManager - backToSetup called");
+    console.log("[QuizManager] backToSetup called");
     clearQuestions();
     setQuizStatus("setup");
   }, [clearQuestions, setQuizStatus]);
 
   // Rendering condizionale
   let content;
+  console.log("[QuizManager] Rendering content with quizStatus:", quizStatus);
+
   if (quizStatus === "active") {
     if (questions.length > 0) {
       content = (
@@ -198,12 +207,14 @@ const QuizManager = ({
           timeRemaining={timeRemaining}
           timerActive={timerActive}
           timerEnabled={timerEnabled}
+          score={score}
         />
       );
     } else {
       content = (
         <div className="p-4 text-center text-lg font-semibold">
-          Nessuna domanda disponibile. Carica un file JSON o PDF per iniziare il quiz.
+          Nessuna domanda disponibile. Carica un file JSON o PDF per iniziare
+          il quiz.
         </div>
       );
     }
@@ -225,6 +236,6 @@ const QuizManager = ({
 export default QuizManager;
 
 export type QuizManagerType = {
-    resetQuiz: () => void;
-    backToSetup: () => void;
-  }
+  resetQuiz: () => void;
+  backToSetup: () => void;
+};

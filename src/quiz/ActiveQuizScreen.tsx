@@ -73,6 +73,7 @@ type ActiveQuizScreenProps = {
   timeRemaining: number;
   timerActive: boolean;
   timerEnabled: boolean;
+  score: number;
 };
 
 const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
@@ -87,6 +88,7 @@ const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
   timeRemaining,
   timerActive,
   timerEnabled,
+  score,
 }) => {
   const progress = (currentQuestionIndex / totalQuestions) * 100;
 
@@ -110,10 +112,12 @@ const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
         )}
       </div>
 
+      {/* QuestionInfo ora visualizza il punteggio dinamico */}
       <QuestionInfo
         currentQuestionIndex={currentQuestionIndex}
         totalQuestions={totalQuestions}
         className="flex-col sm:flex-row items-start sm:items-center"
+        score={score} // Pass the score to QuestionInfo
       />
 
       <div className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 leading-tight">
@@ -127,9 +131,9 @@ const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
             option={option}
             selected={selectedAnswer === option}
             onSelect={() => {
-                if (!showExplanation) {
-                  handleAnswer(option);
-                }
+              if (!showExplanation) {
+                handleAnswer(option);
+              }
             }}
           />
         ))}

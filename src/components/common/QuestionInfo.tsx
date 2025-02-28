@@ -1,26 +1,25 @@
-// components/QuestionInfo.tsx
 import React from "react";
-type QuestionInfoProps = {
+
+interface QuestionInfoProps {
   currentQuestionIndex: number;
   totalQuestions: number;
-  score: number;
-};
+  className?: string;
+  score: number; // Added score prop
+}
 
 const QuestionInfo: React.FC<QuestionInfoProps> = ({
   currentQuestionIndex,
   totalQuestions,
-  score,
+  className,
+  score, // Receive score as prop
 }) => {
   return (
-    <div className="flex justify-between items-center">
+    <div className={`flex gap-2 text-sm font-medium text-gray-600 ${className}`}>
       <div>
-        <span className="text-gray-600 font-medium">
-          Domanda {currentQuestionIndex + 1} di {totalQuestions}
-        </span>
+        Domanda {currentQuestionIndex + 1} di {totalQuestions}
       </div>
-      <div className="text-green-600 font-medium">
-        Punteggio: {score}
-      </div>
+      {/* Display Punteggio here */}
+      <div className="ml-auto">Punteggio: {score}</div>
     </div>
   );
 };
