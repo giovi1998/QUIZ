@@ -1,4 +1,3 @@
-// components/ActiveQuizScreen.tsx
 import React from "react";
 import ProgressBar from "../components/common/ProgressBar.tsx";
 import TimerDisplay from "../components/common/TimerDisplay.tsx";
@@ -136,18 +135,7 @@ const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
         ))}
       </div>
 
-      {!showExplanation ? (
-        <button
-          onClick={() => handleAnswer(selectedAnswer)}
-          disabled={selectedAnswer === null}
-          className={`w-full sm:w-auto px-6 py-3 text-sm sm:text-base rounded-lg transition-all duration-200 
-                ${selectedAnswer === null
-            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-            : "bg-blue-600 text-white hover:bg-blue-700"}`}
-        >
-          Invia Risposta
-        </button>
-      ) : (
+      {showExplanation && (
         <ExplanationSection
           selectedAnswer={selectedAnswer}
           correctAnswer={question.correctAnswer}
