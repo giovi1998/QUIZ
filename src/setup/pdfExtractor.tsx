@@ -28,10 +28,12 @@ export interface QuestionFromPdf {
 
 export async function extractFromPdf(file: File): Promise<QuestionFromPdf[]> {
   if (file.type !== 'application/pdf') {
+    console.error('🚨 File non supportato: solo PDF ammessi');
     throw new Error('Il file non è un PDF valido');
   }
 
   try {
+    console.log('🚀 Inizio estrazione del PDF...');
     const arrayBuffer = await file.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({
       data: new Uint8Array(arrayBuffer),
@@ -46,10 +48,13 @@ export async function extractFromPdf(file: File): Promise<QuestionFromPdf[]> {
         .map(item => (item as TextItem).str)
         .join('\n');
       fullText += pageText + '\n\n';
+      console.log(`✅ Pagina ${i} processata con successo`);
     }
 
+    console.log('🚀 Testo completo del PDF raccolto');
     return processPdfText(fullText);
   } catch (error) {
+    console.error('🚨 Errore critico durante l estrazione:', error);
     throw new Error(`Estrazione fallita: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`);
   }
 }
@@ -59,6 +64,7 @@ function processPdfText(text: string): QuestionFromPdf[] {
     .replace(/[≥≤−×÷≠≈±Δ\u0394\u2212\u2264\u2265–—]/g, (match) => SPECIAL_CHARS_MAP[match] || match)
     .replace(/(\r\n|\n|\r)/gm, '\n')
     .replace(/(\n\s*){2,}/g, '\n');
+  console.log('✅ Testo del PDF pulito');
 
   const questions: QuestionFromPdf[] = [];
   const lectureMatches = [...cleanedText.matchAll(/Lezione\s+(\d{2,3})/gi)];
@@ -72,8 +78,15 @@ function processPdfText(text: string): QuestionFromPdf[] {
     const lectureContent = cleanedText.slice(lectureStart, lectureEnd);
     const lectureNumber = match[1].padStart(3, '0');
     const lecture = `Lezione ${lectureNumber}`;
+    
+    if (!match[1]) {
+      console.error('⚠️ Errore: Numero lezione non riconosciuto');
+      return;
+    }
 
+    console.log(`🚀 Elaborazione ${lecture}`);
     const questionMatches = [...lectureContent.matchAll(/(\d{2}\.)\s+([\s\S]*?)(?=\n\d{2}\.|\nLezione\s+\d+|$)/g)];
+    console.log(`⚠️ ${lecture} contiene ${questionMatches.length} domande`);
 
     questionMatches.forEach(qMatch => {
       const [_, qNumber, qBody] = qMatch;
@@ -87,6 +100,7 @@ function processPdfText(text: string): QuestionFromPdf[] {
         .trim()
         .replace(/\s+/g, ' ');
 
+      console.log(`▸ Domanda ${questionNumber}: ${questionText}`);
       const isOpenQuestion = /descrivere|fornire|spiegare/i.test(questionText);
 
       const options = !isOpenQuestion 
@@ -99,6 +113,8 @@ function processPdfText(text: string): QuestionFromPdf[] {
             .filter(line => line.length > 0)
         : [];
 
+      options.forEach(option => console.log(`▸ Opzione: ${option}`));
+
       questions.push({
         question: `${questionNumber}. ${questionText}`,
         options,
@@ -108,6 +124,7 @@ function processPdfText(text: string): QuestionFromPdf[] {
     });
   });
 
+  console.log(`✅ ${questions.length} domande estratte totali`);
   return questions.sort((a, b) => {
     const lecA = parseInt(a.lecture.split(' ')[1]);
     const lecB = parseInt(b.lecture.split(' ')[1]);
