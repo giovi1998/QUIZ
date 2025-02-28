@@ -112,7 +112,19 @@ function processPdfText(text: string): QuestionFromPdf[] {
             )
             .filter(line => line.length > 0)
         : [];
-
+      
+      // Nuova logica per limitare a 4 opzioni
+    if (options.length > 4) {
+      // Prendi le prime 4 opzioni
+      const firstFourOptions = options.slice(0, 4);
+      // Unisci le opzioni rimanenti nell'ultima
+      const mergedExtras = options.slice(4)
+        .map(opt => opt.replace(/^[A-Z)]+\s*/i, '').trim()) // Rimuovi lettera e parentesi
+        .join(', ');
+      firstFourOptions[3] += ` ${mergedExtras}`;
+      options.splice(0); // Svuota array originale
+      options.push(...firstFourOptions);
+    }
       options.forEach(option => console.log(`▸ Opzione: ${option}`));
 
       questions.push({
