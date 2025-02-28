@@ -1,4 +1,3 @@
-//App.tsx
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { SetupScreen } from "./setup/SetupScreen.tsx";
 import { FormatInfoModal } from "./setup/FormatInfoModal.tsx";
@@ -44,8 +43,8 @@ function App() {
   const [showAlert, setShowAlert] = useState(false);
   const [loading, setLoading] = useState(false);
   const [questions, setQuestions] = useState<Question[]>([]);
-  // externalLoaded indica se un file esterno (JSON) è stato caricato
-  // Per PDF, la logica è diversa: generiamo il PDF e poi carichiamo le default.
+  // externalLoaded indica se un file esterno (JSON) è stato caricato;
+  // per PDF, dopo la generazione del file PDF, carichiamo le domande di default.
   const [externalLoaded, setExternalLoaded] = useState(false);
   const [jsonLoading, setJsonLoading] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
@@ -80,108 +79,112 @@ function App() {
   }, [jsonLoading, pdfLoading, setLoading]);
 
   // Gestione upload file JSON (rimane invariata)
-  const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) {
-      console.log("No JSON file selected.");
-      return;
-    }
-    console.log(`Starting JSON upload. File: ${file.name}`);
-    setJsonLoading(true);
-    setQuestions([]); // Puliamo le domande correnti
-
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      try {
-        const content = event.target?.result as string;
-        console.log("JSON file content loaded.");
-        let parsedData: Question[] = JSON.parse(content);
-        console.log(`Found ${parsedData.length} questions in JSON file.`);
-
-        if (!Array.isArray(parsedData)) {
-          throw new Error("Formato file non valido: il file JSON non contiene un array.");
-        }
-
-        // Selezione massimo 24 domande
-        const MAX_QUESTIONS = 24;
-        parsedData = shuffleArray(parsedData).slice(0, MAX_QUESTIONS);
-        console.log(`After shuffling, selected ${parsedData.length} questions.`);
-        // Validazione: la risposta corretta deve essere presente tra le opzioni
-        parsedData.forEach((q, i) => {
-          if (!q.options.includes(q.correctAnswer)) {
-            throw new Error(`Domanda ${i + 1}: Risposta corretta mancante nei dati.`);
-          }
-        });
-
-        setQuestions(parsedData);
-        setExternalLoaded(true);
-        console.log("JSON upload successful. Questions set.");
-        showTemporaryAlert(`Caricate ${parsedData.length} domande dal file JSON.`);
-        if (fileInputRef.current) {
-          fileInputRef.current.value = "";
-          console.log("Reset JSON file input.");
-        }
-      } catch (error) {
-        console.error("Errore durante il caricamento del file JSON:", error);
-        showTemporaryAlert(`Errore JSON: ${(error as Error).message}`);
-      } finally {
-        setJsonLoading(false);
-        console.log("JSON loading state set to false.");
+  const handleFileUpload = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) {
+        console.log("No JSON file selected.");
+        return;
       }
-    };
-    reader.onerror = (error) => {
-      console.error("FileReader encountered an error:", error);
-      showTemporaryAlert("Errore durante la lettura del file JSON.");
-      setJsonLoading(false);
-    };
-    reader.readAsText(file);
-  }, [showTemporaryAlert]);
+      console.log(`Starting JSON upload. File: ${file.name}`);
+      setJsonLoading(true);
+      setQuestions([]); // Puliamo le domande correnti
+
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        try {
+          const content = event.target?.result as string;
+          console.log("JSON file content loaded.");
+          let parsedData: Question[] = JSON.parse(content);
+          console.log(`Found ${parsedData.length} questions in JSON file.`);
+
+          if (!Array.isArray(parsedData)) {
+            throw new Error("Formato file non valido: il file JSON non contiene un array.");
+          }
+
+          const MAX_QUESTIONS = 24;
+          parsedData = shuffleArray(parsedData).slice(0, MAX_QUESTIONS);
+          console.log(`After shuffling, selected ${parsedData.length} questions.`);
+          // Validazione: la risposta corretta deve essere presente tra le opzioni
+          parsedData.forEach((q, i) => {
+            if (!q.options.includes(q.correctAnswer)) {
+              throw new Error(`Domanda ${i + 1}: Risposta corretta mancante nei dati.`);
+            }
+          });
+
+          setQuestions(parsedData);
+          setExternalLoaded(true);
+          console.log("JSON upload successful. Questions set.");
+          showTemporaryAlert(`Caricate ${parsedData.length} domande dal file JSON.`);
+          if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+            console.log("Reset JSON file input.");
+          }
+        } catch (error) {
+          console.error("Errore durante il caricamento del file JSON:", error);
+          showTemporaryAlert(`Errore JSON: ${(error as Error).message}`);
+        } finally {
+          setJsonLoading(false);
+          console.log("JSON loading state set to false.");
+        }
+      };
+      reader.onerror = (error) => {
+        console.error("FileReader encountered an error:", error);
+        showTemporaryAlert("Errore durante la lettura del file JSON.");
+        setJsonLoading(false);
+      };
+      reader.readAsText(file);
+    },
+    [showTemporaryAlert]
+  );
 
   // Gestione upload file PDF
   // Logica:
-  // 1) Estrae le domande dal PDF e genera un nuovo file PDF con il formato desiderato:
+  // 1) Estrae TUTTE le domande dal PDF e genera un file PDF formattato come richiesto:
   //    - Per domande chiuse: mostra il testo della domanda con opzioni formattate (A), B), ecc.)
   //    - Per domande aperte: mostra il testo e una dicitura "[Spazio per risposta aperta]"
-  // 2) Dopo aver generato il PDF, ricarica le domande di default (perché le domande estratte dal PDF sono senza risposta)
-  const handlePdfUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) {
-      console.log("No PDF file selected.");
-      return;
-    }
-    console.log(`Starting PDF upload. File: ${file.name}`);
-    setPdfLoading(true);
-    // Puliamo le domande correnti (non vogliamo mostrare quelle estratte)
-    setQuestions([]);
-
-    try {
-      const extractedData = await extractFromPdf(file);
-      console.log(`Extracted ${extractedData.length} questions from PDF file.`);
-      // Applichiamo un eventuale shuffle e selezioniamo le prime 24 domande estratte (solo per generare il file PDF)
-      const MAX_QUESTIONS = extractedData.length > 50 ? 24 : extractedData.length;
-      const pdfQuestions = shuffleArray(extractedData).slice(0, MAX_QUESTIONS);
-      console.log(`After shuffling, selected ${pdfQuestions.length} questions from PDF.`);
-      // Genera il PDF con le domande estratte
-      await generatePdf(pdfQuestions);
-      showTemporaryAlert(`PDF generato con ${pdfQuestions.length} domande`);
-      console.log("Ricarico le domande di default, poiché le domande PDF non contengono risposta.");
-      // Ricarica le domande di default
-      const defaultQuestions = shuffleArray(questionsDefaults).slice(0, 24);
-      setQuestions(defaultQuestions);
-      // Non impostiamo externalLoaded a true, così la logica delle default rimane attiva
-      setExternalLoaded(false);
-    } catch (error) {
-      console.error("Errore durante il caricamento del file PDF:", error);
-      showTemporaryAlert(`Errore PDF: ${(error as Error).message}`);
-    } finally {
-      setPdfLoading(false);
-      console.log("PDF loading state set to false.");
-      if (pdfInputRef.current) {
-        pdfInputRef.current.value = "";
-        console.log("Reset PDF file input.");
+  // 2) Dopo aver generato il PDF, ricarica le domande di default (poiché le domande estratte dal PDF non contengono risposta)
+  const handlePdfUpload = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) {
+        console.log("No PDF file selected.");
+        return;
       }
-    }
-  }, [setQuestions, showTemporaryAlert]);
+      console.log(`Starting PDF upload. File: ${file.name}`);
+      setPdfLoading(true);
+      // Puliamo le domande correnti (non vogliamo mostrare quelle estratte)
+      setQuestions([]);
+
+      try {
+        const extractedData = await extractFromPdf(file);
+        console.log(`Extracted ${extractedData.length} questions from PDF file.`);
+        // Non limitiamo il numero: usiamo tutte le domande estratte per generare il file PDF.
+        const pdfQuestions = shuffleArray(extractedData);
+        console.log(`After shuffling, using ${pdfQuestions.length} questions for PDF generation.`);
+        // Genera il PDF con le domande estratte
+        await generatePdf(pdfQuestions);
+        showTemporaryAlert(`PDF generato con ${pdfQuestions.length} domande`);
+        console.log("Ricarico le domande di default, poiché le domande PDF non contengono risposta.");
+        // Ricarica le domande di default
+        const defaultQuestions = shuffleArray(questionsDefaults).slice(0, 24);
+        setQuestions(defaultQuestions);
+        // Non impostiamo externalLoaded a true, così la logica delle default rimane attiva
+        setExternalLoaded(false);
+      } catch (error) {
+        console.error("Errore durante il caricamento del file PDF:", error);
+        showTemporaryAlert(`Errore PDF: ${(error as Error).message}`);
+      } finally {
+        setPdfLoading(false);
+        console.log("PDF loading state set to false.");
+        if (pdfInputRef.current) {
+          pdfInputRef.current.value = "";
+          console.log("Reset PDF file input.");
+        }
+      }
+    },
+    [setQuestions, showTemporaryAlert]
+  );
 
   const handleSetupComplete = useCallback(() => {
     console.log("Setup complete. Quiz mode:", quizMode);
