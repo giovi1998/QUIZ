@@ -32,7 +32,7 @@ function shuffleArray<T>(array: T[]): T[] {
   return array.sort(() => Math.random() - 0.5);
 }
 
-function App() {
+function QuizLoader() {
   const [quizName, setQuizName] = useState("Computer Vision");
   const [quizMode, setQuizMode] = useState<"default" | "custom">("default");
   const [quizStatus, setQuizStatus] = useState<QuizStatus>("setup");
@@ -185,7 +185,11 @@ function App() {
     console.log("✅ Stato quiz impostato su 'attivo'");
   }, [quizMode, questions, showTemporaryAlert]);
 
-  return (
+    useEffect(() => {
+        console.log("QuizLoader rendered. Current quizStatus:", quizStatus);
+    });
+
+    return (
     <div>
       {showAlert && (
         <div className="alert">
@@ -230,4 +234,4 @@ function App() {
   );
 }
 
-export default App;
+export default QuizLoader;
