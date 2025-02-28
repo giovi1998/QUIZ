@@ -5,7 +5,7 @@
   "homepage": "https://giovi1998.github.io/QUIZ/",
   "dependencies": {
     "lucide-react": "^0.476.0",
-    "pdfjs-dist": "^4.10.38",
+    "pdfjs-dist": "^3.11.174",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^6.30.0",

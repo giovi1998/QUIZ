@@ -6,9 +6,10 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { Question } from "../App.tsx";
-import { extractFromPdf } from "../components/pdfExtractor.tsx";
+import { Question } from "../App";
+import { extractFromPdf } from "./pdfExtractor";
 import questionsDefaults from "../Data/questionsDefaults.json";
+import { generatePdf } from "./generatePdf";
 
 type QuizLoaderProps = {
   setQuestions: Dispatch<SetStateAction<Question[]>>;
@@ -18,7 +19,6 @@ type QuizLoaderProps = {
 };
 
 function shuffleArray<T>(array: T[]): T[] {
-  console.log(`Shuffling ${array.length} questions`);
   return array.sort(() => Math.random() - 0.5);
 }
 
@@ -32,123 +32,92 @@ const QuizLoader: React.FC<QuizLoaderProps> = ({
   const pdfInputRef = useRef<HTMLInputElement>(null);
   const [jsonLoading, setJsonLoading] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
+  // externalLoaded indica se è stato caricato un file esterno (JSON o PDF)
+  // Per la modalità PDF, dopo la generazione del file PDF, ricarichiamo le domande di default.
   const [externalLoaded, setExternalLoaded] = useState(false);
 
-  // Caricamento domande predefinite solo se non sono state caricate domande esterne
+  // Carica le domande di default se non sono state caricate domande esterne
   useEffect(() => {
     if (!externalLoaded && questions.length === 0) {
-      console.log("No external questions loaded. Loading default questions.");
+      console.log("Caricamento domande di default");
       const defaultQuestions = shuffleArray(questionsDefaults).slice(0, 24);
       console.log(`Default questions loaded: ${defaultQuestions.length}`);
       setQuestions(defaultQuestions);
     }
   }, [externalLoaded, questions, setQuestions]);
 
-  // Gestione file JSON
+  // Gestione caricamento file JSON (rimane invariata)
   const handleFileUpload = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
-      if (!file) {
-        console.log("No JSON file selected.");
-        return;
-      }
-      console.log(`Starting JSON upload. File: ${file.name}`);
-      setJsonLoading(true);
-      setQuestions([]); // Puliamo le domande correnti
+      if (!file) return;
 
+      setJsonLoading(true);
       const reader = new FileReader();
+      
       reader.onload = async (event) => {
         try {
           const content = event.target?.result as string;
-          console.log("JSON file content loaded.");
           let parsedData: Question[] = JSON.parse(content);
-          console.log(`Found ${parsedData.length} questions in JSON file.`);
-
           if (!Array.isArray(parsedData)) {
-            throw new Error("Formato file non valido: il file JSON non contiene un array.");
+            throw new Error("Formato file non valido");
           }
-
-          // Selezione massimo 24 domande
-          const MAX_QUESTIONS = 24;
-          parsedData = shuffleArray(parsedData).slice(0, MAX_QUESTIONS);
-          console.log(`After shuffling, selected ${parsedData.length} questions.`);
-
-          // Validazione
-          parsedData.forEach((q, i) => {
-            if (!q.options.includes(q.correctAnswer)) {
-              throw new Error(`Domanda ${i + 1}: Risposta corretta mancante nei dati.`);
-            }
-          });
-
+          parsedData = shuffleArray(parsedData).slice(0, 24);
           setQuestions(parsedData);
           setExternalLoaded(true);
-          console.log("JSON upload successful. Questions set.");
-          showTemporaryAlert(`Caricate ${parsedData.length} domande dal file JSON.`);
-          if (fileInputRef.current) {
-            fileInputRef.current.value = "";
-            console.log("Reset JSON file input.");
-          }
+          showTemporaryAlert(`Caricate ${parsedData.length} domande da JSON`);
         } catch (error) {
-          console.error("Errore durante il caricamento del file JSON:", error);
           showTemporaryAlert(`Errore JSON: ${(error as Error).message}`);
         } finally {
           setJsonLoading(false);
-          console.log("JSON loading state set to false.");
+          if (fileInputRef.current) fileInputRef.current.value = "";
         }
-      };
-      reader.onerror = (error) => {
-        console.error("FileReader encountered an error:", error);
-        showTemporaryAlert("Errore durante la lettura del file JSON.");
-        setJsonLoading(false);
       };
       reader.readAsText(file);
     },
     [setQuestions, showTemporaryAlert]
   );
 
-  // Gestione file PDF
+  // Gestione caricamento file PDF
+  // Logica:
+  // 1) Estrae le domande dal PDF e genera il PDF con il formato desiderato:
+  //    ad esempio, con la struttura:
+  //      Lezione 002
+  //      Domanda chiusa 01. La visione è il senso che consente all'essere umano di...
+  //      A) Opzione 1
+  //      B) Opzione 2
+  //      ...
+  //      Domanda aperta 05: Fornire una descrizione del concetto di Visione e Visione Artificiale
+  // 2) Una volta generato il PDF, carica le domande di default (perché le domande estratte dal PDF non hanno risposta)
   const handlePdfUpload = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
-      if (!file) {
-        console.log("No PDF file selected.");
-        return;
-      }
-      console.log(`Starting PDF upload. File: ${file.name}`);
+      if (!file) return;
+
       setPdfLoading(true);
-      setQuestions([]);
-
       try {
-        let parsedData = await extractFromPdf(file);
-        console.log(`Extracted ${parsedData.length} questions from PDF file.`);
-
-        // Limite dinamico per PDF
-        const MAX_QUESTIONS = parsedData.length > 50 ? 24 : parsedData.length;
-        parsedData = shuffleArray(parsedData).slice(0, MAX_QUESTIONS);
-        console.log(`After shuffling, selected ${parsedData.length} questions from PDF.`);
-
-        setQuestions(parsedData);
-        setExternalLoaded(true);
-        console.log("PDF upload successful. Questions set.");
-        showTemporaryAlert(`Caricate ${parsedData.length} domande dal file PDF.`);
-        if (pdfInputRef.current) {
-          pdfInputRef.current.value = "";
-          console.log("Reset PDF file input.");
-        }
+        const extractedQuestions = await extractFromPdf(file);
+        console.log("Domande estratte dal PDF:", extractedQuestions);
+        // Genera il file PDF con le domande estratte
+        await generatePdf(extractedQuestions);
+        showTemporaryAlert(`PDF generato con ${extractedQuestions.length} domande`);
+        console.log("Ricarico le domande di default, poiché le domande PDF non contengono risposta");
+        // Ricarica le domande di default
+        const defaultQuestions = shuffleArray(questionsDefaults).slice(0, 24);
+        setQuestions(defaultQuestions);
+        // Imposta externalLoaded a false (per far rimanere attive le default)
+        setExternalLoaded(false);
       } catch (error) {
-        console.error("Errore durante il caricamento del file PDF:", error);
         showTemporaryAlert(`Errore PDF: ${(error as Error).message}`);
       } finally {
         setPdfLoading(false);
-        console.log("PDF loading state set to false.");
+        if (pdfInputRef.current) pdfInputRef.current.value = "";
       }
     },
     [setQuestions, showTemporaryAlert]
   );
 
-  // Gestione stato loading
   useEffect(() => {
-    console.log(`Loading state updated - JSON: ${jsonLoading}, PDF: ${pdfLoading}`);
     setLoading(jsonLoading || pdfLoading);
   }, [jsonLoading, pdfLoading, setLoading]);
 

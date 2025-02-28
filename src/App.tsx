@@ -1,8 +1,10 @@
+//App.tsx
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { SetupScreen } from "./setup/SetupScreen.tsx";
 import { FormatInfoModal } from "./setup/FormatInfoModal.tsx";
 import QuizManager from "./quiz/QuizManager.tsx";
-import { extractFromPdf } from "./components/pdfExtractor.tsx";
+import { extractFromPdf } from "./setup/pdfExtractor.tsx";
+import { generatePdf } from "./setup/generatePdf.ts";
 import questionsDefaults from "./Data/questionsDefaults.json";
 import { EmptyScreen } from "./setup/EmptyScreen.tsx";
 
@@ -42,6 +44,8 @@ function App() {
   const [showAlert, setShowAlert] = useState(false);
   const [loading, setLoading] = useState(false);
   const [questions, setQuestions] = useState<Question[]>([]);
+  // externalLoaded indica se un file esterno (JSON) è stato caricato
+  // Per PDF, la logica è diversa: generiamo il PDF e poi carichiamo le default.
   const [externalLoaded, setExternalLoaded] = useState(false);
   const [jsonLoading, setJsonLoading] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
@@ -59,7 +63,7 @@ function App() {
     }, 3000);
   }, []);
 
-  // Se nessuna domanda esterna è stata caricata, usa quelle di default
+  // Se non sono state caricate domande esterne, carica le domande di default
   useEffect(() => {
     if (!externalLoaded && questions.length === 0) {
       console.log("No external questions loaded. Loading default questions.");
@@ -67,15 +71,15 @@ function App() {
       console.log(`Default questions loaded: ${defaultQuestions.length}`);
       setQuestions(defaultQuestions);
     }
-  }, [externalLoaded, questions]);
+  }, [externalLoaded, questions, setQuestions]);
 
-  // Aggiorna lo stato di loading in base ai caricamenti in corso
+  // Aggiorna lo stato di loading
   useEffect(() => {
     console.log(`Loading state updated - JSON: ${jsonLoading}, PDF: ${pdfLoading}`);
     setLoading(jsonLoading || pdfLoading);
-  }, [jsonLoading, pdfLoading]);
+  }, [jsonLoading, pdfLoading, setLoading]);
 
-  // Gestione upload file JSON
+  // Gestione upload file JSON (rimane invariata)
   const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) {
@@ -102,7 +106,6 @@ function App() {
         const MAX_QUESTIONS = 24;
         parsedData = shuffleArray(parsedData).slice(0, MAX_QUESTIONS);
         console.log(`After shuffling, selected ${parsedData.length} questions.`);
-
         // Validazione: la risposta corretta deve essere presente tra le opzioni
         parsedData.forEach((q, i) => {
           if (!q.options.includes(q.correctAnswer)) {
@@ -135,6 +138,11 @@ function App() {
   }, [showTemporaryAlert]);
 
   // Gestione upload file PDF
+  // Logica:
+  // 1) Estrae le domande dal PDF e genera un nuovo file PDF con il formato desiderato:
+  //    - Per domande chiuse: mostra il testo della domanda con opzioni formattate (A), B), ecc.)
+  //    - Per domande aperte: mostra il testo e una dicitura "[Spazio per risposta aperta]"
+  // 2) Dopo aver generato il PDF, ricarica le domande di default (perché le domande estratte dal PDF sono senza risposta)
   const handlePdfUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) {
@@ -143,32 +151,37 @@ function App() {
     }
     console.log(`Starting PDF upload. File: ${file.name}`);
     setPdfLoading(true);
+    // Puliamo le domande correnti (non vogliamo mostrare quelle estratte)
     setQuestions([]);
 
     try {
-      let parsedData = await extractFromPdf(file);
-      console.log(`Extracted ${parsedData.length} questions from PDF file.`);
-      // Limite dinamico per PDF
-      const MAX_QUESTIONS = parsedData.length > 50 ? 24 : parsedData.length;
-      parsedData = shuffleArray(parsedData).slice(0, MAX_QUESTIONS);
-      console.log(`After shuffling, selected ${parsedData.length} questions from PDF.`);
-
-      setQuestions(parsedData);
-      setExternalLoaded(true);
-      console.log("PDF upload successful. Questions set.");
-      showTemporaryAlert(`Caricate ${parsedData.length} domande dal file PDF.`);
-      if (pdfInputRef.current) {
-        pdfInputRef.current.value = "";
-        console.log("Reset PDF file input.");
-      }
+      const extractedData = await extractFromPdf(file);
+      console.log(`Extracted ${extractedData.length} questions from PDF file.`);
+      // Applichiamo un eventuale shuffle e selezioniamo le prime 24 domande estratte (solo per generare il file PDF)
+      const MAX_QUESTIONS = extractedData.length > 50 ? 24 : extractedData.length;
+      const pdfQuestions = shuffleArray(extractedData).slice(0, MAX_QUESTIONS);
+      console.log(`After shuffling, selected ${pdfQuestions.length} questions from PDF.`);
+      // Genera il PDF con le domande estratte
+      await generatePdf(pdfQuestions);
+      showTemporaryAlert(`PDF generato con ${pdfQuestions.length} domande`);
+      console.log("Ricarico le domande di default, poiché le domande PDF non contengono risposta.");
+      // Ricarica le domande di default
+      const defaultQuestions = shuffleArray(questionsDefaults).slice(0, 24);
+      setQuestions(defaultQuestions);
+      // Non impostiamo externalLoaded a true, così la logica delle default rimane attiva
+      setExternalLoaded(false);
     } catch (error) {
       console.error("Errore durante il caricamento del file PDF:", error);
       showTemporaryAlert(`Errore PDF: ${(error as Error).message}`);
     } finally {
       setPdfLoading(false);
       console.log("PDF loading state set to false.");
+      if (pdfInputRef.current) {
+        pdfInputRef.current.value = "";
+        console.log("Reset PDF file input.");
+      }
     }
-  }, [showTemporaryAlert]);
+  }, [setQuestions, showTemporaryAlert]);
 
   const handleSetupComplete = useCallback(() => {
     console.log("Setup complete. Quiz mode:", quizMode);
@@ -188,7 +201,6 @@ function App() {
   useEffect(() => {
     console.log("App - quizStatus changed:", quizStatus);
   }, [quizStatus]);
-
 
   return (
     <div className="max-w-4xl mx-auto p-4 bg-white rounded-lg shadow-lg min-h-screen">
@@ -220,18 +232,18 @@ function App() {
         />
       )}
 
-{(quizStatus === "active" || quizStatus === "completed") && (
-  <QuizManager
-    quizName={quizName}
-    questions={questions}
-    setQuestions={setQuestions}
-    quizStatus={quizStatus}
-    setQuizStatus={setQuizStatus}
-    timerEnabled={timerEnabled}
-    timerDuration={timerDuration}
-    showTemporaryAlert={showTemporaryAlert}
-  />
-)}
+      {(quizStatus === "active" || quizStatus === "completed") && (
+        <QuizManager
+          quizName={quizName}
+          questions={questions}
+          setQuestions={setQuestions}
+          quizStatus={quizStatus}
+          setQuizStatus={setQuizStatus}
+          timerEnabled={timerEnabled}
+          timerDuration={timerDuration}
+          showTemporaryAlert={showTemporaryAlert}
+        />
+      )}
 
       {quizStatus === "empty" && (
         <EmptyScreen
