@@ -4,6 +4,7 @@
   "private": true,
   "homepage": "https://giovi1998.github.io/QUIZ/",
   "dependencies": {
+    "@huggingface/inference": "^3.4.1",
     "lucide-react": "^0.476.0",
     "pdfjs-dist": "^3.11.174",
     "react": "^19.0.0",
