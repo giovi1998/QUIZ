@@ -1,9 +1,8 @@
 // components/ProgressBar.tsx
 import React from "react";
+import {ProgressBarProps} from "../type/types.tsx";
 
-type ProgressBarProps = {
-  progress: number;
-};
+
 
 const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
   return (

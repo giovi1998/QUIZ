@@ -1,9 +1,9 @@
 // components/NextQuestionButton.tsx
 import React from "react";
+import { NextQuestionButtonProps } from "../components/type/types.tsx";
 
-export type NextQuestionButtonProps = {
-  nextQuestion: () => void;
-};
+
+
 
 const NextQuestionButton: React.FC<NextQuestionButtonProps> = ({ nextQuestion }) => {
   return (

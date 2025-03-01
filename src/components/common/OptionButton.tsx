@@ -1,13 +1,6 @@
 // components/common/OptionButton.tsx
 import React, { ButtonHTMLAttributes } from "react";
-type OptionButtonProps = {
-  option: string;
-  selectedAnswer: string | null;
-  showExplanation: boolean;
-  setSelectedAnswer: (answer: string | null) => void;
-  correctAnswer: string;
-};
-
+import { OptionButtonProps } from "../type/types.tsx";
 
 const OptionButton: React.FC<OptionButtonProps> = ({
   option,

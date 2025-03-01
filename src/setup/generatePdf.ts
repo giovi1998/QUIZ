@@ -1,6 +1,7 @@
 // File: generatePdf.ts
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import { QuestionFromPdf } from './pdfExtractor.tsx';
+import { getAiAnswer } from './aiService.ts';
 
 const SPECIAL_CHARS_MAP: { [key: string]: string } = {
   '≥': '>=',
@@ -93,49 +94,55 @@ export async function generatePdf(questions: QuestionFromPdf[]) {
     });
 
     let currentLecture = '';
-    for (const question of sortedQuestions) {
-      if (y < 50 + 100) {
-        page = pdfDoc.addPage([595, 842]);
-        y = 800;
-        currentPage++;
-        console.log(`✅ Aggiunta nuova pagina (totale: ${currentPage})`);
-      }
+    // Nel ciclo delle domande
+for (const question of sortedQuestions) {
+  if (y < 50 + 100) {
+    page = pdfDoc.addPage([595, 842]);
+    y = 800;
+    currentPage++;
+  }
 
-      if (question.lecture !== currentLecture) {
-        currentLecture = question.lecture;
-        const lectureText = `LEZIONE ${question.lecture}`;
-        const height = addText(lectureText, 50, y, true);
-        y -= height + 18;
-        console.log(`⚠️ Sezione ${currentLecture} inizializzata`);
-      }
+  if (question.lecture !== currentLecture) {
+    currentLecture = question.lecture;
+    y -= addText(`LEZIONE ${question.lecture}`, 50, y, true) + 36;
+  }
 
-      const qText = question.question.split('. ').slice(1).join('. ');
-      console.log(`▸ Elaborazione domanda: ${qText}`);
-      y -= addText(qText, 50, y, true) + 18;
+  // Aggiungi la domanda
+  const qText = question.question.split('. ').slice(1).join('. ');
+  y -= addText(qText, 50, y, true) + 18;
 
-      if (question.type === 'multiple-choice') {
-        question.options.forEach((option, i) => {
-          const optText = `${String.fromCharCode(65 + i)}) ${option}`;
-          console.log(`▸ Opzione aggiunta: ${optText}`);
-          y -= addText(optText, 70, y) + 18;
-        });
-      } else {
-        console.log('✅ Aggiunto spazio per risposta aperta');
-        y -= addText("[Spazio per risposta aperta]", 70, y) + 18;
-      }
-      y -= 18 * 1.5;
+  // Aggiungi le opzioni
+  if (question.type === 'multiple-choice') {
+    question.options.forEach((option, i) => {
+      const optText = `${String.fromCharCode(65 + i)}) ${option}`;
+      y -= addText(optText, 70, y) + 18;
+    });
+    
+    // Aggiungi la risposta dell'IA dopo le opzioni
+    try {
+      const answer = await getAiAnswer(question.question, question.options);
+      y -= addText(`→ Risposta generata: ${answer}`, 70, y, true) + 18;
+      question.correctAnswer = answer; // Aggiorna il dato
+    } catch (error) {
+      y -= addText('⚠️ Errore AI', 70, y, true) + 18;
     }
+  } else {
+    y -= addText("[Spazio per risposta aperta]", 70, y) + 18;
+  }
 
-    console.log('🚀 PDF completo, inizio salvataggio...');
+  // Spaziatura tra domande
+  y -= 36;
+};
+
     const pdfBytes = await pdfDoc.save();
     const blob = new Blob([pdfBytes], { type: 'application/pdf' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = 'domande_ordinate.pdf';
     link.click();
-    console.log(`✅ PDF generato con ${questions.length} domande totali`);
+
   } catch (error) {
-    console.error('🚨 Errore critico durante la generazione del PDF:', error);
-    throw new Error('Impossibile generare il PDF');
-  }
+      console.error('Errore durante la generazione del PDF:', error);
+      throw error;
+    }
 }

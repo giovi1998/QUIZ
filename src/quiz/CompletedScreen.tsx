@@ -1,24 +1,8 @@
 // CompletedScreen.tsx migliorato
 import React, { useEffect } from "react";
 import { Smile, Download } from "lucide-react";
+import { Props, Report } from "../components/type/types";
 
-export type Report = {
-  totalQuestions: number;
-  correctAnswers: number;
-  percentage: number;
-  missed: {
-    question: string;
-    yourAnswer: string;
-    correctAnswer: string;
-  }[];
-};
-
-type Props = {
-  quizName: string;
-  report: Report;
-  resetQuiz: () => void;
-  backToSetup: () => void;
-};
 
 export const CompletedScreen: React.FC<Props> = ({
   quizName,

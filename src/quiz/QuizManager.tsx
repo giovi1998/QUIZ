@@ -6,7 +6,7 @@ import React, {
   Dispatch,
   SetStateAction,
 } from "react";
-import { Question, Report, QuizStatus } from "../App.tsx";
+import { Question, Report, QuizStatus } from "../components/type/types.tsx";
 import ActiveQuizScreen from "./ActiveQuizScreen.tsx";
 import { CompletedScreen } from "./CompletedScreen.tsx";
 

@@ -1,15 +1,8 @@
 // EmptyScreen.tsx
 import React from "react";
 import { FileQuestion } from "lucide-react";
+import { EmptyScreenProps } from "../components/type/types";
 
-// Tipo delle props per il componente EmptyScreen
-type EmptyScreenProps = {
-  quizName: string;                                      // Nome corrente del quiz
-  fileInputRef: React.RefObject<HTMLInputElement>;      // Riferimento per l'input file
-  handleFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void; // Gestore caricamento file
-  setQuizStatus: (status: string) => void;              // Funzione per cambiare lo stato del quiz
-  setShowFormatInfo: (show: boolean) => void;           // Funzione per mostrare info formato file
-};
 
 // Componente visualizzato quando non ci sono domande disponibili
 export const EmptyScreen: React.FC<EmptyScreenProps> = ({

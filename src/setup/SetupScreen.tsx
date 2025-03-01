@@ -2,7 +2,7 @@
 import React from "react";
 import { RotateCcw, Info, Upload, FileText, Loader2, CheckCircle } from "lucide-react";
 import { FormatInfoModal } from "./FormatInfoModal.tsx";
-import { Question } from "../App.tsx";
+import { Question } from "../components/type/types.tsx";
 
 type SetupScreenProps = {
   quizName: string;

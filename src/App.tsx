@@ -6,27 +6,7 @@ import { extractFromPdf } from "./setup/pdfExtractor.tsx";
 import { generatePdf } from "./setup/generatePdf.ts";
 import questionsDefaults from "./Data/questionsDefaults.json";
 import { EmptyScreen } from "./setup/EmptyScreen.tsx";
-
-export type QuizStatus = "setup" | "active" | "completed" | "empty";
-
-export type Question = {
-  question: string;
-  options: string[];
-  correctAnswer: string;
-  explanation: string;
-};
-
-export type Report = {
-  totalQuestions: number;
-  correctAnswers: number;
-  percentage: number;
-  missed: {
-    question: string;
-    yourAnswer: string;
-    correctAnswer: string;
-  }[];
-};
-
+import { Question, QuizStatus } from "./components/type/types.tsx"
 function shuffleArray<T>(array: T[]): T[] {
   console.log(`Shuffling ${array.length} questions`);
   return array.sort(() => Math.random() - 0.5);

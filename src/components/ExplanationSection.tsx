@@ -1,14 +1,9 @@
 // ExplanationSection.tsx
 import React from "react";
 import { Check, X } from "lucide-react";
+import { ExplanationSectionProps } from "../components/type/types.tsx";
 
-// Tipo delle props per il componente ExplanationSection
-type ExplanationSectionProps = {
-  selectedAnswer: string | null;       // Risposta selezionata dall'utente
-  correctAnswer: string;              // Risposta corretta della domanda
-  explanation: string;                // Spiegazione della risposta corretta
-  nextQuestion: () => void;           // Funzione per passare alla prossima domanda
-};
+
 
 // Componente per la sezione di feedback e spiegazione dopo una risposta
 const ExplanationSection: React.FC<ExplanationSectionProps> = ({

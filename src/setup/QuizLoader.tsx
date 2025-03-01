@@ -6,15 +6,7 @@ import { extractFromPdf } from "./pdfExtractor.tsx";
 import { generatePdf } from "./generatePdf.ts";
 import questionsDefaults from "../Data/questionsDefaults.json";
 import { EmptyScreen } from "./EmptyScreen.tsx";
-
-export type QuizStatus = "setup" | "active" | "completed" | "empty";
-
-export type Question = {
-  question: string;
-  options: string[];
-  correctAnswer: string;
-  explanation: string;
-};
+import {QuizStatus,Question} from "../components/type/types.tsx";
 
 export type Report = {
   totalQuestions: number;
