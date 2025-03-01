@@ -46,11 +46,13 @@ export async function generatePdf(questions: QuestionFromPdf[]) {
 
     const splitLines = (text: string) => {
       console.log(`▸ Divisione testo in righe per: ${text}`);
-      const sanitized = sanitizeText(text);
+      
+      // Sanifica i caratteri non supportati da WinAnsi
+      const sanitized = text.replace(/[\u26A0-\u26FF\uFE00-\uFE0F]/g, ""); // Rimuovi emoji/simboli
       const words = sanitized.split(' ');
       const lines: string[] = [];
       let currentLine = words[0] || '';
-
+    
       for (let i = 1; i < words.length; i++) {
         const word = words[i];
         const testLine = currentLine + ' ' + word;
