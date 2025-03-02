@@ -22,8 +22,12 @@ const SPECIAL_CHARS_MAP: { [key: string]: string } = {
 
 // Funzione per estrarre la lettera dell'opzione dalla risposta dell'IA
 function extractOptionLetter(answer: string): string | undefined {
-  const match = answer.match(/([A-D])\)/i); // Cerca una lettera da A a D seguita da ")"
-  return match ? match[1].toUpperCase() : undefined;
+  // Estrazione migliorata della lettera dell'opzione
+  const match = answer.match(/^[A-D]\)/i); // Cerca una lettera da A a D all'inizio
+  if (match) {
+    return match[0].toUpperCase().replace(')', ''); // Restituisce la lettera
+  }
+  return undefined;
 }
 
 export interface QuestionFromPdf {
@@ -33,6 +37,7 @@ export interface QuestionFromPdf {
   type: 'multiple-choice' | 'open';
   correctAnswer?: string;
   explanation?: string;
+  openAnswer?: string; // Aggiunta proprietà per risposta aperta
 }
 
 export async function extractFromPdf(file: File): Promise<QuestionFromPdf[]> {
@@ -142,27 +147,29 @@ async function processPdfText(text: string): Promise<QuestionFromPdf[]> {
       console.log("Type of question:", isOpenQuestion? "Open":"multiple-choice");
 
       // Modifica la sezione di elaborazione della domanda
-      let correctAnswer, explanation;
+      let correctAnswer, explanation, openAnswer;
       if (!isOpenQuestion) {
         try {
           console.log("Question text for AI:", questionText);
           console.log("Options for AI:", options);
           const aiResponse = await getAiAnswer(questionText, options);
           console.log("AI Response:", aiResponse);
-          const [answerPart, explanationPart] = aiResponse.split('\nExplanation: ');
-          const answerLetter = extractOptionLetter(answerPart);
+
+          // Trova la lettera della risposta
+          const answerLetter = extractOptionLetter(aiResponse);
 
           // Trova l'opzione corrispondente
           if (answerLetter) {
-            correctAnswer = options.find(opt => opt.startsWith(answerLetter));
+            correctAnswer = options.find(opt => opt.trim().startsWith(answerLetter));
           } else {
             // Se la lettera non è trovata, cerca una corrispondenza testuale
             correctAnswer = options.find(opt => 
               aiResponse.toLowerCase().includes(opt.toLowerCase())
             );
           }
-          explanation = explanationPart || "Spiegazione non disponibile";
-
+            // Estrai la spiegazione se presente nella risposta
+          const explanationMatch = aiResponse.match(/Explanation:\s*(.*)/i);
+          explanation = explanationMatch ? explanationMatch[1].trim() : "Spiegazione non disponibile";
           // Gestisci casi non risolti
           if (!correctAnswer) {
             console.error("⚠️ Risposta non trovata per domanda:", questionText);
@@ -172,11 +179,13 @@ async function processPdfText(text: string): Promise<QuestionFromPdf[]> {
         } catch (error) {
           console.error(`🚨 Errore getAiAnswer: ${error}`);
           correctAnswer = "Errore: Risposta non determinabile";
+          explanation = "Spiegazione non disponibile";
         }
       } else {
           console.log("Question text for AI:", questionText); // Log per domande aperte
           const aiResponse = await getAiAnswer(questionText, options);
           console.log("AI Response:", aiResponse);
+          openAnswer = aiResponse; // Salva la risposta aperta
       }
 
       questions.push({
@@ -185,7 +194,8 @@ async function processPdfText(text: string): Promise<QuestionFromPdf[]> {
         lecture,
         type: isOpenQuestion ? 'open' : 'multiple-choice',
         correctAnswer,
-        explanation
+        explanation,
+        openAnswer, // Aggiunta della proprietà per risposta aperta
       });
     }
   }

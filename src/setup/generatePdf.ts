@@ -15,11 +15,15 @@ const SPECIAL_CHARS_MAP: { [key: string]: string } = {
   '–': '-',
   '—': '-',
   'Δ': 'Delta',
-  '→': '->' // Added mapping for the arrow
+  '→': '->' ,
+  '•':'',
+  '○':'',
+  '▪':'',
+  '▸':'',
 };
 
 const sanitizeText = (text: string) => {
-  return text.replace(/[≥≤−×÷≠≈±Δ→\u26A0-\u26FF\uFE00-\uFE0F]/g, (match) =>
+  return text.replace(/[≥≤−×÷≠≈±Δ→•○▪▸\u26A0-\u26FF\uFE00-\uFE0F]/g, (match) =>
     SPECIAL_CHARS_MAP[match] || match
   );
 };
@@ -121,6 +125,12 @@ export async function generatePdf(questions: QuestionFromPdf[]) {
           y -= addText(`→ Spiegazione: ${question.explanation}`, 70, y) + 18;
         }
         
+      } else if (question.type === 'open') { // Handle open-ended questions
+          if (question.openAnswer) {
+              y -= addText(`Risposta: ${question.openAnswer}`, 70, y) + 18; // Display the open answer
+          } else {
+              y -= addText('⚠️ Risposta aperta non disponibile', 70, y) + 18;
+          }
       }
 
       // Spaziatura tra domande
