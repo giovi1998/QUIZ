@@ -22,25 +22,25 @@ const SPECIAL_CHARS_MAP: { [key: string]: string } = {
   '○': '',
   '▪': '',
   '▸': '',
-  '⚠': '',   // per "⚠"
-  '⚠️': '',   // per "⚠️" (con VS16)
+  '⚠': '',
+  '⚠️': '',
   'δ': 'omega',
   'Ω': 'omega',
   'Σ': 'sigma',
   'π': 'pi',
   'Π': 'pi',
   'λ': 'lambda',
-  'γ':   'phi',
-  'ϕ':   'phi',
-  '∫' : 'integral',
-  '∑' : 'sigma',
-  '∞' : 'infinity'
+  'γ': 'phi',
+  'ϕ': 'phi',
+  '∫': 'integral',
+  '∑': 'sigma',
+  '∞': 'infinity'
 };
 
 const sanitizeText = (text: string) => {
   return text.replace(
-    /[\n\r\x00-\x1F\x7F-\x9F]/g, // Remove control characters (including \n, \r, etc.)
-    ' ' // Replace with space (or '' to remove entirely)
+    /[\n\r\x00-\x1F\x7F-\x9F]/g, // Rimuove caratteri di controllo
+    ' '
   ).replace(
     /[≥≤−×÷≠≈±Δ→•○▪▸⚠⚠️δλγϕΩΣπΠ∫\u26A0-\u26FF\uFE00-\uFE0F]/g,
     (match) => (SPECIAL_CHARS_MAP.hasOwnProperty(match) ? SPECIAL_CHARS_MAP[match] : '')
@@ -61,8 +61,8 @@ export async function generatePdf(questions: QuestionFromPdf[]) {
     let currentPage = 1;
 
     const splitLines = (text: string, maxWidth: number = 500) => {
-      const sanitized = sanitizeText(text); // Ensure no control characters
-      const words = sanitized.split(' '); // Split by spaces (no more \n)
+      const sanitized = sanitizeText(text);
+      const words = sanitized.split(' ');
       const lines: string[] = [];
       let currentLine = words[0] || '';
 
@@ -98,10 +98,11 @@ export async function generatePdf(questions: QuestionFromPdf[]) {
       });
       return totalHeight;
     };
-     const sortedQuestions = questions.sort((a, b) => {
+
+    const sortedQuestions = questions.sort((a, b) => {
       const lecA = parseInt(a.lecture.split(' ')[1]);
       const lecB = parseInt(b.lecture.split(' ')[1]);
-        return lecA - lecB || parseInt(a.questionNumber) - parseInt(b.questionNumber);
+      return lecA - lecB || parseInt(a.questionNumber) - parseInt(b.questionNumber);
     });
 
     let currentLecture = '';
@@ -118,9 +119,8 @@ export async function generatePdf(questions: QuestionFromPdf[]) {
         y -= addText(`LEZIONE ${question.lecture}`, 50, y, true) + 36;
       }
 
-      // Formattazione domanda
-      // Modifica la formattazione della domanda
-      const qText = question.question.replace(/^\d+\.?\s*/, '').trim(); // Rimuove numero e punto
+      // Formattazione della domanda
+      const qText = question.question.replace(/^\d+\.?\s*/, '').trim();
       y -= addText(qText, 50, y, true) + 18;
 
       // Aggiunta opzioni
@@ -129,25 +129,27 @@ export async function generatePdf(questions: QuestionFromPdf[]) {
           const optText = `${String.fromCharCode(65 + i)}) ${option}`;
           y -= addText(optText, 70, y);
         });
-        y -= 18; // Spaziatura
+        y -= 18;
 
-        // Visualizza la risposta corretta dalla proprietà correctAnswer
+        // Visualizzazione della risposta corretta comprensiva della lettera, se disponibile
         if (question.correctAnswer) {
-          y -= addText(`Risposta corretta: ${question.correctAnswer}`, 70, y, true) + 18;
+          const answerDisplay = question.answerLetter
+            ? `${question.answerLetter}) ${question.correctAnswer}`
+            : question.correctAnswer;
+          y -= addText(`Risposta corretta: ${answerDisplay}`, 70, y, true) + 18;
         } else {
           y -= addText('⚠️ Risposta non disponibile', 70, y, true) + 18;
         }
 
-        // Aggiungi spiegazione dopo la risposta
+        // Aggiunta della spiegazione, se presente
         if (question.correctAnswer && question.explanation) {
           y -= addText(`Spiegazione: ${question.explanation}`, 70, y) + 18;
         }
-
-      } else if (question.type === 'open') { // Handle open-ended questions
+      } else if (question.type === 'open') { // Per domande aperte
         if (question.openAnswer) {
-          y -= addText(`Risposta: ${question.openAnswer}`, 70, y) + 18; // Display the open answer
+          y -= addText(`Risposta: ${question.openAnswer}`, 70, y) + 18;
         } else {
-          y -= addText('⚠️ Risposta aperta non disponibile', 70, y) + 18;
+          y -= addText('⚠️ Risposta aperta non disponibile', 70, y, true) + 18;
         }
       }
 

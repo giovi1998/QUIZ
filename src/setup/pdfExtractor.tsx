@@ -22,20 +22,20 @@ const SPECIAL_CHARS_MAP: { [key: string]: string } = {
   '○': '',
   '▪': '',
   '▸': '',
-  '⚠': '',   // per "⚠"
-  '⚠️': '',   // per "⚠️" (con VS16)
+  '⚠': '',
+  '⚠️': '',
   'δ': 'omega',
   'Ω': 'omega',
   'Σ': 'sigma',
   'π': 'pi',
   'Π': 'pi'
 };
+
 // Funzione per estrarre la lettera dell'opzione dalla risposta dell'IA
 function extractOptionLetter(answer: string): string | undefined {
-  // Estrazione migliorata della lettera dell'opzione
   const match = answer.match(/^[A-D]\)/i); // Cerca una lettera da A a D all'inizio con parentesi
   if (match) {
-    return match[0].toUpperCase().replace(')', ''); // Restituisce la lettera
+    return match[0].toUpperCase().replace(')', '');
   }
   const matchNoParenthesis = answer.match(/^[A-D]/i); // Cerca una lettera da A a D all'inizio senza parentesi
   if (matchNoParenthesis) {
@@ -51,8 +51,9 @@ export interface QuestionFromPdf {
   type: 'multiple-choice' | 'open';
   correctAnswer?: string;
   explanation?: string;
-  openAnswer?: string; // Aggiunta proprietà per risposta aperta
+  openAnswer?: string; // Risposta aperta (per domande aperte)
   questionNumber: string;
+  answerLetter?: string; // Nuova proprietà per salvare la lettera della risposta
 }
 
 export async function extractFromPdf(file: File): Promise<QuestionFromPdf[]> {
@@ -81,9 +82,9 @@ export async function extractFromPdf(file: File): Promise<QuestionFromPdf[]> {
     }
 
     console.log('🚀 Testo completo del PDF raccolto');
-    return await processPdfText(fullText); // Ora la funzione è asincrona
+    return await processPdfText(fullText);
   } catch (error) {
-    console.error('🚨 Errore critico durante l estrazione:', error);
+    console.error('🚨 Errore critico durante l\'estrazione:', error);
     throw new Error(`Estrazione fallita: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`);
   }
 }
@@ -134,12 +135,12 @@ async function processPdfText(text: string): Promise<QuestionFromPdf[]> {
       console.log(`▸ Domanda ${questionNumber}: ${questionText}`);
       const isOpenQuestion = /descrivere|spiegare|fornire/i.test(questionText);
 
-      // Filtraggio migliorato per rimuovere header
+      // Rimozione di eventuali header indesiderati
       const cleanedLines = lines.filter(line =>
         !/Set Domande:|©|Data Stampa|Lezione \d{3}|COMPUTER VISION|INGEGNERIA|Docente:|Randieri Cristian/i.test(line)
       );
 
-      // Estrazione delle opzioni
+      // Estrazione delle opzioni (solo per domande a risposta chiusa)
       const options = !isOpenQuestion
         ? cleanedLines.slice(1)
           .map(line => line
@@ -149,7 +150,7 @@ async function processPdfText(text: string): Promise<QuestionFromPdf[]> {
           .filter(line => line.length > 0)
         : [];
 
-      // Limita a 4 opzioni e unisci eventuali opzioni extra
+      // Se ci sono più di 4 opzioni, limita a 4 e unisci quelle extra
       if (options.length > 4) {
         const firstFourOptions = options.slice(0, 4);
         const mergedExtras = options.slice(4)
@@ -161,8 +162,10 @@ async function processPdfText(text: string): Promise<QuestionFromPdf[]> {
       }
       console.log("Type of question:", isOpenQuestion ? "Open" : "multiple-choice");
 
-      // Modifica la sezione di elaborazione della domanda
-      let correctAnswer, explanation, openAnswer;
+      // Variabili per la risposta
+      let correctAnswer: string | undefined, explanation: string | undefined, openAnswer: string | undefined;
+      let answerLetter: string | undefined = undefined; // Variabile per salvare la lettera della risposta
+
       if (!isOpenQuestion) {
         try {
           console.log("Question text for AI:", questionText);
@@ -170,49 +173,54 @@ async function processPdfText(text: string): Promise<QuestionFromPdf[]> {
           const aiResponse = await getAiAnswer(questionText, options);
           console.log("AI Response:", aiResponse);
 
-          // Trova la lettera della risposta
-          const answerLetter = aiResponse.letter;
+          // Estrazione della lettera dalla risposta dell'IA
+          answerLetter = aiResponse.letter;
           console.log("Answer letter:", answerLetter);
-          // Trova l'opzione corrispondente
+          
+          // Se abbiamo una lettera, cerchiamo l'opzione corrispondente
           if (answerLetter) {
             correctAnswer = options.find(opt => opt.trim().startsWith(answerLetter));
           } else {
-            // Se la lettera non è trovata, cerca una corrispondenza testuale
+            // Se non viene trovata la lettera, si esegue un matching testuale
             const bestMatch = options.reduce((best, opt) => {
               const similarity = compareTwoStrings(aiResponse.text.toLowerCase(), opt.toLowerCase());
               return similarity > best.similarity ? { option: opt, similarity } : best;
             }, { option: '', similarity: 0 });
-
+  
             if (bestMatch.similarity > 0.5) {
               correctAnswer = bestMatch.option;
-            } else if (aiResponse.text.toLowerCase().includes('nessuna delle precedenti')||aiResponse.toLowerCase().includes('nessuno dei casi precedenti')) {
-                correctAnswer = options.find(opt => opt.toLowerCase().includes('nessuna delle precedenti') || opt.toLowerCase().includes('nessuno dei casi precedenti'));
+            } else if (
+              aiResponse.text.toLowerCase().includes('nessuna delle precedenti') ||
+              aiResponse.text.toLowerCase().includes('nessuno dei casi precedenti')
+            ) {
+              correctAnswer = options.find(opt =>
+                opt.toLowerCase().includes('nessuna delle precedenti') ||
+                opt.toLowerCase().includes('nessuno dei casi precedenti')
+              );
             }
-             
           }
-
-          // Estrai la spiegazione se presente nella risposta
+  
+          // Estrazione della spiegazione, se presente
           const explanationMatch = aiResponse.text.match(/Spiegazione:\s*([\s\S]*)/i);
-          explanation = explanationMatch ? explanationMatch[1].trim() : aiResponse; //fallback to all answer
-          explanation = typeof explanation === 'string' ? explanation : explanation.text;
-          // Gestisci casi non risolti
+          explanation = explanationMatch ? explanationMatch[1].trim() : aiResponse.text;
+  
           if (!correctAnswer) {
             console.error("⚠️ Risposta non trovata per domanda:", questionText);
             correctAnswer = "Errore: Risposta non determinabile";
           }
-
         } catch (error) {
           console.error(`🚨 Errore getAiAnswer: ${error}`);
           correctAnswer = "Errore: Risposta non determinabile";
           explanation = "Spiegazione non disponibile";
         }
       } else {
-        console.log("Question text for AI:", questionText); // Log per domande aperte
+        console.log("Question text for AI (domanda aperta):", questionText);
         const aiResponse = await getAiAnswer(questionText, options);
         console.log("AI Response:", aiResponse);
-        openAnswer = typeof aiResponse === 'string' ? aiResponse : aiResponse.text; // Salva la risposta aperta
+        openAnswer = typeof aiResponse === 'string' ? aiResponse : aiResponse.text;
       }
 
+      // Inserimento dell'oggetto domanda con la nuova proprietà answerLetter
       questions.push({
         question: `${questionNumber}. ${questionText}`,
         options,
@@ -220,8 +228,9 @@ async function processPdfText(text: string): Promise<QuestionFromPdf[]> {
         type: isOpenQuestion ? 'open' : 'multiple-choice',
         correctAnswer,
         explanation,
-        openAnswer, // Aggiunta della proprietà per risposta aperta
-        questionNumber: questionNumber
+        openAnswer,
+        questionNumber: questionNumber,
+        answerLetter // Salvo la lettera della risposta (undefined per domande aperte)
       });
     }
   }
@@ -233,6 +242,7 @@ async function processPdfText(text: string): Promise<QuestionFromPdf[]> {
     return lecA - lecB || parseInt(a.questionNumber) - parseInt(b.questionNumber);
   });
 }
+
 function compareTwoStrings(string1: string, string2: string) {
   string1 = string1.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
   string2 = string2.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
