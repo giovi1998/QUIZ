@@ -18,7 +18,7 @@ export const getAiAnswer = async (
   question: string,
   options: string[],
   model: string = "gpt-3.5-turbo",
-  maxTokens: number = 100
+  maxTokens: number = 200 // Increase the number of max token to get better open response.
 ): Promise<string> => {
   let messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
     { role: "system", content: "You are a helpful assistant." },
@@ -37,11 +37,12 @@ Risposta: `,
   } else {
     messages.push({
       role: "user",
-      content: `Rispondi brevemente alla domanda in 5 righe massimo:
+      content: `Rispondi alla seguente domanda in modo conciso e preciso. Cerca di usare un linguaggio chiaro e dettagliato. Limita la risposta a 5 frasi. La risposta deve essere in italiano.
 Domanda: ${question}
 Risposta: `,
     });
   }
+  console.log("question to the AI:", question, options) // Check the question.
 
   try {
     const response = await openai.chat.completions.create({
@@ -51,13 +52,14 @@ Risposta: `,
       temperature: 0.7,
       top_p: 0.9,
       n: 1,
-      stop: options.length > 0 ? ["\n"] : ["\n\n\n\n\n"],
+      stop: options.length > 0 ? ["\n"] : ["\n\n"], // Reduce stop sequence.
     });
 
     // Controllo esplicito su choices
     if (!response.choices || response.choices.length === 0) {
       throw new Error("Nessuna risposta generata dall'API");
     }
+    console.log("Response from the model:", response.choices[0].message?.content)
 
     const answerText = response.choices[0].message?.content?.trim() || "";
 
@@ -65,8 +67,8 @@ Risposta: `,
     if (options.length > 0 && answerText) {
       const answerLetter = answerText[0].toUpperCase();
       const index = answerLetter.charCodeAt(0) - 'A'.charCodeAt(0);
-      return index >= 0 && index < options.length 
-        ? options[index] 
+      return index >= 0 && index < options.length
+        ? options[index]
         : answerText;
     } else {
       return answerText.split('\n').slice(0, 5).join('\n');

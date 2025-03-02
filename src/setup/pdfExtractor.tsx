@@ -139,39 +139,44 @@ async function processPdfText(text: string): Promise<QuestionFromPdf[]> {
         options.splice(0);
         options.push(...firstFourOptions);
       }
+      console.log("Type of question:", isOpenQuestion? "Open":"multiple-choice");
 
       // Modifica la sezione di elaborazione della domanda
-let correctAnswer, explanation;
-if (!isOpenQuestion) {
-  try {
-    const aiResponse = await getAiAnswer(questionText, options);
-    const [answerPart, explanationPart] = aiResponse.split('\nExplanation: ');
-    const answerLetter = extractOptionLetter(answerPart);
+      let correctAnswer, explanation;
+      if (!isOpenQuestion) {
+        try {
+          console.log("Question text for AI:", questionText);
+          console.log("Options for AI:", options);
+          const aiResponse = await getAiAnswer(questionText, options);
+          console.log("AI Response:", aiResponse);
+          const [answerPart, explanationPart] = aiResponse.split('\nExplanation: ');
+          const answerLetter = extractOptionLetter(answerPart);
 
           // Trova l'opzione corrispondente
           if (answerLetter) {
             correctAnswer = options.find(opt => opt.startsWith(answerLetter));
-            console.log(`📝 Spiegazione: ${explanation}`);
           } else {
             // Se la lettera non è trovata, cerca una corrispondenza testuale
             correctAnswer = options.find(opt => 
               aiResponse.toLowerCase().includes(opt.toLowerCase())
-              
             );
           }
           explanation = explanationPart || "Spiegazione non disponibile";
-          console.log(`📝 Spiegazione: ${explanation}`);
+
           // Gestisci casi non risolti
           if (!correctAnswer) {
             console.error("⚠️ Risposta non trovata per domanda:", questionText);
             correctAnswer = "Errore: Risposta non determinabile";
           }
 
-          console.log(`✅ Risposta corretta: ${correctAnswer}`);
         } catch (error) {
           console.error(`🚨 Errore getAiAnswer: ${error}`);
           correctAnswer = "Errore: Risposta non determinabile";
         }
+      } else {
+          console.log("Question text for AI:", questionText); // Log per domande aperte
+          const aiResponse = await getAiAnswer(questionText, options);
+          console.log("AI Response:", aiResponse);
       }
 
       questions.push({
