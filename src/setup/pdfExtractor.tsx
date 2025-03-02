@@ -1,7 +1,6 @@
-// File: pdfExtractor.ts
 import * as pdfjsLib from 'pdfjs-dist';
 import { TextItem } from 'pdfjs-dist/types/src/display/api';
-import { getAiAnswer } from './aiService'; // Importa la funzione getAiAnswer
+import { getAiAnswer } from './aiService'; // Assicurati che il path sia corretto
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
@@ -17,8 +16,15 @@ const SPECIAL_CHARS_MAP: { [key: string]: string } = {
   '': '',
   '–': '-',
   '—': '-',
-  'Δ': 'Delta'
+  'Δ': 'Delta',
+  '→': '->' // Added mapping for the arrow
 };
+
+// Funzione per estrarre la lettera dell'opzione dalla risposta dell'IA
+function extractOptionLetter(answer: string): string | undefined {
+  const match = answer.match(/([A-D])\)/i); // Cerca una lettera da A a D seguita da ")"
+  return match ? match[1].toUpperCase() : undefined;
+}
 
 export interface QuestionFromPdf {
   question: string;
@@ -67,7 +73,7 @@ async function processPdfText(text: string): Promise<QuestionFromPdf[]> {
     .replace(/[≥≤−×÷≠≈±Δ\u0394\u2212\u2264\u2265–—]/g, (match) => SPECIAL_CHARS_MAP[match] || match)
     .replace(/(\r\n|\n|\r)/gm, '\n')
     .replace(/(\n\s*){2,}/g, '\n');
-    
+
   console.log('✅ Testo del PDF pulito');
 
   const questions: QuestionFromPdf[] = [];
@@ -100,7 +106,6 @@ async function processPdfText(text: string): Promise<QuestionFromPdf[]> {
       if (lines.length === 0) continue;
 
       const questionNumber = qNumber.padStart(2, '0');
-      
       const questionText = lines[0]
         .replace(/^\d{2}\.\s*/, '')
         .trim()
@@ -108,42 +113,60 @@ async function processPdfText(text: string): Promise<QuestionFromPdf[]> {
 
       console.log(`▸ Domanda ${questionNumber}: ${questionText}`);
       const isOpenQuestion = /descrivere|spiegare|fornire/i.test(questionText);
-  const cleanedLines = lines.filter(line => 
-    !/Set Domande:|© 2016-2024|Data Stampa|Lezione \d{3}/i.test(line)
-  );
+
+      // Pulizia delle linee per rimuovere intestazioni/scarti
+      const cleanedLines = lines.filter(line => 
+        !/Set Domande:|© 2016-2024|Data Stampa|Lezione \d{3}/i.test(line)
+      );
+
+      // Estrazione delle opzioni
       const options = !isOpenQuestion
-        ? lines.slice(1)
+        ? cleanedLines.slice(1)
           .map(line => line
-            .replace(/^[•○▪▸]\s*/, '')
-            .replace(/\s+/g, ' ')
+            .replace(/^[•○▪▸]|\s+/g, ' ')
             .trim()
           )
           .filter(line => line.length > 0)
         : [];
 
-      // Nuova logica per limitare a 4 opzioni
+      // Limita a 4 opzioni e unisci eventuali opzioni extra
       if (options.length > 4) {
-        // Prendi le prime 4 opzioni
         const firstFourOptions = options.slice(0, 4);
-        // Unisci le opzioni rimanenti nell'ultima
         const mergedExtras = options.slice(4)
-          .map(opt => opt.replace(/^[A-Z)]+\s*/i, '').trim()) // Rimuovi lettera e parentesi
+          .map(opt => opt.replace(/^[A-D)]+\s*/i, '').trim())
           .join(', ');
-        firstFourOptions[3] += ` ${mergedExtras}`;
-        options.splice(0); // Svuota array originale
+        firstFourOptions[3] += ` (${mergedExtras})`;
+        options.splice(0);
         options.push(...firstFourOptions);
       }
-      options.forEach(option => console.log(`▸ Opzione: ${option}`));
 
       let correctAnswer;
       if (!isOpenQuestion) {
         try {
-          // Ottieni la risposta corretta con l'IA
-          correctAnswer = await getAiAnswer(questionText, options);
-          console.log(`✅ Risposta corretta secondo la AI trovata: ${correctAnswer}`);
+          // Richiama l'AI per ottenere la risposta
+          const aiResponse = await getAiAnswer(questionText, options);
+          const answerLetter = extractOptionLetter(aiResponse);
+
+          // Trova l'opzione corrispondente
+          if (answerLetter) {
+            correctAnswer = options.find(opt => opt.startsWith(answerLetter));
+          } else {
+            // Se la lettera non è trovata, cerca una corrispondenza testuale
+            correctAnswer = options.find(opt => 
+              aiResponse.toLowerCase().includes(opt.toLowerCase())
+            );
+          }
+
+          // Gestisci casi non risolti
+          if (!correctAnswer) {
+            console.error("⚠️ Risposta non trovata per domanda:", questionText);
+            correctAnswer = "Errore: Risposta non determinabile";
+          }
+
+          console.log(`✅ Risposta corretta: ${correctAnswer}`);
         } catch (error) {
-          console.error(`🚨 Errore getAiAnswer ai:`, error);
-          correctAnswer = "Risposta non determinabile"; // Imposta su "N/A" o qualcosa di simile
+          console.error(`🚨 Errore getAiAnswer: ${error}`);
+          correctAnswer = "Errore: Risposta non determinabile";
         }
       }
 
