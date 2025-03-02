@@ -116,7 +116,7 @@ export async function generatePdf(questions: QuestionFromPdf[]) {
 
       if (question.lecture !== currentLecture) {
         currentLecture = question.lecture;
-        y -= addText(`LEZIONE ${question.lecture}`, 50, y, true) + 36;
+        y -= addText(`${question.lecture}`, 50, y, true) + 36;
       }
 
       // Formattazione della domanda

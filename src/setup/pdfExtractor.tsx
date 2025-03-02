@@ -126,15 +126,15 @@ async function processPdfText(text: string): Promise<QuestionFromPdf[]> {
 
       if (lines.length === 0) continue;
 
-      const questionNumber = qNumber.padStart(2, '0');
+      const questionNumber = qNumber.replace(/\.$/g, '').padStart(3, '0'); //remove . and pad to 3 digit
       const questionText = lines[0]
-        .replace(/^\d{2}\.\s*/, '')
+        .replace(/^\d+\.\s*/, '') //change to one or more digit
         .trim()
         .replace(/\s+/g, ' ');
-
+      
       console.log(`▸ Domanda ${questionNumber}: ${questionText}`);
       const isOpenQuestion = /descrivere|spiegare|fornire/i.test(questionText);
-
+      
       // Rimozione di eventuali header indesiderati
       const cleanedLines = lines.filter(line =>
         !/Set Domande:|©|Data Stampa|Lezione \d{3}|COMPUTER VISION|INGEGNERIA|Docente:|Randieri Cristian/i.test(line)
