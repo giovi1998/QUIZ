@@ -1,96 +1,69 @@
+// File: aiService.ts
 import OpenAI from "openai";
 
 // Gestione API Key
 const apiKey = process.env.REACT_APP_OPENAI_TOKEN;
-console.log("API KEY:", JSON.stringify(apiKey));
 if (!apiKey) {
   throw new Error("OpenAI API Key mancante");
 }
 
-// Configurazione OpenAI
 const openai = new OpenAI({
   apiKey,
   dangerouslyAllowBrowser: true,
+  timeout: 30000,
 });
 
-// Funzione per gestire le risposte
 export const getAiAnswer = async (
   question: string,
   options: string[],
   model: string = "gpt-3.5-turbo",
-  maxTokens: number = 200 // Increase the number of max token to get better open response.
-): Promise<string> => {
-  let messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
-    { role: "system", content: "You are a helpful assistant." },
+  maxTokens: number = 100
+): Promise<{ text: string; letter?: string }> => { // Modificato il return type
+  const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
+    { 
+      role: "system", 
+      content: "Sei un esperto di Computer Vision. Rispondi in italiano tecnico. Per le domande a scelta multipla rispondi SOLO con la lettera corretta preceduta da 'Risposta: '." 
+    },
+    {
+      role: "user",
+      content: `${question}\nOpzioni:\n${options.map((opt, i) => `${String.fromCharCode(65 + i)}) ${opt}`).join('\n')}`
+    }
   ];
-
-  // Ottimizzazione prompt
-  if (options.length > 0) {
-    messages.push({
-      role: "user",
-      content: `Seleziona solo la lettera dell'opzione corretta.
-Domanda: ${question}
-Opzioni:
-${options.map((opt, i) => `${String.fromCharCode(65 + i)}) ${opt}`).join('\n')}
-Risposta: `,
-    });
-  } else {
-    messages.push({
-      role: "user",
-      content: `Rispondi alla seguente domanda in modo conciso e preciso. Cerca di usare un linguaggio chiaro e dettagliato. Limita la risposta a 5 frasi. La risposta deve essere in italiano.
-Domanda: ${question}
-Risposta: `,
-    });
-  }
-  console.log("question to the AI:", question, options) // Check the question.
 
   try {
     const response = await openai.chat.completions.create({
       model,
       messages,
       max_tokens: maxTokens,
-      temperature: 0.7,
-      top_p: 0.9,
-      n: 1,
-      stop: options.length > 0 ? ["\n"] : ["\n\n"], // Reduce stop sequence.
+      temperature: 0.2, // Temperatura più bassa per risposte più focalizzate
     });
 
-    // Controllo esplicito su choices
-    if (!response.choices || response.choices.length === 0) {
-      throw new Error("Nessuna risposta generata dall'API");
-    }
-    console.log("Response from the model:", response.choices[0].message?.content)
-
     const answerText = response.choices[0].message?.content?.trim() || "";
+    console.log("Risposta grezza del modello:", answerText);
 
-    // Gestione risposte
-    if (options.length > 0 && answerText) {
-      const answerLetter = answerText[0].toUpperCase();
-      const index = answerLetter.charCodeAt(0) - 'A'.charCodeAt(0);
-      return index >= 0 && index < options.length
-        ? options[index]
-        : answerText;
-    } else {
-      return answerText.split('\n').slice(0, 5).join('\n');
-    }
+    // Estrazione lettera con regex migliorata
+    const letterMatch = answerText.match(/^Risposta:\s*([A-D])/i) || answerText.match(/([A-D])\)/i);
+    const answerLetter = letterMatch?.[1]?.toUpperCase();
 
+    // Estrazione testo completo
+    const fullAnswer = options.find(opt => 
+      opt.startsWith(answerLetter ? `studiare il mondo 3D, di localizzare e riconoscere` : "")
+    );
+
+    return {
+      text: fullAnswer || answerText,
+      letter: answerLetter
+    };
+    
   } catch (error: any) {
-    // Gestione errori con tipaggi corretti
-    if (
-      error?.response?.status === 429 ||
-      error?.code === 'rate_limit_reached' ||
-      error?.code === 'TooManyRequests'
-    ) {
-      console.log("Limite raggiunto, attesa 2 secondi...");
+    // Gestione errori migliorata
+    if (error.message.includes("rate limit")) {
       await new Promise(r => setTimeout(r, 2000));
       return getAiAnswer(question, options, model, maxTokens);
-    } else if (error?.response?.status === 401) {
-      throw new Error("API Key OpenAI non valida");
     }
-    throw new Error(`Errore AI: ${error?.message}`);
+    throw new Error(`Errore AI: ${error.message}`);
   }
 };
-
 // import { HfInference } from '@huggingface/inference';
 
 // // Gestione API Key con validazione

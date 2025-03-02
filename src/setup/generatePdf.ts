@@ -1,7 +1,9 @@
 // File: generatePdf.ts
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import { QuestionFromPdf } from './pdfExtractor.tsx';
+import { Omega } from 'lucide-react';
 
+// Mappa dei caratteri speciali da sostituire
 const SPECIAL_CHARS_MAP: { [key: string]: string } = {
   '≥': '>=',
   '≤': '<=',
@@ -20,11 +22,28 @@ const SPECIAL_CHARS_MAP: { [key: string]: string } = {
   '○': '',
   '▪': '',
   '▸': '',
+  '⚠': '',   // per "⚠"
+  '⚠️': '',   // per "⚠️" (con VS16)
+  'δ': 'omega',
+  'Ω': 'omega',
+  'Σ': 'sigma',
+  'π': 'pi',
+  'Π': 'pi',
+  'λ': 'lambda',
+  'γ':   'phi',
+  'ϕ':   'phi',
+  '∫' : 'integral',
+  '∑' : 'sigma',
+  '∞' : 'infinity'
 };
 
 const sanitizeText = (text: string) => {
-  return text.replace(/[≥≤−×÷≠≈±Δ→•○▪▸\u26A0-\u26FF\uFE00-\uFE0F]/g, (match) =>
-    SPECIAL_CHARS_MAP[match] || match
+  return text.replace(
+    /[\n\r\x00-\x1F\x7F-\x9F]/g, // Remove control characters (including \n, \r, etc.)
+    ' ' // Replace with space (or '' to remove entirely)
+  ).replace(
+    /[≥≤−×÷≠≈±Δ→•○▪▸⚠⚠️δλγϕΩΣπΠ∫\u26A0-\u26FF\uFE00-\uFE0F]/g,
+    (match) => (SPECIAL_CHARS_MAP.hasOwnProperty(match) ? SPECIAL_CHARS_MAP[match] : '')
   );
 };
 
@@ -42,8 +61,8 @@ export async function generatePdf(questions: QuestionFromPdf[]) {
     let currentPage = 1;
 
     const splitLines = (text: string, maxWidth: number = 500) => {
-      const sanitized = sanitizeText(text);
-      const words = sanitized.split(' ');
+      const sanitized = sanitizeText(text); // Ensure no control characters
+      const words = sanitized.split(' '); // Split by spaces (no more \n)
       const lines: string[] = [];
       let currentLine = words[0] || '';
 

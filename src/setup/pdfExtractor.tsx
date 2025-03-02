@@ -22,8 +22,14 @@ const SPECIAL_CHARS_MAP: { [key: string]: string } = {
   '○': '',
   '▪': '',
   '▸': '',
+  '⚠': '',   // per "⚠"
+  '⚠️': '',   // per "⚠️" (con VS16)
+  'δ': 'omega',
+  'Ω': 'omega',
+  'Σ': 'sigma',
+  'π': 'pi',
+  'Π': 'pi'
 };
-
 // Funzione per estrarre la lettera dell'opzione dalla risposta dell'IA
 function extractOptionLetter(answer: string): string | undefined {
   // Estrazione migliorata della lettera dell'opzione
@@ -165,7 +171,7 @@ async function processPdfText(text: string): Promise<QuestionFromPdf[]> {
           console.log("AI Response:", aiResponse);
 
           // Trova la lettera della risposta
-          const answerLetter = extractOptionLetter(aiResponse);
+          const answerLetter = aiResponse.letter;
           console.log("Answer letter:", answerLetter);
           // Trova l'opzione corrispondente
           if (answerLetter) {
@@ -173,22 +179,22 @@ async function processPdfText(text: string): Promise<QuestionFromPdf[]> {
           } else {
             // Se la lettera non è trovata, cerca una corrispondenza testuale
             const bestMatch = options.reduce((best, opt) => {
-              const similarity = compareTwoStrings(aiResponse.toLowerCase(), opt.toLowerCase());
+              const similarity = compareTwoStrings(aiResponse.text.toLowerCase(), opt.toLowerCase());
               return similarity > best.similarity ? { option: opt, similarity } : best;
             }, { option: '', similarity: 0 });
 
             if (bestMatch.similarity > 0.5) {
               correctAnswer = bestMatch.option;
-            } else if (aiResponse.toLowerCase().includes('nessuna delle precedenti')||aiResponse.toLowerCase().includes('nessuno dei casi precedenti')) {
+            } else if (aiResponse.text.toLowerCase().includes('nessuna delle precedenti')||aiResponse.toLowerCase().includes('nessuno dei casi precedenti')) {
                 correctAnswer = options.find(opt => opt.toLowerCase().includes('nessuna delle precedenti') || opt.toLowerCase().includes('nessuno dei casi precedenti'));
             }
              
           }
 
           // Estrai la spiegazione se presente nella risposta
-          const explanationMatch = aiResponse.match(/Spiegazione:\s*([\s\S]*)/i);
+          const explanationMatch = aiResponse.text.match(/Spiegazione:\s*([\s\S]*)/i);
           explanation = explanationMatch ? explanationMatch[1].trim() : aiResponse; //fallback to all answer
-
+          explanation = typeof explanation === 'string' ? explanation : explanation.text;
           // Gestisci casi non risolti
           if (!correctAnswer) {
             console.error("⚠️ Risposta non trovata per domanda:", questionText);
@@ -204,7 +210,7 @@ async function processPdfText(text: string): Promise<QuestionFromPdf[]> {
         console.log("Question text for AI:", questionText); // Log per domande aperte
         const aiResponse = await getAiAnswer(questionText, options);
         console.log("AI Response:", aiResponse);
-        openAnswer = aiResponse; // Salva la risposta aperta
+        openAnswer = typeof aiResponse === 'string' ? aiResponse : aiResponse.text; // Salva la risposta aperta
       }
 
       questions.push({
