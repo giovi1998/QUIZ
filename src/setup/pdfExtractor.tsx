@@ -17,15 +17,23 @@ const SPECIAL_CHARS_MAP: { [key: string]: string } = {
   '–': '-',
   '—': '-',
   'Δ': 'Delta',
-  '→': '->' // Added mapping for the arrow
+  '→': '->',
+  '•': '',
+  '○': '',
+  '▪': '',
+  '▸': '',
 };
 
 // Funzione per estrarre la lettera dell'opzione dalla risposta dell'IA
 function extractOptionLetter(answer: string): string | undefined {
   // Estrazione migliorata della lettera dell'opzione
-  const match = answer.match(/^[A-D]\)/i); // Cerca una lettera da A a D all'inizio
+  const match = answer.match(/^[A-D]\)/i); // Cerca una lettera da A a D all'inizio con parentesi
   if (match) {
     return match[0].toUpperCase().replace(')', ''); // Restituisce la lettera
+  }
+  const matchNoParenthesis = answer.match(/^[A-D]/i); // Cerca una lettera da A a D all'inizio senza parentesi
+  if (matchNoParenthesis) {
+    return matchNoParenthesis[0].toUpperCase();
   }
   return undefined;
 }
@@ -38,6 +46,7 @@ export interface QuestionFromPdf {
   correctAnswer?: string;
   explanation?: string;
   openAnswer?: string; // Aggiunta proprietà per risposta aperta
+  questionNumber: string;
 }
 
 export async function extractFromPdf(file: File): Promise<QuestionFromPdf[]> {
@@ -120,7 +129,7 @@ async function processPdfText(text: string): Promise<QuestionFromPdf[]> {
       const isOpenQuestion = /descrivere|spiegare|fornire/i.test(questionText);
 
       // Filtraggio migliorato per rimuovere header
-      const cleanedLines = lines.filter(line => 
+      const cleanedLines = lines.filter(line =>
         !/Set Domande:|©|Data Stampa|Lezione \d{3}|COMPUTER VISION|INGEGNERIA|Docente:|Randieri Cristian/i.test(line)
       );
 
@@ -144,7 +153,7 @@ async function processPdfText(text: string): Promise<QuestionFromPdf[]> {
         options.splice(0);
         options.push(...firstFourOptions);
       }
-      console.log("Type of question:", isOpenQuestion? "Open":"multiple-choice");
+      console.log("Type of question:", isOpenQuestion ? "Open" : "multiple-choice");
 
       // Modifica la sezione di elaborazione della domanda
       let correctAnswer, explanation, openAnswer;
@@ -157,19 +166,29 @@ async function processPdfText(text: string): Promise<QuestionFromPdf[]> {
 
           // Trova la lettera della risposta
           const answerLetter = extractOptionLetter(aiResponse);
-
+          console.log("Answer letter:", answerLetter);
           // Trova l'opzione corrispondente
           if (answerLetter) {
             correctAnswer = options.find(opt => opt.trim().startsWith(answerLetter));
           } else {
             // Se la lettera non è trovata, cerca una corrispondenza testuale
-            correctAnswer = options.find(opt => 
-              aiResponse.toLowerCase().includes(opt.toLowerCase())
-            );
+            const bestMatch = options.reduce((best, opt) => {
+              const similarity = compareTwoStrings(aiResponse.toLowerCase(), opt.toLowerCase());
+              return similarity > best.similarity ? { option: opt, similarity } : best;
+            }, { option: '', similarity: 0 });
+
+            if (bestMatch.similarity > 0.5) {
+              correctAnswer = bestMatch.option;
+            } else if (aiResponse.toLowerCase().includes('nessuna delle precedenti')||aiResponse.toLowerCase().includes('nessuno dei casi precedenti')) {
+                correctAnswer = options.find(opt => opt.toLowerCase().includes('nessuna delle precedenti') || opt.toLowerCase().includes('nessuno dei casi precedenti'));
+            }
+             
           }
-            // Estrai la spiegazione se presente nella risposta
-          const explanationMatch = aiResponse.match(/Explanation:\s*(.*)/i);
-          explanation = explanationMatch ? explanationMatch[1].trim() : "Spiegazione non disponibile";
+
+          // Estrai la spiegazione se presente nella risposta
+          const explanationMatch = aiResponse.match(/Spiegazione:\s*([\s\S]*)/i);
+          explanation = explanationMatch ? explanationMatch[1].trim() : aiResponse; //fallback to all answer
+
           // Gestisci casi non risolti
           if (!correctAnswer) {
             console.error("⚠️ Risposta non trovata per domanda:", questionText);
@@ -182,10 +201,10 @@ async function processPdfText(text: string): Promise<QuestionFromPdf[]> {
           explanation = "Spiegazione non disponibile";
         }
       } else {
-          console.log("Question text for AI:", questionText); // Log per domande aperte
-          const aiResponse = await getAiAnswer(questionText, options);
-          console.log("AI Response:", aiResponse);
-          openAnswer = aiResponse; // Salva la risposta aperta
+        console.log("Question text for AI:", questionText); // Log per domande aperte
+        const aiResponse = await getAiAnswer(questionText, options);
+        console.log("AI Response:", aiResponse);
+        openAnswer = aiResponse; // Salva la risposta aperta
       }
 
       questions.push({
@@ -196,6 +215,7 @@ async function processPdfText(text: string): Promise<QuestionFromPdf[]> {
         correctAnswer,
         explanation,
         openAnswer, // Aggiunta della proprietà per risposta aperta
+        questionNumber: questionNumber
       });
     }
   }
@@ -204,8 +224,27 @@ async function processPdfText(text: string): Promise<QuestionFromPdf[]> {
   return questions.sort((a, b) => {
     const lecA = parseInt(a.lecture.split(' ')[1]);
     const lecB = parseInt(b.lecture.split(' ')[1]);
-    const numA = parseInt(a.question.split('.')[0]);
-    const numB = parseInt(b.question.split('.')[0]);
-    return lecA - lecB || numA - numB;
+    return lecA - lecB || parseInt(a.questionNumber) - parseInt(b.questionNumber);
   });
+}
+function compareTwoStrings(string1: string, string2: string) {
+  string1 = string1.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+  string2 = string2.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+
+  const length1 = string1.length;
+  const length2 = string2.length;
+
+  if (length1 === 0 || length2 === 0) {
+    return 0;
+  }
+  const maxLength = Math.max(length1, length2);
+
+  let distance = 0;
+  for (let i = 0; i < Math.min(length1, length2); i++) {
+    if (string1[i] === string2[i]) {
+      distance++;
+    }
+  }
+
+  return distance / maxLength;
 }
