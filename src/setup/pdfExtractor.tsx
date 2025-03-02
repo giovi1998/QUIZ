@@ -74,7 +74,7 @@ async function processPdfText(text: string): Promise<QuestionFromPdf[]> {
     .replace(/(\r\n|\n|\r)/gm, '\n')
     .replace(/(\n\s*){2,}/g, '\n');
 
-  console.log('✅ Testo del PDF pulito');
+  console.log('📄 Testo estratto pulito:', cleanedText);
 
   const questions: QuestionFromPdf[] = [];
   const lectureMatches = [...cleanedText.matchAll(/Lezione\s+(\d{2,3})/gi)];
@@ -114,9 +114,9 @@ async function processPdfText(text: string): Promise<QuestionFromPdf[]> {
       console.log(`▸ Domanda ${questionNumber}: ${questionText}`);
       const isOpenQuestion = /descrivere|spiegare|fornire/i.test(questionText);
 
-      // Pulizia delle linee per rimuovere intestazioni/scarti
+      // Filtraggio migliorato per rimuovere header
       const cleanedLines = lines.filter(line => 
-        !/Set Domande:|© 2016-2024|Data Stampa|Lezione \d{3}/i.test(line)
+        !/Set Domande:|©|Data Stampa|Lezione \d{3}|COMPUTER VISION|INGEGNERIA|Docente:|Randieri Cristian/i.test(line)
       );
 
       // Estrazione delle opzioni
@@ -140,23 +140,27 @@ async function processPdfText(text: string): Promise<QuestionFromPdf[]> {
         options.push(...firstFourOptions);
       }
 
-      let correctAnswer;
-      if (!isOpenQuestion) {
-        try {
-          // Richiama l'AI per ottenere la risposta
-          const aiResponse = await getAiAnswer(questionText, options);
-          const answerLetter = extractOptionLetter(aiResponse);
+      // Modifica la sezione di elaborazione della domanda
+let correctAnswer, explanation;
+if (!isOpenQuestion) {
+  try {
+    const aiResponse = await getAiAnswer(questionText, options);
+    const [answerPart, explanationPart] = aiResponse.split('\nExplanation: ');
+    const answerLetter = extractOptionLetter(answerPart);
 
           // Trova l'opzione corrispondente
           if (answerLetter) {
             correctAnswer = options.find(opt => opt.startsWith(answerLetter));
+            console.log(`📝 Spiegazione: ${explanation}`);
           } else {
             // Se la lettera non è trovata, cerca una corrispondenza testuale
             correctAnswer = options.find(opt => 
               aiResponse.toLowerCase().includes(opt.toLowerCase())
+              
             );
           }
-
+          explanation = explanationPart || "Spiegazione non disponibile";
+          console.log(`📝 Spiegazione: ${explanation}`);
           // Gestisci casi non risolti
           if (!correctAnswer) {
             console.error("⚠️ Risposta non trovata per domanda:", questionText);
@@ -176,6 +180,7 @@ async function processPdfText(text: string): Promise<QuestionFromPdf[]> {
         lecture,
         type: isOpenQuestion ? 'open' : 'multiple-choice',
         correctAnswer,
+        explanation
       });
     }
   }

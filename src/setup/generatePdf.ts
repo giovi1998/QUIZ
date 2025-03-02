@@ -97,7 +97,8 @@ export async function generatePdf(questions: QuestionFromPdf[]) {
       }
 
       // Formattazione domanda
-      const qText = question.question.replace(/\d+\.\s*/, '');
+      // Modifica la formattazione della domanda
+      const qText = question.question.replace(/^\d+\.?\s*/, ''); // Rimuove numero e punto
       y -= addText(qText, 50, y, true) + 18;
 
       // Aggiunta opzioni
@@ -114,6 +115,12 @@ export async function generatePdf(questions: QuestionFromPdf[]) {
         } else {
           y -= addText('⚠️ Risposta non disponibile', 70, y, true) + 18;
         }
+
+        // Aggiungi spiegazione dopo la risposta
+        if (question.correctAnswer && question.explanation) {
+          y -= addText(`→ Spiegazione: ${question.explanation}`, 70, y) + 18;
+        }
+        
       }
 
       // Spaziatura tra domande

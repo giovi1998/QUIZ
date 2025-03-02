@@ -88,6 +88,7 @@ Risposta: `,
     throw new Error(`Errore AI: ${error?.message}`);
   }
 };
+
 // import { HfInference } from '@huggingface/inference';
 
 // // Gestione API Key con validazione
