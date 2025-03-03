@@ -31,18 +31,6 @@ const SPECIAL_CHARS_MAP: { [key: string]: string } = {
   'Π': 'pi'
 };
 
-// Funzione per estrarre la lettera dell'opzione dalla risposta dell'IA
-function extractOptionLetter(answer: string): string | undefined {
-  const match = answer.match(/^[A-D]\)/i); // Cerca una lettera da A a D all'inizio con parentesi
-  if (match) {
-    return match[0].toUpperCase().replace(')', '');
-  }
-  const matchNoParenthesis = answer.match(/^[A-D]/i); // Cerca una lettera da A a D all'inizio senza parentesi
-  if (matchNoParenthesis) {
-    return matchNoParenthesis[0].toUpperCase();
-  }
-  return undefined;
-}
 
 export interface QuestionFromPdf {
   question: string;
@@ -179,7 +167,7 @@ async function processPdfText(text: string): Promise<QuestionFromPdf[]> {
           
           // Se abbiamo una lettera, cerchiamo l'opzione corrispondente
           if (answerLetter) {
-            correctAnswer = options.find(opt => opt.trim().startsWith(answerLetter));
+            correctAnswer = options.find(opt => opt.trim().startsWith(`${answerLetter})`));
           } else {
             // Se non viene trovata la lettera, si esegue un matching testuale
             const bestMatch = options.reduce((best, opt) => {
@@ -202,12 +190,14 @@ async function processPdfText(text: string): Promise<QuestionFromPdf[]> {
   
           // Estrazione della spiegazione, se presente
           const explanationMatch = aiResponse.text.match(/Spiegazione:\s*([\s\S]*)/i);
-          explanation = explanationMatch ? explanationMatch[1].trim() : aiResponse.text;
+          explanation = explanationMatch ? 
+          explanationMatch[1].trim().replace(correctAnswer || '', '') : 
+          aiResponse.text.replace(correctAnswer || '', '');
   
-          if (!correctAnswer) {
-            console.error("⚠️ Risposta non trovata per domanda:", questionText);
-            correctAnswer = "Errore: Risposta non determinabile";
-          }
+          // if (!correctAnswer) {
+          //   console.error("⚠️ Risposta non trovata per domanda:", questionText);
+          //   correctAnswer = "Errore: Risposta non determinabile";
+          // }
         } catch (error) {
           console.error(`🚨 Errore getAiAnswer: ${error}`);
           correctAnswer = "Errore: Risposta non determinabile";
@@ -221,17 +211,18 @@ async function processPdfText(text: string): Promise<QuestionFromPdf[]> {
       }
 
       // Inserimento dell'oggetto domanda con la nuova proprietà answerLetter
-      questions.push({
-        question: `${questionNumber}. ${questionText}`,
-        options,
-        lecture,
-        type: isOpenQuestion ? 'open' : 'multiple-choice',
-        correctAnswer,
-        explanation,
-        openAnswer,
-        questionNumber: questionNumber,
-        answerLetter // Salvo la lettera della risposta (undefined per domande aperte)
-      });
+// Modifica la creazione dell'oggetto question
+    questions.push({
+      question: `${questionNumber}. ${questionText}`,
+      options,
+      lecture,
+      type: isOpenQuestion ? 'open' : 'multiple-choice',
+      correctAnswer: answerLetter ? `${answerLetter})` : correctAnswer, // Mostra solo la lettera
+      explanation,  // Aggiungi la spiegazione estratta
+      openAnswer,
+      questionNumber: questionNumber,
+      answerLetter
+    });
     }
   }
 

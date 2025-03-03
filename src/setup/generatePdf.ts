@@ -1,7 +1,6 @@
 // File: generatePdf.ts
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
-import { QuestionFromPdf } from './pdfExtractor.tsx';
-import { Omega } from 'lucide-react';
+import { QuestionFromPdf } from './pdfExtractor';
 
 // Mappa dei caratteri speciali da sostituire
 const SPECIAL_CHARS_MAP: { [key: string]: string } = {
@@ -34,17 +33,16 @@ const SPECIAL_CHARS_MAP: { [key: string]: string } = {
   'ϕ': 'phi',
   '∫': 'integral',
   '∑': 'sigma',
-  '∞': 'infinity'
+  '∞': 'infinity',
 };
 
 const sanitizeText = (text: string) => {
-  return text.replace(
-    /[\n\r\x00-\x1F\x7F-\x9F]/g, // Rimuove caratteri di controllo
-    ' '
-  ).replace(
-    /[≥≤−×÷≠≈±Δ→•○▪▸⚠⚠️δλγϕΩΣπΠ∫\u26A0-\u26FF\uFE00-\uFE0F]/g,
-    (match) => (SPECIAL_CHARS_MAP.hasOwnProperty(match) ? SPECIAL_CHARS_MAP[match] : '')
-  );
+  return text
+    .replace(/[\n\r\x00-\x1F\x7F-\x9F]/g, ' ') // Rimuove caratteri di controllo
+    .replace(
+      /[≥≤−×÷≠≈±Δ→•○▪▸⚠⚠️δλγϕΩΣπΠ∫\u26A0-\u26FF\uFE00-\uFE0F]/g,
+      (match) => (SPECIAL_CHARS_MAP.hasOwnProperty(match) ? SPECIAL_CHARS_MAP[match] : '')
+    );
 };
 
 export async function generatePdf(questions: QuestionFromPdf[]) {
@@ -90,7 +88,7 @@ export async function generatePdf(questions: QuestionFromPdf[]) {
       lines.forEach((line, index) => {
         page.drawText(line, {
           x,
-          y: y - (index * 18),
+          y: y - index * 18,
           size: 12,
           font: fontToUse,
           color: rgb(0, 0, 0),
@@ -106,9 +104,20 @@ export async function generatePdf(questions: QuestionFromPdf[]) {
     });
 
     let currentLecture = '';
+    const printedLectures = new Set<string>();
 
     for (const question of sortedQuestions) {
-      if (y < 50 + 100) {
+      // Check if there is enough space for the next question
+      const spaceNeededForQuestion =
+        18 + // question text
+        (question.type === 'multiple-choice'
+          ? question.options.length * 18 + 18 + (question.explanation ? 18 : 0)
+          : 0) + //options + correctAnswer and explanation
+        (question.type === 'open' ? 18 : 0) + //openAnswer
+        36 + // Spacing between questions
+        (question.lecture !== currentLecture ? 36 + 18 : 0); //Space for the lecture + question title
+
+      if (y - spaceNeededForQuestion < 50) {
         page = pdfDoc.addPage([595, 842]);
         y = 800;
         currentPage++;
@@ -116,7 +125,10 @@ export async function generatePdf(questions: QuestionFromPdf[]) {
 
       if (question.lecture !== currentLecture) {
         currentLecture = question.lecture;
-        y -= addText(`${question.lecture}`, 50, y, true) + 36;
+        if (!printedLectures.has(currentLecture)) {
+          y -= addText(`LEZIONE ${question.lecture}`, 50, y, true) + 36;
+          printedLectures.add(currentLecture);
+        }
       }
 
       // Formattazione della domanda
@@ -132,20 +144,27 @@ export async function generatePdf(questions: QuestionFromPdf[]) {
         y -= 18;
 
         // Visualizzazione della risposta corretta comprensiva della lettera, se disponibile
-        if (question.correctAnswer) {
-          const answerDisplay = question.answerLetter
-            ? `${question.answerLetter}) ${question.correctAnswer}`
-            : question.correctAnswer;
+        if (question.correctAnswer && question.correctAnswer !== 'Errore: Risposta non determinabile') {
+          let answerDisplay;
+          if (question.answerLetter) {
+              answerDisplay = question.answerLetter; // Mostra solo la lettera
+          } else {
+              answerDisplay = question.correctAnswer;
+          }
           y -= addText(`Risposta corretta: ${answerDisplay}`, 70, y, true) + 18;
+           if (!question.answerLetter) {
+              y -= addText(`Risposta corretta: ${question.correctAnswer}`, 70, y, true) + 18;
+          }
+          // Aggiunta della spiegazione, se presente
+
+          if (question.explanation && !question.explanation.startsWith(question.correctAnswer)) {
+              y -= addText(`Spiegazione: ${question.explanation}`, 70, y) + 18;
+          }
         } else {
           y -= addText('⚠️ Risposta non disponibile', 70, y, true) + 18;
         }
-
-        // Aggiunta della spiegazione, se presente
-        if (question.correctAnswer && question.explanation) {
-          y -= addText(`Spiegazione: ${question.explanation}`, 70, y) + 18;
-        }
-      } else if (question.type === 'open') { // Per domande aperte
+      } else if (question.type === 'open') {
+        // Per domande aperte
         if (question.openAnswer) {
           y -= addText(`Risposta: ${question.openAnswer}`, 70, y) + 18;
         } else {
@@ -163,7 +182,6 @@ export async function generatePdf(questions: QuestionFromPdf[]) {
     link.href = URL.createObjectURL(blob);
     link.download = 'domande_ordinate.pdf';
     link.click();
-
   } catch (error) {
     console.error('Errore generazione PDF:', error);
     throw error;

@@ -20,9 +20,10 @@ export const getAiAnswer = async (
   maxTokens: number = 100
 ): Promise<{ text: string; letter?: string }> => { // Modificato il return type
   const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
+    // Modifica il system message
     { 
       role: "system", 
-      content: "Sei un esperto di Computer Vision. Rispondi in italiano tecnico. Per le domande a scelta multipla rispondi SOLO con la lettera corretta preceduta da 'Risposta: '." 
+      content: "Sei un esperto di Computer Vision. Rispondi in italiano tecnico. Per le domande a scelta multipla rispondi con: 1) La lettera corretta preceduta da 'Risposta: ' 2) Una spiegazione dettagliata iniziante con 'Spiegazione: '" 
     },
     {
       role: "user",
