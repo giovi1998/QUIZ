@@ -1,0 +1,1488 @@
+[
+  {
+    "question": "La visione è il senso che consente all'essere umano di:",
+    "options": [
+      "studiare il mondo 3D, di localizzare senza riconoscere gli oggetti presenti in una scena e di percepire i rapidi mutamenti dell’ambiente",
+      "studiare il mondo 2D, di localizzare e riconoscere gli oggetti presenti in una scena e di percepire i rapidi mutamenti dell’ambiente",
+      "studiare il mondo 3D, di localizzare e riconoscere gli oggetti presenti in una scena senza percepire i rapidi mutamenti dell’ambiente",
+      "studiare il mondo 3D, di localizzare e riconoscere gli oggetti presenti in una scena e di percepire i rapidi mutamenti dell’ambiente"
+    ],
+    "correctAnswer": "studiare il mondo 3D, di localizzare e riconoscere gli oggetti presenti in una scena e di percepire i rapidi mutamenti dell’ambiente",
+    "explanation": "La visione umana permette di interpretare il mondo in tre dimensioni, riconoscere oggetti e percepire rapidi cambiamenti nell'ambiente circostante."
+  },
+  {
+    "question": "La pattern recognition si occupa:",
+    "options": [
+      "del miglioramento, restauro e compressione di immagini, ovvero, si elabora una immagine per ottenerne un’altra in qualche senso 'migliore'",
+      "dell'(estrazione), identificazione, classificazione di caratteristiche presenti all’interno delle immagini",
+      "dell’analisi di immagini numeriche al calcolatore con il fine di scoprire cosa è presente nella scena e dove si trova all’interno di essa",
+      "nessuno dei casi precedenti"
+    ],
+    "correctAnswer": "dell'(estrazione), identificazione, classificazione di caratteristiche presenti all’interno delle immagini",
+    "explanation": "La pattern recognition si concentra sull'estrazione, identificazione e classificazione delle caratteristiche visive presenti nelle immagini."
+  },
+  {
+    "question": "Cosa s'intende per visione di alto livello nella computer vision?",
+    "options": [
+      "Esalta alcune caratteristiche visuali tipo il contorno degli oggetti",
+      "L'analisi della scena da un punto di vista sementico",
+      "il reprimento di informazioni sulla struttura dell'immagine",
+      "L'analisi della scena da un punto di vista sintattico"
+    ],
+    "correctAnswer": "L'analisi della scena da un punto di vista sementico",
+    "explanation": "La visione di alto livello riguarda l'interpretazione semantica della scena, ovvero comprendere il significato degli oggetti e delle relazioni tra di essi."
+  },
+  {
+    "question": "La differenza tra Digital Image Processing e Computer Vision sta:",
+    "options": [
+      "non vi è alcuna differenza",
+      "negli obiettivi e non nei metodi",
+      "nessuno dei casi precedenti",
+      "nei metodi e non negli obiettivi"
+    ],
+    "correctAnswer": "negli obiettivi e non nei metodi",
+    "explanation": "Il Digital Image Processing si concentra sulla manipolazione delle immagini per migliorarle, mentre la Computer Vision mira a estrarre informazioni significative dalle immagini per comprendere il contenuto."
+  },
+    {
+    "question": "A quanto risale l'utilizzo delle prime immagini digitali?",
+    "options": [
+      "Anni '20",
+      "Anni '40",
+      "Anni '30",
+      "Anni '10"
+    ],
+    "correctAnswer": "Anni '40",
+    "explanation": "Le prime immagini digitali sono state utilizzate negli anni '40, principalmente in ambito scientifico e militare, prima dello sviluppo dei computer moderni."
+  },
+  {
+    "question": "Quando è stato introdotto per la prima volta il concetto di Computer Vision?",
+    "options": [
+      "Nel 1966 presso il Massachusetts Institute of Technology (MIT)",
+      "Nel 1990 grazie all'Intelligenza Artificiale",
+      "Da David Marr nel 1982",
+      "Negli Anni '90 dalla Berkely University"
+    ],
+    "correctAnswer": "Nel 1966 presso il Massachusetts Institute of Technology (MIT)",
+    "explanation": "Il concetto di Computer Vision è stato formalizzato nel 1966 al MIT con un progetto pionieristico che mirava a far 'vedere' i computer."
+  },
+  {
+    "question": "Cosa percepiscono i bastoncelli?",
+    "options": [
+      "Percepiscono i dettagli e i rapidi cambi di immagine",
+      "Sensibili alle condizioni di elevata illuminazione (fotopica)",
+      "Forniscono una visione di insieme della scena",
+      "Sensibili ai colori"
+    ],
+    "correctAnswer": "Forniscono una visione di insieme della scena",
+    "explanation": "I bastoncelli sono fotorecettori nella retina specializzati nella visione in condizioni di scarsa luce e nella percezione dell'insieme della scena."
+  },
+  {
+    "question": "Come si ottiene la messa a fuoco dell'immagine sull'occhio umano?",
+    "options": [
+      "Allontanandosi dall'immagine",
+      "Deformando il cristallino con appositi muscoli",
+      "Avvicinandosi all'immagine",
+      "Deformando la cornea"
+    ],
+    "correctAnswer": "Deformando il cristallino con appositi muscoli",
+    "explanation": "La messa a fuoco avviene grazie ai muscoli ciliari che modificano la forma del cristallino (processo chiamato accomodazione)."
+  },
+  {
+    "question": "La percezione visiva umana è il risultato di:",
+    "options": [
+      "Una semplice sequenza di elaborazioni che avvengono in alternanza ad altre attività celebrali percettive",
+      "Una complessa sequenza di elaborazioni che avvengono in concomitanza ad altre attività celebrali percettive",
+      "Una complessa sequenza di elaborazioni che avvengono in alternanza ad altre attività celebrali percettive",
+      "Una singola sequenza di elaborazioni che avvengono in concomitanza ad altre attività celebrali percettive"
+    ],
+    "correctAnswer": "Una complessa sequenza di elaborazioni che avvengono in concomitanza ad altre attività celebrali percettive",
+    "explanation": "La percezione visiva coinvolge processi cerebrali paralleli che integrano informazioni visive con altri input sensoriali e cognitivi."
+  },
+  {
+    "question": "La luce, oltre alla frequenza, è caratterizzata dalle seguenti grandezze:",
+    "options": [
+      "radianza, luminanza, luminosità",
+      "radianza, contrasto, colore",
+      "nessuna delle precedenti",
+      "luminanza, saturazione, luminosità"
+    ],
+    "correctAnswer": "luminanza, saturazione, luminosità",
+    "explanation": "Queste tre grandezze descrivono rispettivamente l'intensità luminosa, la purezza del colore e la percezione soggettiva della luce."
+  },
+  {
+    "question": "Cosa s'intende per risoluzione di un'immagine?",
+    "options": [
+      "La saturazione di un'immagine",
+      "Il numero e la dimensione dei pixel di un'immagine",
+      "La scala di grigi di un'immagine",
+      "Il colore di un'immagine"
+    ],
+    "correctAnswer": "Il numero e la dimensione dei pixel di un'immagine",
+    "explanation": "La risoluzione determina il dettaglio visibile ed è data dalla densità dei pixel (elementi immagine) per unità di misura."
+  },
+  {
+    "question": "Cosa s'intende per quantizzazione di un'immagine?",
+    "options": [
+      "E' l'operazione di digitalizzazione dei valori delle coordinate di un’immagine",
+      "nessuna delle precedenti",
+      "E' l'operazione di digitalizzazione dei valori dell’ampiezza di una immagine",
+      "E' l'operazione di digitalizzazione sia dei valori dell’ampiezza che delle coordinate di una immagine"
+    ],
+    "correctAnswer": "E' l'operazione di digitalizzazione dei valori dell’ampiezza di una immagine",
+    "explanation": "La quantizzazione converte i valori continui di intensità luminosa in un insieme discreto di livelli digitali."
+  },
+  {
+    "question": "Come si definisce il concetto di saturazione di un'immagine?",
+    "options": [
+      "E' il fenomeno per il quale tutte le intensità superiori ad una certa soglia vengono rappresentate come bianco",
+      "E' il fenomeno per il quale tutte le intensità inferiori ad una certa soglia vengono rappresentate come bianco",
+      "E' il fenomeno per il quale tutte le intensità comprese in un intervallo di soglia vengono rappresentate come bianco",
+      "nessuna delle precedenti"
+    ],
+    "correctAnswer": "E' il fenomeno per il quale tutte le intensità superiori ad una certa soglia vengono rappresentate come bianco",
+    "explanation": "La saturazione determina la purezza del colore, ma in questo contesto specifico si riferisce alla soglia di intensità massima registrabile."
+  },
+  {
+    "question": "Quando due regioni si definiscono disgiunte?",
+    "options": [
+      "Quando la loro unione non è connessa",
+      "Quando non sono adiacenti",
+      "Quando le due regioni sono adiacenti e connesse",
+      "Nessuno delle precedenti"
+    ],
+    "correctAnswer": "Quando non sono adiacenti",
+    "explanation": "Due regioni sono disgiunte quando non condividono alcun confine comune né pixel adiacenti."
+  },
+  {
+    "question": "Quando un path tra pixel è definito chiuso?",
+    "options": [
+      "Quando (x₀, y₀) è diverso (xₙ, yₙ)",
+      "Quando (x₀, y₀) = (xₙ, yₙ)",
+      "Quando due percorsi aperti s'intersecano",
+      "Nessuno delle precedenti"
+    ],
+    "correctAnswer": "Quando (x₀, y₀) = (xₙ, yₙ)",
+    "explanation": "Un path è chiuso se il pixel iniziale e finale coincidono, formando un circuito continuo."
+  },
+  {
+    "question": "Il dominio spaziale di un'immagine è",
+    "options": [
+      "Il piano che contiene i pixel dell'immagine",
+      "Lo sfondo di un'immagine",
+      "Il negativo di un'immagine",
+      "La proiezione di un'immagine su un piano"
+    ],
+    "correctAnswer": "Il piano che contiene i pixel dell'immagine",
+    "explanation": "Rappresenta l'insieme delle coordinate (x,y) dei pixel che compongono l'immagine digitale."
+  },
+  {
+    "question": "Il negativo di un’immagine con livelli d’intensità [0,L-1] si ottiene per:",
+    "options": [
+      "s = L + 1 − r",
+      "s = L − 1 − r",
+      "s = L − 1 + r",
+      "s = L − 1 − r²"
+    ],
+    "correctAnswer": "s = L − 1 − r",
+    "explanation": "Trasformazione che inverte i valori di intensità: il bianco diventa nero e viceversa."
+  },
+  {
+    "question": "Nella selezione mediante piani di bit l'immagine è vista come",
+    "options": [
+      "Composta da strati di grigio",
+      "Composta da regioni",
+      "Somma di immagini di diverso colore",
+      "Composta da strati di bit"
+    ],
+    "correctAnswer": "Composta da strati di bit",
+    "explanation": "Ogni bit rappresenta un piano separato, permettendo di analizzare singoli livelli binari dell'immagine."
+  },
+  {
+    "question": "Se consideriamo i livelli d'intensità come variabili casuali si dimostra che",
+    "options": [
+      "solo per alcuni livelli di intensità di r prossimi al valore 255, le intensità risultanti s hanno PDF uniforme",
+      "solo per alcuni livelli di intensità di r prossimi al valore 0, le intensità risultanti s hanno PDF uniforme",
+      "a tutti i livelli di intensità r, le intensità risultanti s hanno PDF uniforme",
+      "solo per alcuni livelli di intensità r, le intensità risultanti s hanno PDF uniforme"
+    ],
+    "correctAnswer": "solo per alcuni livelli di intensità r, le intensità risultanti s hanno PDF uniforme",
+    "explanation": "La distribuzione uniforme si ottiene solo per specifici intervalli di intensità dopo la trasformazione."
+  },
+  {
+    "question": "Una funzione monotona crescente",
+    "options": [
+      "non permette di ottenere una trasformazione inversa",
+      "permette di ottenere una trasformazione inversa definita in tutti i punti",
+      "permette di ottenere una trasformazione inversa solo in pochi punti",
+      "nessuna delle precedenti"
+    ],
+    "correctAnswer": "permette di ottenere una trasformazione inversa definita in tutti i punti",
+    "explanation": "Le funzioni monotone crescenti strettamente sono invertibili su tutto il loro dominio."
+  },
+  {
+    "question": "Una funzione T(r) è detta monotona non decrescente quando",
+    "options": [
+      "T(r₂) = T(r₁)/2 con r₂ > r₁",
+      "T(r₂) = T(r₁) con r₂ > r₁",
+      "T(r₂) ≥ T(r₁) con r₂ > r₁",
+      "T(r₂) < T(r₁) con r₂ > r₁"
+    ],
+    "correctAnswer": "T(r₂) ≥ T(r₁) con r₂ > r₁",
+    "explanation": "Definizione matematica standard di funzione monotona non decrescente."
+  },
+  {
+    "question": "Un'immagine ad elevato contrasto presenterà un istogramma",
+    "options": [
+      "con valori distribuiti in tutto il range d'intensità",
+      "con valori distribuiti solo nei valori prossimi allo 0",
+      "con valori distribuiti solo nei valori prossimi al 255",
+      "con valori distribuiti nella parte centrale del range"
+    ],
+    "correctAnswer": "con valori distribuiti in tutto il range d'intensità",
+    "explanation": "Alto contrasto implica utilizzo completo della gamma dinamica disponibile."
+  },
+  {
+    "question": "L’operazione di filtraggio si riduce all’attenuazione o all’amplificazione di",
+    "options": [
+      "tutte le componenti determinate da intervalli di frequenza ben precisi",
+      "alcune componenti determinate da intervalli di frequenza ben precisi",
+      "tutte le componenti ad alta frequenza",
+      "tutte le componenti a bassa frequenza"
+    ],
+    "correctAnswer": "alcune componenti determinate da intervalli di frequenza ben precisi",
+    "explanation": "Il filtraggio opera selettivamente su specifiche bande di frequenza."
+  },
+  {
+    "question": "Se consideriamo i livelli d'intensità come variabili casuali si dimostra che",
+    "options": [
+      "solo per alcuni livelli di intensità di r prossimi al valore 255, le intensità risultanti s hanno PDF uniforme",
+      "solo per alcuni livelli di intensità di r prossimi al valore 0, le intensità risultanti s hanno PDF uniforme",
+      "a tutti i livelli di intensità r, le intensità risultanti s hanno PDF uniforme",
+      "solo per alcuni livelli di intensità r, le intensità risultanti s hanno PDF uniforme"
+    ],
+    "correctAnswer": "solo per alcuni livelli di intensità r, le intensità risultanti s hanno PDF uniforme",
+    "explanation": "La distribuzione uniforme si ottiene solo per specifici intervalli di intensità dopo la trasformazione."
+  },
+  {
+    "question": "Una funzione monotona crescente",
+    "options": [
+      "non permette di ottenere una trasformazione inversa",
+      "permette di ottenere una trasformazione inversa definita in tutti i punti",
+      "permette di ottenere una trasformazione inversa solo in pochi punti",
+      "nessuna delle precedenti"
+    ],
+    "correctAnswer": "permette di ottenere una trasformazione inversa definita in tutti i punti",
+    "explanation": "Le funzioni monotone crescenti strettamente sono invertibili su tutto il loro dominio."
+  },
+  {
+    "question": "Una funzione T(r) è detta monotona non decrescente quando",
+    "options": [
+      "T(r₂) = T(r₁)/2 con r₂ > r₁",
+      "T(r₂) = T(r₁) con r₂ > r₁",
+      "T(r₂) ≥ T(r₁) con r₂ > r₁",
+      "T(r₂) < T(r₁) con r₂ > r₁"
+    ],
+    "correctAnswer": "T(r₂) ≥ T(r₁) con r₂ > r₁",
+    "explanation": "Definizione matematica standard di funzione monotona non decrescente."
+  },
+  {
+    "question": "Un'immagine ad elevato contrasto presenterà un istogramma",
+    "options": [
+      "con valori distribuiti in tutto il range d'intensità",
+      "con valori distribuiti solo nei valori prossimi allo 0",
+      "con valori distribuiti solo nei valori prossimi al 255",
+      "con valori distribuiti nella parte centrale del range"
+    ],
+    "correctAnswer": "con valori distribuiti in tutto il range d'intensità",
+    "explanation": "Alto contrasto implica utilizzo completo della gamma dinamica disponibile."
+  },
+  {
+    "question": "L’operazione di filtraggio si riduce all’attenuazione o all’amplificazione di",
+    "options": [
+      "tutte le componenti determinate da intervalli di frequenza ben precisi",
+      "alcune componenti determinate da intervalli di frequenza ben precisi",
+      "tutte le componenti ad alta frequenza",
+      "tutte le componenti a bassa frequenza"
+    ],
+    "correctAnswer": "alcune componenti determinate da intervalli di frequenza ben precisi",
+    "explanation": "Il filtraggio opera selettivamente su specifiche bande di frequenza."
+  },
+  {
+    "question": "L’operazione di filtraggio si riduce all’attenuazione o all’amplificazione di",
+    "options": [
+      "di alcune componenti determinate da intervalli spaziali ben precisi",
+      "di tutte le componenti determinate da intervalli di frequenza non ben definiti",
+      "di alcune componenti determinate da intervalli di frequenza ben precisi",
+      "di tutte le componenti determinate da intervalli di frequenza ben precisi"
+    ],
+    "correctAnswer": "di alcune componenti determinate da intervalli di frequenza ben precisi",
+    "explanation": "Il filtraggio opera selettivamente su bande di frequenza specifiche, amplificando o attenuando componenti mirate."
+  },
+  {
+    "question": "La tecnica di filtraggio spaziale di definisce lineare",
+    "options": [
+      "quando la regola di trasformazione è una funzione lineare dei valori di intensità rispetto a tutta l'immagine",
+      "quando la regola di trasformazione è una funzione non lineare dei valori di intensità dell’intorno considerato",
+      "quando la regola di trasformazione è una funzione discreta dei valori di intensità dell’intorno considerato",
+      "quando la regola di trasformazione è una funzione lineare dei valori di intensità dell’intorno considerato"
+    ],
+    "correctAnswer": "quando la regola di trasformazione è una funzione lineare dei valori di intensità dell’intorno considerato",
+    "explanation": "Il filtraggio lineare applica operatori come la media pesata o la convoluzione su un intorno del pixel."
+  },
+  {
+    "question": "Col termine zero padding si ci riferisce all'operazione per cui",
+    "options": [
+      "si inseriscono zeri solo sulle colonne quando le funzioni non combaciano",
+      "si inseriscono zeri su entrambi i lati quando le funzioni non combaciano",
+      "si inseriscono uni su entrambi i lati quando le funzioni non combaciano",
+      "si inseriscono zeri solo sulle righe quando le funzioni non combaciano"
+    ],
+    "correctAnswer": "si inseriscono zeri su entrambi i lati quando le funzioni non combaciano",
+    "explanation": "Tecnica usata per mantenere le dimensioni dell'immagine durante operazioni di convoluzione."
+  },
+  {
+    "question": "I meccanismi di convoluzione differiscono dalla correlazione per",
+    "options": [
+      "la rotazione del filtro di 45°",
+      "la rotazione del filtro di 180°",
+      "la traslazione del filtro di 135°",
+      "la rotazione del filtro di 90°"
+    ],
+    "correctAnswer": "la rotazione del filtro di 180°",
+    "explanation": "La rotazione di 180° del kernel è la caratteristica distintiva della convoluzione rispetto alla correlazione."
+  },
+  {
+    "question": "Cosa s’intende per Analisi di Fourier continua nelle immagini?",
+    "options": [
+      "Scomposizione in componenti spaziali",
+      "Scomposizione in componenti a diversa frequenza",
+      "Scomposizione in componenti di uguale frequenza",
+      "Scomposizione in differenze di frequenza"
+    ],
+    "correctAnswer": "Scomposizione in componenti a diversa frequenza",
+    "explanation": "L'analisi di Fourier rappresenta l'immagine come sovrapposizione di sinusoidi a diverse frequenze spaziali."
+  },
+  {
+    "question": "La trasformata di Fourier di una funzione campionata è:",
+    "options": [
+      "Una sequenza di copie della trasformata originale shiftate della frequenza di campionamento",
+      "Una sequenza finita e periodica di copie della trasformata originale",
+      "Una sequenza infinita e periodica di copie della trasformata originale shiftate",
+      "Una sequenza infinita di copie della trasformata originale shiftate"
+    ],
+    "correctAnswer": "Una sequenza infinita e periodica di copie della trasformata originale shiftate",
+    "explanation": "Il teorema del campionamento mostra che lo spettro diventa periodico con repliche separate dalla frequenza di campionamento."
+  },
+  {
+    "question": "L'operazione di campionamento può essere espressa come:",
+    "options": [
+      "Il rapporto tra la funzione e il passo di campionamento",
+      "Il prodotto tra la funzione e il passo di campionamento",
+      "La differenza tra la funzione e il passo di campionamento",
+      "La somma tra la funzione e il passo di campionamento"
+    ],
+    "correctAnswer": "Il prodotto tra la funzione e il passo di campionamento",
+    "explanation": "Matematicamente rappresentato come moltiplicazione per un treno di impulsi δ(t)."
+  },
+  {
+    "question": "Il concetto di campionamento critico indica che:",
+    "options": [
+      "La frequenza di campionamento è insufficiente",
+      "La frequenza di campionamento è al limite minimo per evitare aliasing",
+      "La frequenza di campionamento supera il doppio della massima frequenza del segnale",
+      "La frequenza di campionamento è casuale"
+    ],
+    "correctAnswer": "La frequenza di campionamento è al limite minimo per evitare aliasing",
+    "explanation": "Corrisponde alla frequenza di Nyquist: 2 volte la massima frequenza presente nel segnale."
+  },
+  {
+    "question": "L'aliasing è:",
+    "options": [
+      "La sovrapposizione di componenti ad alta frequenza su quelle a bassa frequenza",
+      "La perdita di componenti ad alta frequenza",
+      "Un artefatto dovuto a errori di quantizzazione",
+      "Un miglioramento della risoluzione spaziale"
+    ],
+    "correctAnswer": "La sovrapposizione di componenti ad alta frequenza su quelle a bassa frequenza",
+    "explanation": "Fenomeno che distorce il segnale quando non si rispetta il teorema del campionamento."
+  },
+  {
+    "question": "L’effetto di Aliasing può essere ridotto:",
+    "options": [
+      "Interpolando l'immagine",
+      "Applicando lo smoothing prima del campionamento",
+      "Aumentando la risoluzione spaziale",
+      "Modificando la profondità di colore"
+    ],
+    "correctAnswer": "Applicando lo smoothing prima del campionamento",
+    "explanation": "Un filtro anti-aliasing (low-pass) rimuove le frequenze oltre la metà della frequenza di campionamento."
+  },
+  {
+    "question": "Le basi del filtraggio lineare delle immagini nel dominio della frequenza sono stabilite:",
+    "options": [
+      "Dalla proprietà di traslazione della trasformata di Fourier 2-D",
+      "Dalla proprietà di rotazione della trasformata di Fourier 2-D",
+      "Dal teorema della convoluzione 2-D",
+      "Dalla proprietà di simmetria della trasformata di Fourier 2-D"
+    ],
+    "correctAnswer": "Dal teorema della convoluzione 2-D",
+    "explanation": "Il teorema della convoluzione lega il filtraggio spaziale a quello nel dominio della frequenza."
+  },
+  {
+    "question": "Un filtro passa-basso definito nel dominio della frequenza:",
+    "options": [
+      "Permette di ottenere un’immagine filtrata più nitida",
+      "Permette di ottenere un’immagine filtrata sfocata",
+      "Permette di ottenere un’immagine filtrata messa a fuoco",
+      "Nessuna delle precedenti"
+    ],
+    "correctAnswer": "Permette di ottenere un’immagine filtrata sfocata",
+    "explanation": "I filtri low-pass attenuano le alte frequenze responsabili dei dettagli fini."
+  },
+  {
+    "question": "Il filtraggio nel dominio della frequenza si ottiene:",
+    "options": [
+      "Modificando i coefficienti della trasformata inversa",
+      "Modificando i coefficienti della trasformata originale",
+      "Moltiplicando per una funzione discontinua",
+      "Sommando alla trasformata una costante"
+    ],
+    "correctAnswer": "Modificando i coefficienti della trasformata originale",
+    "explanation": "Si altera lo spettro di Fourier prima di applicare l'antitrasformata."
+  },
+  {
+    "question": "Il legame tra filtraggio spaziale e frequenziale è costituito dal:",
+    "options": [
+      "Teorema del campionamento",
+      "Teorema della convoluzione",
+      "Teorema della correlazione",
+      "Principio di indeterminazione"
+    ],
+    "correctAnswer": "Teorema della convoluzione",
+    "explanation": "Il teorema mostra l'equivalenza tra convoluzione spaziale e moltiplicazione in frequenza."
+  },
+  {
+    "question": "I filtri basati su funzioni gaussiane sono interessanti perché:",
+    "options": [
+      "Hanno trasformata di Fourier complessa",
+      "Sono facili da implementare hardware",
+      "Trasformata e antitrasformata sono gaussiane reali",
+      "Hanno risposta in frequenza discontinua"
+    ],
+    "correctAnswer": "Trasformata e antitrasformata sono gaussiane reali",
+    "explanation": "La Gaussiana mantiene la sua forma in entrambi i domini (spazio e frequenza)."
+  },
+  {
+    "question": "Nel filtro passa basso ideale il raggio D₀ rappresenta:",
+    "options": [
+      "Il punto di transizione tra H(u,v)=1 e H(u,v)=1",
+      "Il punto di transizione tra H(u,v)=0 e H(u,v)=1",
+      "Il punto di transizione tra H(u,v)=1 e H(u,v)=0",
+      "Il punto di transizione tra H(u,v)=0 e H(u,v)=0"
+    ],
+    "correctAnswer": "Il punto di transizione tra H(u,v)=1 e H(u,v)=0",
+    "explanation": "D₀ è la frequenza di taglio che separa le componenti a bassa frequenza (preservate) da quelle ad alta (attenuate)."
+  },
+  {
+    "question": "Lo smoothing nel dominio della frequenza è ottenuto tramite:",
+    "options": [
+      "Attenuazione delle basse frequenze",
+      "Attenuazione delle alte frequenze",
+      "Amplificazione delle medie frequenze",
+      "Eliminazione della componente DC"
+    ],
+    "correctAnswer": "Attenuazione delle alte frequenze",
+    "explanation": "Lo smoothing sfoca l'immagine rimuovendo i dettagli fini associati alle alte frequenze."
+  },
+  {
+    "question": "La funzione di trasferimento del filtro low pass di Butterworth è:",
+    "options": [
+      "A tratti",
+      "Discontinua",
+      "Periodica",
+      "Graduale"
+    ],
+    "correctAnswer": "Graduale",
+    "explanation": "La transizione graduale riduce l'effetto ringing rispetto al filtro ideale."
+  },
+  {
+    "question": "L’assenza del ringing in un filtro low pass di Butterworth è dovuta:",
+    "options": [
+      "Alla transizione brusca tra frequenze",
+      "Alla transizione graduale tra frequenze basse e alte",
+      "Alla eliminazione delle componenti DC",
+      "Alla risposta in frequenza lineare"
+    ],
+    "correctAnswer": "Alla transizione graduale tra frequenze basse e alte",
+    "explanation": "La morbida transizione evita oscillazioni spurie (ringing) ai bordi."
+  },
+  {
+    "question": "L’antitrasformata di Fourier del filtro low pass gaussiano è:",
+    "options": [
+      "Una funzione logaritmica",
+      "Una funzione gaussiana",
+      "Una funzione sinusoidale",
+      "Una funzione a gradino"
+    ],
+    "correctAnswer": "Una funzione gaussiana",
+    "explanation": "La Gaussiana mantiene la sua forma sia nel dominio spaziale che frequenziale."
+  },
+  {
+    "question": "Tipicamente un filtro high pass di Butterworth (BHPF) presenta:",
+    "options": [
+      "Effetto ringing nullo",
+      "Effetto ringing pronunciato",
+      "Effetto ringing modesto",
+      "Nessun effetto di smoothing"
+    ],
+    "correctAnswer": "Effetto ringing modesto",
+    "explanation": "La versione di Butterworth riduce ma non elimina completamente il ringing."
+  },
+  {
+    "question": "Lo sharpening delle immagini si può ottenere nel dominio della frequenza con:",
+    "options": [
+      "Filtri low pass",
+      "Filtri high pass",
+      "Filtri band pass",
+      "Filtri notch"
+    ],
+    "correctAnswer": "Filtri high pass",
+    "explanation": "I filtri high pass enfatizzano i bordi e i dettagli ad alta frequenza."
+  },
+  {
+    "question": "Un filtro high pass ideale (IHPF) presenta:",
+    "options": [
+      "Effetto ringing nullo",
+      "Effetto ringing modesto",
+      "Effetto ringing pronunciato",
+      "Transizione graduale"
+    ],
+    "correctAnswer": "Effetto ringing pronunciato",
+    "explanation": "La brusca transizione nelle frequenze causa artefatti di ringing significativi."
+  },
+  {
+    "question": "Tipicamente un filtro high pass gaussiano (GHPF) presenta:",
+    "options": [
+      "Risultati più intensi rispetto agli altri filtri HP",
+      "Risultati più tenui rispetto agli altri filtri HP",
+      "Risultati equivalenti al filtro ideale",
+      "Nessuna differenza rispetto al filtro di Butterworth"
+    ],
+    "correctAnswer": "Risultati più tenui rispetto agli altri filtri HP",
+    "explanation": "La natura graduale della Gaussiana produce un effetto di sharpening più soft."
+  },
+  {
+    "question": "I filtri passa banda:",
+    "options": [
+      "Processano tutto lo spettro di frequenza",
+      "Processano determinate bande di frequenza",
+      "Eliminano solo le basse frequenze",
+      "Amplificano uniformemente tutte le frequenze"
+    ],
+    "correctAnswer": "Processano determinate bande di frequenza",
+    "explanation": "Isolano intervalli specifici di frequenze per analisi mirate (es. texture)."
+  },
+  {
+    "question": "Il colore viene utilizzato nelle immagini digitali perché:",
+    "options": [
+      "Migliora il contrasto dell'immagine",
+      "È un descrittore che semplifica l’identificazione e l’estrazione di oggetti",
+      "Aumenta la risoluzione spaziale",
+      "Riduce le dimensioni del file"
+    ],
+    "correctAnswer": "È un descrittore che semplifica l’identificazione e l’estrazione di oggetti",
+    "explanation": "Il colore fornisce informazioni aggiuntive per il riconoscimento e la segmentazione degli oggetti."
+  },
+  {
+    "question": "La qualità della luce cromatica è descritta tramite:",
+    "options": [
+      "Radianza, luminanza, contrasto",
+      "Radianza, saturazione, luminosità",
+      "Luminanza, tonalità, contrasto",
+      "Intensità, saturazione, profondità"
+    ],
+    "correctAnswer": "Radianza, saturazione, luminosità",
+    "explanation": "Queste tre grandezze descrivono rispettivamente l'energia luminosa, la purezza del colore e la percezione soggettiva."
+  },
+  {
+    "question": "La luce acromatica (senza colore) ha come unico attributo:",
+    "options": [
+      "Il colore",
+      "Il contrasto",
+      "L'intensità",
+      "La radianza"
+    ],
+    "correctAnswer": "L'intensità",
+    "explanation": "Si riferisce alla scala di grigi senza informazioni cromatiche."
+  },
+  {
+    "question": "Le caratteristiche per distinguere un colore da un altro sono:",
+    "options": [
+      "Luminosità, contrasto, saturazione",
+      "Luminosità, tonalità, saturazione",
+      "Luminosità, tonalità, radianza",
+      "Tonalità, contrasto, profondità"
+    ],
+    "correctAnswer": "Luminosità, tonalità, saturazione",
+    "explanation": "Triade fondamentale nel modello HSI per la descrizione del colore."
+  },
+  {
+    "question": "Cosa si intende per profondità del pixel nel modello RGB?",
+    "options": [
+      "Il numero di bit per rappresentare ogni pixel",
+      "Il numero di byte per rappresentare una regione",
+      "La dimensione fisica del pixel",
+      "La distanza dal sensore"
+    ],
+    "correctAnswer": "Il numero di bit per rappresentare ogni pixel",
+    "explanation": "Determina la gamma di colori rappresentabile (es: 24 bit = 16 milioni di colori)."
+  },
+  {
+    "question": "I colori RGB scuri sono:",
+    "options": [
+      "Sottoinsieme riproducibile fedelmente su qualsiasi hardware",
+      "Colori con componente di blu dominante",
+      "Colori con valori di intensità inferiori a 128",
+      "Colori non visibili all'occhio umano"
+    ],
+    "correctAnswer": "Sottoinsieme riproducibile fedelmente su qualsiasi hardware",
+    "explanation": "Sono standardizzati per garantire consistenza tra dispositivi."
+  },
+  {
+    "question": "Il modello HSI separa:",
+    "options": [
+      "Componente di intensità dalle informazioni di colore",
+      "Componente di saturazione dalla luminosità",
+      "Componente di tonalità dalla radianza",
+      "Componente spaziale dalla cromatica"
+    ],
+    "correctAnswer": "Componente di intensità dalle informazioni di colore",
+    "explanation": "Permette di elaborare separatamente luminosità (I) e caratteristiche cromatiche (H,S)."
+  },
+  {
+    "question": "A cosa servono i modelli del colore?",
+    "options": [
+      "Definire scale di contrasto",
+      "Standardizzare la specifica dei colori",
+      "Aumentare la risoluzione",
+      "Ridurre il rumore"
+    ],
+    "correctAnswer": "Standardizzare la specifica dei colori",
+    "explanation": "Forniscono framework matematici per rappresentare/riprodurre colori in modo consistente."
+  },
+  {
+    "question": "Nell'elaborazione full-color:",
+    "options": [
+      "Si elabora solo la componente di intensità",
+      "Ogni componente RGB viene elaborata individualmente",
+      "Si utilizzano esclusivamente filtri morfologici",
+      "Si converte sempre in scala di grigi"
+    ],
+    "correctAnswer": "Ogni componente RGB viene elaborata individualmente",
+    "explanation": "Le operazioni vengono applicate separatamente sui canali R, G e B."
+  },
+  {
+    "question": "L’elaborazione a falsi colori consiste:",
+    "options": [
+      "Nell'assegnare colori a valori di grigio",
+      "Nel correggere i colori reali",
+      "Nel aumentare la saturazione",
+      "Nel ridurre la gamma cromatica"
+    ],
+    "correctAnswer": "Nell'assegnare colori a valori di grigio",
+    "explanation": "Tecnica usata per evidenziare dettagli in immagini monocromatiche (es: termografie)."
+  },
+  {
+    "question": "Il Color Slicing serve per evidenziare:",
+    "options": [
+      "Una gamma generica di colori",
+      "Una gamma specifica di colori per separare oggetti dal contesto",
+      "Colori complementari",
+      "Regioni ad alto contrasto"
+    ],
+    "correctAnswer": "Una gamma specifica di colori per separare oggetti dal contesto",
+    "explanation": "Tecnica che isola intervalli cromatici specifici per segmentare oggetti di interesse."
+  },
+  {
+    "question": "Le correzioni di tonalità del colore hanno come obiettivo:",
+    "options": [
+      "Regolare sperimentalmente luminosità o contrasto",
+      "Aumentare la saturazione",
+      "Modificare la temperatura colore",
+      "Eliminare il rumore cromatico"
+    ],
+    "correctAnswer": "Regolare sperimentalmente luminosità o contrasto",
+    "explanation": "Interventi empirici per ottimizzare la resa visiva dell'immagine."
+  },
+  {
+    "question": "Con il termine trasformazione di colore si intende:",
+    "options": [
+      "Tecniche di conversione tra spazi colore",
+      "Modifica della risoluzione spaziale",
+      "Applicazione di filtri morfologici",
+      "Elaborazione delle componenti RGB separatamente"
+    ],
+    "correctAnswer": "Tecniche di conversione tra spazi colore",
+    "explanation": "Ad esempio conversione RGB ↔ HSI per scopi di elaborazione specifici."
+  },
+  {
+    "question": "I valori complementari dei colori sono utili per:",
+    "options": [
+      "Evidenziare dettagli in regioni chiare",
+      "Creare effetti artistici",
+      "Aumentare la saturazione",
+      "Ridurre il rumore"
+    ],
+    "correctAnswer": "Evidenziare dettagli in regioni chiare",
+    "explanation": "Sfruttano il contrasto cromatico per enfatizzare elementi specifici."
+  },
+  {
+    "question": "Per l'elaborazione degli istogrammi di immagini a colori conviene lavorare nello spazio:",
+    "options": [
+      "RGB",
+      "HSI",
+      "CMY",
+      "YUV"
+    ],
+    "correctAnswer": "HSI",
+    "explanation": "Permette di elaborare la componente intensità (I) indipendentemente dal colore."
+  },
+  {
+    "question": "Nello smoothing delle immagini a colori:",
+    "options": [
+      "Si elaborano solo i canali di saturazione",
+      "Si utilizzano i vettori delle componenti colore",
+      "Si applica il laplaciano",
+      "Si converte in scala di grigi"
+    ],
+    "correctAnswer": "Si utilizzano i vettori delle componenti colore",
+    "explanation": "Operazioni vettoriali che preservano le relazioni cromatiche tra pixel."
+  },
+  {
+    "question": "Lo sharpening di un’immagine a colori può essere ottenuto mediante:",
+    "options": [
+      "Filtro mediano",
+      "Operatore laplaciano",
+      "Filtro medio",
+      "Erosione morfologica"
+    ],
+    "correctAnswer": "Operatore laplaciano",
+    "explanation": "Enfatizza i bordi agendo sulle alte frequenze, preservando il colore."
+  },
+  {
+    "question": "Nella segmentazione basata sullo spazio RGB l'obiettivo è:",
+    "options": [
+      "Classificare i pixel in base alla tonalità",
+      "Classificare i pixel in una gamma specificata",
+      "Estrarre componenti strutturali",
+      "Ridurre il rumore"
+    ],
+    "correctAnswer": "Classificare i pixel in una gamma specificata",
+    "explanation": "Isola regioni in base a intervalli predefiniti di valori RGB."
+  },
+  {
+    "question": "Nello spazio HSI i risultati di segmentazione sono:",
+    "options": [
+      "Peggiori rispetto a RGB",
+      "Più intuitivi rispetto a RGB",
+      "Equivalenti a CMYK",
+      "Non utilizzabili"
+    ],
+    "correctAnswer": "Più intuitivi rispetto a RGB",
+    "explanation": "La separazione tra tonalità e intensità facilita l'analisi semantica."
+  },
+  {
+    "question": "Nella segmentazione HSI la saturazione è usata come:",
+    "options": [
+      "Componente principale",
+      "Maschera per isolare regioni",
+      "Sostituta della luminosità",
+      "Filtro anti-rumore"
+    ],
+    "correctAnswer": "Maschera per isolare regioni",
+    "explanation": "Aiuta a distinguere aree con colori puri da quelle con colori sbiaditi."
+  },
+  {
+    "question": "Quando si passa dallo spazio RGB a quello HSI se solo un canale RGB è rumoroso:",
+    "options": [
+      "Il rumore resta confinato al canale originale",
+      "Il rumore si distribuisce solo alla componente intensità",
+      "Il rumore si distribuisce a tutte le componenti HSI",
+      "Il rumore viene eliminato automaticamente"
+    ],
+    "correctAnswer": "Il rumore si distribuisce a tutte le componenti HSI",
+    "explanation": "La conversione di spazio colore propaga il rumore a tutte le componenti a causa delle relazioni non lineari tra i modelli."
+  },
+  {
+    "question": "In un’immagine a colori il rumore a grana è:",
+    "options": [
+      "Più visibile che in monocromatico",
+      "Meno visibile che in monocromatico",
+      "Identico al monocromatico",
+      "Sempre eliminabile con filtri mediani"
+    ],
+    "correctAnswer": "Meno visibile che in monocromatico",
+    "explanation": "La percezione cromatica umana maschera parzialmente il rumore rispetto alle immagini in scala di grigi."
+  },
+  {
+    "question": "Nella morfologia la riflessione di un insieme B è definita come:",
+    "options": [
+      "Insieme dei punti (-x, y)",
+      "Insieme dei punti (-x, -y)",
+      "Insieme dei punti (y, x)",
+      "Insieme traslato di un vettore z"
+    ],
+    "correctAnswer": "Insieme dei punti (-x, -y)",
+    "explanation": "Operazione fondamentale per definire trasformazioni come l'erosione."
+  },
+  {
+    "question": "Gli elementi strutturanti (SE) sono:",
+    "options": [
+      "Insiemi casuali per esplorare l'immagine",
+      "Sotto-immagini per analisi locali",
+      "Pattern globali di riferimento",
+      "Filtri frequenziali"
+    ],
+    "correctAnswer": "Sotto-immagini per analisi locali",
+    "explanation": "Definiscono l'intorno di pixel considerato nelle operazioni morfologiche."
+  },
+  {
+    "question": "L'erosione può essere considerata come:",
+    "options": [
+      "Rimozione di dettagli più piccoli dello SE",
+      "Amplificazione dei bordi",
+      "Aggiunta di pixel all'oggetto",
+      "Filtraggio passa-alto"
+    ],
+    "correctAnswer": "Rimozione di dettagli più piccoli dello SE",
+    "explanation": "Operazione che assottiglia gli oggetti in base alla dimensione dell'elemento strutturante."
+  },
+  {
+    "question": "La dilatazione morfologica:",
+    "options": [
+      "Riduce le dimensioni degli oggetti",
+      "Aumenta le dimensioni degli oggetti",
+      "Isola componenti connesse",
+      "Elimina il rumore impulsivo"
+    ],
+    "correctAnswer": "Aumenta le dimensioni degli oggetti",
+    "explanation": "Operazione duale all'erosione, espande i confini degli oggetti."
+  },
+  {
+    "question": "Il processo di apertura è definito come:",
+    "options": [
+      "Erosione seguita da dilatazione",
+      "Dilatazione seguita da erosione",
+      "Erosione ripetuta due volte",
+      "Dilatazione con SE ruotato"
+    ],
+    "correctAnswer": "Erosione seguita da dilatazione",
+    "explanation": "Sequenza che rimuove piccoli oggetti preservando la forma generale."
+  },
+  {
+    "question": "Il processo di chiusura è utile per:",
+    "options": [
+      "Eliminare piccoli buchi negli oggetti",
+      "Aumentare il contrasto",
+      "Ridurre il rumore gaussiano",
+      "Segmentare texture complesse"
+    ],
+    "correctAnswer": "Eliminare piccoli buchi negli oggetti",
+    "explanation": "Operazione duale all'apertura, riempie vuoti e leviga contorni."
+  },
+  {
+    "question": "Un vuoto (Hole) in morfologia è:",
+    "options": [
+      "Una regione di foreground circondata da background",
+      "Una regione di background circondata da foreground",
+      "Un artefatto di campionamento",
+      "Un errore di quantizzazione"
+    ],
+    "correctAnswer": "Una regione di background circondata da foreground",
+    "explanation": "Definizione topologica fondamentale per algoritmi di riempimento."
+  },
+  {
+    "question": "L'algoritmo di riempimento di vuoti utilizza:",
+    "options": [
+      "Erosione e complemento",
+      "Dilatazione e intersezione",
+      "Apertura e chiusura",
+      "Trasformata di Hough"
+    ],
+    "correctAnswer": "Dilatazione e intersezione",
+    "explanation": "Combina operazioni morfologiche per garantire la convergenza."
+  },
+  {
+    "question": "L'algoritmo involucro convesso converge quando:",
+    "options": [
+      "Xₖ = Xₖ₋₁",
+      "Xₖ = Xₖ₋₂",
+      "Xₖ = Xₖ₋ₙ",
+      "Xₖ ≠ Xₖ₋₁"
+    ],
+    "correctAnswer": "Xₖ = Xₖ₋₁",
+    "explanation": "Condizione di convergenza basata sulla stabilità dell'insieme trasformato."
+  },
+  {
+    "question": "I metodi di potatura sono essenziali per:",
+    "options": [
+      "Eliminare componenti spurie dopo la scheletrizzazione",
+      "Aumentare la risoluzione spaziale",
+      "Migliorare il contrasto",
+      "Ridurre il rumore gaussiano"
+    ],
+    "correctAnswer": "Eliminare componenti spurie dopo la scheletrizzazione",
+    "explanation": "Rimuovono ramificazioni indesiderate negli scheletri morfologici."
+  },
+  {
+    "question": "Lo scheletro di un'immagine può essere espresso con:",
+    "options": [
+      "Erosioni e dilatazioni",
+      "Erosioni e aperture",
+      "Aperture e chiusure",
+      "Trasformate di Fourier"
+    ],
+    "correctAnswer": "Erosioni e aperture",
+    "explanation": "Procedura iterativa che preserva la topologia dell'oggetto."
+  },
+  {
+    "question": "Il disco massimo nella scheletrizzazione è:",
+    "options": [
+      "Il più piccolo contenuto nell'oggetto",
+      "Il più grande centrato in un punto dell'oggetto",
+      "Un disco a raggio variabile",
+      "Un artefatto di rumore"
+    ],
+    "correctAnswer": "Il più grande centrato in un punto dell'oggetto",
+    "explanation": "Definisce i punti centrali dello scheletro morfologico."
+  },
+  {
+    "question": "Nell'erosione geodetica l'unione garantisce:",
+    "options": [
+      "Che il risultato sia ≥ all'immagine marker",
+      "Che il risultato sia ≤ all'immagine marker",
+      "La conservazione della forma originale",
+      "L'eliminazione del rumore"
+    ],
+    "correctAnswer": "Che il risultato sia ≤ all'immagine marker",
+    "explanation": "Vincolo per preservare la relazione spaziale con l'immagine maschera."
+  },
+  {
+    "question": "La ricostruzione morfologica si basa su:",
+    "options": [
+      "Dilatazioni/erosioni condizionate",
+      "Trasformate wavelet",
+      "Filtri frequenziali",
+      "Operatori di smoothing"
+    ],
+    "correctAnswer": "Dilatazioni/erosioni condizionate",
+    "explanation": "Tecnica per estrarre componenti connesse preservando la forma."
+  },
+  {
+    "question": "L'apertura in scala di grigio è definita come:",
+    "options": [
+      "Erosione seguita da dilatazione",
+      "Dilatazione seguita da erosione",
+      "Media dei pixel nell'intorno",
+      "Applicazione del laplaciano"
+    ],
+    "correctAnswer": "Erosione seguita da dilatazione",
+    "explanation": "Analogo all'apertura binaria, applicato a immagini in toni di grigio."
+  },
+  {
+    "question": "L’erosione in scala di grigio produce un’immagine:",
+    "options": [
+      "Più scura",
+      "Più chiara",
+      "A contrasto invertito",
+      "Con dettagli enfatizzati"
+    ],
+    "correctAnswer": "Più scura",
+    "explanation": "Sostituisce ogni pixel con il minimo locale, riducendo l'intensità media."
+  },
+  {
+    "question": "Le trasformazioni top-hat e bottom-hat servono per:",
+    "options": [
+      "Estrarre dettagli chiari/scuri su sfondo non uniforme",
+      "Aumentare la saturazione",
+      "Modificare la gamma dinamica",
+      "Ridurre l'aliasing"
+    ],
+    "correctAnswer": "Estrarre dettagli chiari/scuri su sfondo non uniforme",
+    "explanation": "Basate sulla differenza tra immagine originale e sua apertura/chiusura."
+  },
+  {
+    "question": "Nell'individuazione delle discontinuità, la derivata seconda:",
+    "options": [
+      "Evidenzia cambiamenti bruschi",
+      "Smorza i bordi",
+      "Migliora il contrasto",
+      "Aumenta il rumore"
+    ],
+    "correctAnswer": "Evidenzia cambiamenti bruschi",
+    "explanation": "Rileva zero-crossing corrispondenti a transizioni rapide d'intensità."
+  },
+  {
+    "question": "Un edge a roof è associato a:",
+    "options": [
+      "Bordi sfocati",
+      "Linee sottili",
+      "Transizioni graduali",
+      "Punti isolati"
+    ],
+    "correctAnswer": "Bordi sfocati",
+    "explanation": "Modello di edge con transizione graduale tipico di superfici curve."
+  },
+  {
+    "question": "Per ridurre l'aliasing negli edge:",
+    "options": [
+      "Si applica smoothing pre-campionamento",
+      "Si aumenta la risoluzione",
+      "Si usano filtri passa-alto",
+      "Si converte in HSI"
+    ],
+    "correctAnswer": "Si applica smoothing pre-campionamento",
+    "explanation": "Filtro anti-aliasing per limitare le alte frequenze prima del campionamento."
+  },
+  {
+    "question": "L'algoritmo di Canny ottimizza:",
+    "options": [
+      "Localizzazione precisa e basso rumore",
+      "Velocità di elaborazione",
+      "Compressione dell'immagine",
+      "Riduzione della gamma dinamica"
+    ],
+    "correctAnswer": "Localizzazione precisa e basso rumore",
+    "explanation": "Combina smoothing, gradiente e isteresi per bilanciare accuratezza e robustezza."
+  },
+  {
+    "question": "La trasformata di Hough è utilizzata per:",
+    "options": [
+      "Trovare forme geometriche parametriche",
+      "Eliminare il rumore impulsivo",
+      "Aumentare la risoluzione",
+      "Modificare la profondità di colore"
+    ],
+    "correctAnswer": "Trovare forme geometriche parametriche",
+    "explanation": "Rileva linee, cerchi o altre figure tramite accumulo nello spazio dei parametri."
+  },
+  {
+    "question": "Nella segmentazione mediante sogliatura globale:",
+    "options": [
+      "La soglia T è costante per tutta l'immagine",
+      "T dipende dalle coordinate (x,y)",
+      "T viene aggiornata iterativamente",
+      "Si utilizzano solo livelli di grigio"
+    ],
+    "correctAnswer": "La soglia T è costante per tutta l'immagine",
+    "explanation": "Metodo semplice ma efficace per immagini con distribuzione bimodale."
+  },
+  {
+    "question": "Nella procedura di region growing:",
+    "options": [
+      "Si dividono le regioni in base al colore",
+      "Si raggruppano pixel in regioni basate su similarità",
+      "Si applicano solo filtri morfologici",
+      "Si utilizza esclusivamente l'istogramma"
+    ],
+    "correctAnswer": "Si raggruppano pixel in regioni basate su similarità",
+    "explanation": "Algoritmo che unisce pixel vicini con caratteristiche simili (intensità, texture)."
+  },
+  {
+    "question": "Nella segmentazione watershed con marker, i marker interni sono:",
+    "options": [
+      "Aree di sfondo",
+      "Componenti connesse con stessa intensità",
+      "Linee di bordo",
+      "Punti casuali"
+    ],
+    "correctAnswer": "Componenti connesse con stessa intensità",
+    "explanation": "Definiscono le regioni di partenza per la crescita delle bacine idrografiche."
+  },
+  {
+    "question": "La segmentazione region splitting e merging:",
+    "options": [
+      "Divide l'immagine in regioni arbitrarie disgiunte",
+      "Utilizza solo criteri di colore",
+      "Combina divisione iniziale e fusione successiva",
+      "Richiede una soglia fissa"
+    ],
+    "correctAnswer": "Combina divisione iniziale e fusione successiva",
+    "explanation": "Approccio ibrido per ottimizzare omogeneità e connettività."
+  },
+  {
+    "question": "Il soft computing unisce metodologie:",
+    "options": [
+      "Con logica precisa e deterministica",
+      "Basate esclusivamente su reti neurali",
+      "Con precisione sfumata e logica elastica",
+      "Solo per applicazioni militari"
+    ],
+    "correctAnswer": "Con precisione sfumata e logica elastica",
+    "explanation": "Include logica fuzzy, reti neurali e algoritmi probabilistici."
+  },
+  {
+    "question": "L'hard computing:",
+    "options": [
+      "Gestisce incertezza e imprecisione",
+      "Non gestisce incertezza e imprecisione",
+      "È un sottoinsieme del soft computing",
+      "Utilizza solo reti Bayesiane"
+    ],
+    "correctAnswer": "Non gestisce incertezza e imprecisione",
+    "explanation": "Basato su modelli matematici rigidi e deterministici."
+  },
+  {
+    "question": "Un sistema fuzzy mappa gli input:",
+    "options": [
+      "In modo binario",
+      "Con funzioni a gradino",
+      "In modo non lineare e continuo",
+      "Solo per applicazioni grafiche"
+    ],
+    "correctAnswer": "In modo non lineare e continuo",
+    "explanation": "Gestisce sfumature tramite funzioni di appartenenza."
+  },
+  {
+    "question": "La derivata della funzione sigmoide è:",
+    "options": [
+      "σ'(x) = σ(x)(1 + σ(x))",
+      "σ'(x) = σ(x)(1 - σ(x))",
+      "σ'(x) = 1 - σ²(x)",
+      "σ'(x) = e^{-x}"
+    ],
+    "correctAnswer": "σ'(x) = σ(x)(1 - σ(x))",
+    "explanation": "Proprietà fondamentale per l'addestramento delle reti neurali."
+  },
+  {
+    "question": "Il paradigma connessionista si basa su:",
+    "options": [
+      "Interazioni tra unità semplici interconnesse",
+      "Algoritmi simbolici",
+      "Database relazionali",
+      "Fisica quantistica"
+    ],
+    "correctAnswer": "Interazioni tra unità semplici interconnesse",
+    "explanation": "Modelli ispirati al cervello umano (es: reti neurali)."
+  },
+  {
+    "question": "Il potenziale post-sinaptico è:",
+    "options": [
+      "La media semplice degli input",
+      "La media pesata degli input",
+      "Il massimo degli input",
+      "La varianza degli input"
+    ],
+    "correctAnswer": "La media pesata degli input",
+    "explanation": "Somma pesata dei segnali in ingresso a un neurone."
+  },
+  {
+    "question": "Nell'algoritmo di Widrow-Hoff, il learning rate è:",
+    "options": [
+      "Un vettore casuale",
+      "Una costante tra 0 e 1",
+      "Una funzione non lineare",
+      "Un parametro negativo"
+    ],
+    "correctAnswer": "Una costante tra 0 e 1",
+    "explanation": "Controlla l'aggiornamento dei pesi durante l'apprendimento."
+  },
+  {
+    "question": "Il momentum nelle reti MLP serve a:",
+    "options": [
+      "Ridurre le dimensioni del modello",
+      "Filtrare variazioni ad alta frequenza nell'errore",
+      "Aumentare il learning rate",
+      "Eliminare outlier"
+    ],
+    "correctAnswer": "Filtrare variazioni ad alta frequenza nell'errore",
+    "explanation": "Stabilizza la discesa del gradiente considerando passi precedenti."
+  },
+  {
+    "question": "Calcolare Wₒᵤₜ con: Stride=1, Padding=0, Wᵢₙ=35, F=5",
+    "options": [
+      "32",
+      "31",
+      "30",
+      "33"
+    ],
+    "correctAnswer": "31",
+    "explanation": "Formula: Wₒᵤₜ = (Wᵢₙ - F + 2P)/S + 1 = (35 - 5)/1 + 1 = 31."
+  },
+  {
+    "question": "L'interazione sparsa nelle CNN permette:",
+    "options": [
+      "Aumentare le dimensioni del kernel",
+      "Ridurre i parametri da apprendere",
+      "Modificare la funzione di attivazione",
+      "Eliminare i livelli fully-connected"
+    ],
+    "correctAnswer": "Ridurre i parametri da apprendere",
+    "explanation": "Connessioni locali invece che globali per efficienza computazionale."
+  },
+  {
+    "question": "Quale NON è una proprietà delle CNN?",
+    "options": [
+      "Invarianza a traslazioni",
+      "Condivisione dei parametri",
+      "Interazione sparsa",
+      "Apprendimento non supervisionato"
+    ],
+    "correctAnswer": "Apprendimento non supervisionato",
+    "explanation": "Le CNN richiedono tipicamente supervisione per l'addestramento."
+  },
+  {
+    "question": "La convoluzione nelle CNN è:",
+    "options": [
+      "Un'operazione lineare per estrarre features",
+      "Una tecnica di compressione",
+      "Un metodo di clustering",
+      "Un tipo di normalizzazione"
+    ],
+    "correctAnswer": "Un'operazione lineare per estrarre features",
+    "explanation": "Applica filtri locali per rilevare pattern spaziali."
+  },
+  {
+    "question": "Nella morfologia la riflessione di un insieme B è definita come:",
+    "options": [
+      "Insieme dei punti (-x, y)",
+      "Insieme dei punti (-x, -y)",
+      "Insieme dei punti (y, x)",
+      "Insieme traslato di un vettore z"
+    ],
+    "correctAnswer": "Insieme dei punti (-x, -y)",
+    "explanation": "La riflessione morfologica inverte le coordinate (x,y) di tutti i punti dell'insieme B, generando una versione speculare rispetto all'origine."
+  },
+  {
+    "question": "L'operazione di dilatazione:",
+    "options": [
+      "Marca gli oggetti in un'immagine binaria",
+      "Assottiglia gli oggetti",
+      "Accresce o ispessisce gli oggetti",
+      "Ha effetti simili al filtraggio low-pass"
+    ],
+    "correctAnswer": "Accresce o ispessisce gli oggetti",
+    "explanation": "La dilatazione espande i confini degli oggetti nell'immagine, aggiungendo pixel in base all'elemento strutturante utilizzato."
+  },
+  {
+    "question": "Nell'individuazione delle discontinuità la derivata seconda:",
+    "options": [
+      "Evidenzia cambiamenti bruschi",
+      "Smorza i bordi",
+      "Migliora il contrasto",
+      "Aumenta il rumore"
+    ],
+    "correctAnswer": "Evidenzia cambiamenti bruschi",
+    "explanation": "La derivata seconda rileva transizioni rapide nell'intensità luminosa, enfatizzando bordi e dettagli sottili attraverso lo zero-crossing."
+  },
+  {
+    "question": "Il soft computing unisce metodologie 'soft' nel senso che:",
+    "options": [
+      "La loro precisione è sfumata e la logica è elastica",
+      "La loro precisione è discreta e la logica è rigida",
+      "La loro precisione è sfumata e la logica è rigida",
+      "La loro precisione è discreta e la logica è elastica"
+    ],
+    "correctAnswer": "La loro precisione è sfumata e la logica è elastica",
+    "explanation": "Il soft computing gestisce incertezza e approssimazione, utilizzando modelli flessibili come reti neurali e logica fuzzy."
+  },
+  {
+    "question": "La trasformata di Hough, dati n punti in un’immagine, permette di trovare dei sottoinsiemi che si trovano su:",
+    "options": [
+      "Poligoni",
+      "Linee rette",
+      "Curve qualsiasi",
+      "Regioni chiuse"
+    ],
+    "correctAnswer": "Linee rette",
+    "explanation": "La trasformata di Hough identifica pattern geometrici parametrici, come linee o cerchi, aggregando punti allineati nello spazio dei parametri."
+  },
+  {
+    "question": "Nella procedura di region growing:",
+    "options": [
+      "Si dividono le regioni in base al colore",
+      "Si raggruppano pixel in regioni basate su similarità",
+      "Si applicano solo filtri morfologici",
+      "Si utilizza esclusivamente l'istogramma"
+    ],
+    "correctAnswer": "Si raggruppano pixel in regioni basate su similarità",
+    "explanation": "Il region growing unisce pixel vicini con caratteristiche simili (es. intensità, colore) per formare regioni omogenee."
+  },
+  {
+    "question": "Il rumore a grana fine ha la tendenza:",
+    "options": [
+      "Ad essere più evidente in immagini a colori",
+      "Ad essere meno evidente in immagini a colori",
+      "Ad essere nullo in immagini a colori",
+      "Nessuna delle precedenti"
+    ],
+    "correctAnswer": "Ad essere meno evidente in immagini a colori",
+    "explanation": "La percezione cromatica umana maschera meglio il rumore fine rispetto alle immagini in scala di grigi."
+  },
+  {
+    "question": "L'algoritmo involucro convesso converge quando:",
+    "options": [
+      "Xₖ = Xₖ₋₁",
+      "Xₖ = Xₖ₋₂",
+      "Xₖ = Xₖₙ",
+      "Xₖ ≠ Xₖ₋₁"
+    ],
+    "correctAnswer": "Xₖ = Xₖ₋₁",
+    "explanation": "La convergenza avviene quando l'insieme non cambia più tra un'iterazione e la successiva, raggiungendo stabilità."
+  },
+  {
+    "question": "Nelle CNN l'interazione sparsa permette di:",
+    "options": [
+      "Aumentare le dimensioni del kernel",
+      "Ridurre i parametri da apprendere",
+      "Modificare la funzione di attivazione",
+      "Eliminare i livelli fully-connected"
+    ],
+    "correctAnswer": "Ridurre i parametri da apprendere",
+    "explanation": "Le connessioni locali (non globali) riducono il numero di pesi, migliorando efficienza computazionale."
+  },
+  {
+    "question": "La fase secondo la forma polare della trasformata di Fourier 2D corrisponde:",
+    "options": [
+      "A informazioni sull'intensità",
+      "A informazioni sulla posizione degli oggetti",
+      "A informazioni sulla frequenza",
+      "Nessuna delle precedenti"
+    ],
+    "correctAnswer": "A informazioni sulla posizione degli oggetti",
+    "explanation": "La fase della trasformata di Fourier codifica la disposizione spaziale delle strutture nell'immagine."
+  },
+  {
+    "question": "Il processo di apertura può anche essere considerato come:",
+    "options": [
+      "Erosione seguita da dilatazione",
+      "Dilatazione seguita da erosione",
+      "Erosione ripetuta due volte",
+      "Dilatazione con SE ruotato"
+    ],
+    "correctAnswer": "Erosione seguita da dilatazione",
+    "explanation": "L'apertura rimuove piccoli oggetti e leviga i contorni applicando prima erosione e poi dilatazione con lo stesso elemento strutturante."
+  },
+  {
+    "question": "Un vuoto (Hole) in morfologia è definito come:",
+    "options": [
+      "Una regione di foreground circondata da background",
+      "Una regione di background circondata da foreground",
+      "Un artefatto di campionamento",
+      "Un errore di quantizzazione"
+    ],
+    "correctAnswer": "Una regione di background circondata da foreground",
+    "explanation": "Un hole è un'area di sfondo completamente racchiusa da pixel di primo piano, formando una cavità."
+  },
+  {
+    "question": "La trasformazione Hit-or-Miss è fondamentale per:",
+    "options": [
+      "Individuare gli sfondi",
+      "Individuare i contorni",
+      "Individuare forme specifiche",
+      "Ridurre il rumore"
+    ],
+    "correctAnswer": "Individuare forme specifiche",
+    "explanation": "Hit-or-Miss rileva pattern precisi combinando erosioni con elementi strutturanti complementari."
+  },
+  {
+    "question": "Nella segmentazione watershed con marker, i marker interni sono:",
+    "options": [
+      "Aree di sfondo",
+      "Componenti connesse con stessa intensità",
+      "Linee di bordo",
+      "Punti casuali"
+    ],
+    "correctAnswer": "Componenti connesse con stessa intensità",
+    "explanation": "I marker interni definiscono regioni di partenza omogenee per la crescita delle bacine idrografiche."
+  },
+  {
+    "question": "Il metodo di region splitting e merging:",
+    "options": [
+      "Divide l'immagine in regioni arbitrarie disgiunte",
+      "Utilizza solo criteri di colore",
+      "Combina divisione iniziale e fusione successiva",
+      "Richiede una soglia fissa"
+    ],
+    "correctAnswer": "Combina divisione iniziale e fusione successiva",
+    "explanation": "Divide l'immagine in blocchi, poi fonde o separa le regioni in base a omogeneità e connettività."
+  },
+  {
+    "question": "Nell'algoritmo di Canny, l'isteresi serve a:",
+    "options": [
+      "Filtrare il rumore",
+      "Collegare edge deboli a edge forti",
+      "Calcolare il gradiente",
+      "Sfocare l'immagine"
+    ],
+    "correctAnswer": "Collegare edge deboli a edge forti",
+    "explanation": "L'isteresi utilizza due soglie per preservare bordi continui, collegando pixel deboli vicini a quelli forti."
+  },
+  {
+    "question": "La derivata della funzione sigmoide σ(x) è:",
+    "options": [
+      "σ'(x) = σ(x)(1 + σ(x))",
+      "σ'(x) = σ(x)(1 - σ(x))",
+      "σ'(x) = 1 - σ²(x)",
+      "σ'(x) = e^{-x}"
+    ],
+    "correctAnswer": "σ'(x) = σ(x)(1 - σ(x))",
+    "explanation": "La derivata della sigmoide è efficiente da calcolare ed è fondamentale per l'addestramento delle reti neurali."
+  },
+  {
+    "question": "Nelle CNN, la condivisione dei parametri si riferisce a:",
+    "options": [
+      "Utilizzare lo stesso kernel per tutto l'input",
+      "Condividere pesi tra layer diversi",
+      "Utilizzare kernel diversi per ogni regione",
+      "Nessuna delle precedenti"
+    ],
+    "correctAnswer": "Utilizzare lo stesso kernel per tutto l'input",
+    "explanation": "I filtri (kernel) vengono applicati in modo convoluzionale a tutte le posizioni, riducendo i parametri."
+  },
+  {
+    "question": "La trasformata di Fourier 2D di un'immagine campionata è:",
+    "options": [
+      "Non periodica",
+      "Periodica con repliche infinite",
+      "Limitata alla frequenza di Nyquist",
+      "Sempre reale"
+    ],
+    "correctAnswer": "Periodica con repliche infinite",
+    "explanation": "Il campionamento crea uno spettro periodico, con repliche separate dalla frequenza di campionamento."
+  },
+  {
+    "question": "L'aliasing nelle immagini è causato da:",
+    "options": [
+      "Campionamento insufficiente",
+      "Quantizzazione eccessiva",
+      "Filtraggio passa-alto",
+      "Compressione lossless"
+    ],
+    "correctAnswer": "Campionamento insufficiente",
+    "explanation": "Violazione del teorema di Nyquist: frequenze alte si mascherano come basse se campionate male."
+  },
+  {
+    "question": "Il filtraggio omomorfico viene utilizzato per:",
+    "options": [
+      "Separare illuminazione e riflettività",
+      "Aumentare la saturazione",
+      "Ridurre la risoluzione",
+      "Eliminare il rumore impulsivo"
+    ],
+    "correctAnswer": "Separare illuminazione e riflettività",
+    "explanation": "Lavora nel dominio logaritmico per correggere illuminazione non uniforme migliorando il contrasto."
+  },
+  {
+    "question": "Nello spazio HSI, la componente I (intensità):",
+    "options": [
+      "Contiene informazioni cromatiche",
+      "È analoga alla luminosità",
+      "Definisce la tonalità",
+      "È ridondante con la saturazione"
+    ],
+    "correctAnswer": "È analoga alla luminosità",
+    "explanation": "La componente I rappresenta la luminosità, separata dalle informazioni di colore (H e S)."
+  }
+]
+

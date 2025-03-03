@@ -17,7 +17,7 @@ export const getAiAnswer = async (
   question: string,
   options: string[],
   model: string = "gpt-3.5-turbo",
-  maxTokens: number = 100
+  maxTokens: number = 1000
 ): Promise<{ text: string; letter?: string }> => { // Modificato il return type
   const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
     // Modifica il system message

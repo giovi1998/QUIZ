@@ -29,18 +29,38 @@ const SPECIAL_CHARS_MAP: { [key: string]: string } = {
   'π': 'pi',
   'Π': 'pi',
   'λ': 'lambda',
-  'γ': 'phi',
+  'γ': 'gamma',
   'ϕ': 'phi',
   '∫': 'integral',
-  '∑': 'sigma',
-  '∞': 'infinity'
-};
+  '∞': 'infinity',
+  '∈': 'e',
+  'α': 'alpha',
+  'β': 'beta',
+  'ε': 'epsilon',
+  'ζ': 'zeta',
+  'η': 'eta',
+  'θ': 'theta',
+  'ι': 'iota',
+  'κ': 'kappa',
+  'μ': 'mu',
+  'ν': 'nu',
+  'ξ': 'xi',
+  'ο': 'omicron',
+  'ρ': 'rho',
+  'σ': 'sigma',
+  'τ': 'tau',
+  'υ': 'upsilon',
+  'φ': 'phi',
+  'χ': 'chi',
+  'ψ': 'psi',
+  'ω': 'omega'
+}
 
 const sanitizeText = (text: string) => {
   return text
     .replace(/[\n\r\x00-\x1F\x7F-\x9F]/g, ' ') // Rimuove caratteri di controllo
     .replace(
-      /[≥≤−×÷≠≈±Δ→•○▪▸⚠⚠️δλγϕΩΣπΠ∫∞\u26A0-\u26FF\uFE00-\uFE0F]/g,
+      /[≥≤−×÷≠≈±Δ→•○▪▸⚠⚠️δλγϕΩΣπΠ∫∞∈αβεζηθικμνξορστυφχψω\u26A0-\u26FF\uFE00-\uFE0F]/g,
       (match) => (SPECIAL_CHARS_MAP.hasOwnProperty(match) ? SPECIAL_CHARS_MAP[match] : '')
     );
 };
@@ -116,7 +136,7 @@ export async function generatePdf(questions: QuestionFromPdf[]) {
         (question.type === 'multiple-choice'
           ? question.options.length * 18 + 18 + (question.explanation ? 18 : 0)
           : 0) + //options + correctAnswer and explanation
-        (question.type === 'open' ? 18 : 0) + //openAnswer
+        (question.type === 'open' ? 18 + 54 : 0) + //openAnswer + margine
         36 + // Spacing between questions
         (question.lecture !== currentLecture ? 36 + 18 : 0); //Space for the lecture + question title
         
@@ -134,10 +154,13 @@ export async function generatePdf(questions: QuestionFromPdf[]) {
           printedLectures.add(currentLecture);
         }
       }
+      
+      const questionLines = question.question.split(/\r?\n/);
 
       // Formattazione della domanda
-      const qText = question.question.replace(/^\d+\.?\s*/, '').trim();
-      y -= addText(qText, margin, y, true) + 18;
+      for (const qText of questionLines) {
+          y -= addText(qText.replace(/^\d+\.?\s*/, '').trim(), margin, y, true) + 18;
+      }
 
       // Aggiunta opzioni
       if (question.type === 'multiple-choice') {
@@ -170,9 +193,10 @@ export async function generatePdf(questions: QuestionFromPdf[]) {
       } else if (question.type === 'open') {
         // Per domande aperte
         if (question.openAnswer) {
-          y -= addText(`Risposta: ${question.openAnswer}`, margin, y) + 18;
+          y -= addText(`Risposta: ${question.openAnswer}`, margin, y) + 18 + 36; // Aggiunto spazio di 36 tra risposta e domanda successiva
         } else {
           y -= addText('⚠️ Risposta aperta non disponibile', margin, y, true) + 18;
+          y -= 36;
         }
       }
 
