@@ -14,6 +14,7 @@ const SPECIAL_CHARS_MAP: { [key: string]: string } = {
   '≈': '≈',
   '±': '+/-',
   '': '',
+  '�': '',
   '–': '-',
   '—': '-',
   'Δ': 'Delta',
@@ -105,13 +106,17 @@ async function processPdfText(text: string): Promise<QuestionFromPdf[]> {
     }
 
     console.log(`🚀 Elaborazione ${lecture}`);
-    const questionMatches = [...lectureContent.matchAll(/(\d{2}\.)\s+([\s\S]*?)(?=\n\d{2}\.|\nLezione\s+\d+|$)/g)];
+    const questionMatches = [...lectureContent.matchAll(
+      /(\d{2}\.)\s+((?:.(?!\d{2}\.|\nLezione\s+\d+))*)/gis
+    )];
     console.log(`⚠️ ${lecture} contiene ${questionMatches.length} domande`);
 
     for (const qMatch of questionMatches) {
       const [_, qNumber, qBody] = qMatch;
-      const lines = qBody.split('\n').filter(l => l.trim() !== '');
-
+      const lines = qBody.split('\n')
+      .map(line => line.trim())
+      .filter(line => line && !/^\d+$/.test(line)); // Esclude numeri solitari
+      console.log("Raw lines before filtering:", lines);
       if (lines.length === 0) continue;
 
       const questionNumber = qNumber.replace(/\.$/g, '').padStart(3, '0'); //remove . and pad to 3 digit
@@ -123,11 +128,9 @@ async function processPdfText(text: string): Promise<QuestionFromPdf[]> {
       console.log(`▸ Domanda ${questionNumber}: ${questionText}`);
       const isOpenQuestion = /descrivere|spiegare|fornire/i.test(questionText);
       
-      // Rimozione di eventuali header indesiderati
       const cleanedLines = lines.filter(line =>
-        !/Set Domande:|©|Data Stampa|Lezione \d{3}|COMPUTER VISION|INGEGNERIA|Docente:|Randieri Cristian/i.test(line)
+        !/^(Set Domande:|©|Data Stampa|Lezione \d{3}|Docente:|Suraci Vincenzo|Randieri Cristian)/i.test(line)
       );
-
       // Estrazione delle opzioni (solo per domande a risposta chiusa)
       const options = !isOpenQuestion
         ? cleanedLines.slice(1)
