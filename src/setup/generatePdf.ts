@@ -54,8 +54,8 @@ const SPECIAL_CHARS_MAP: { [key: string]: string } = {
   'χ': 'chi',
   'ψ': 'psi',
   'ω': 'omega',
-  '⊕':  ''
-}
+  '⊕': ''
+};
 
 const sanitizeText = (text: string) => {
   return text
@@ -77,9 +77,9 @@ export async function generatePdf(questions: QuestionFromPdf[]) {
     const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     const pageWidth = 595;
     const pageHeight = 842;
-    const margin = 50; // Impostazione del margine (alto, basso, sinistro, destro)
+    const margin = 50; // Impostazione del margine
     let page = pdfDoc.addPage([pageWidth, pageHeight]);
-    let y = pageHeight - margin; // Start from the top minus the margin
+    let y = pageHeight - margin; // Inizia dall'alto
     let currentPage = 1;
 
     const splitLines = (text: string, maxWidth: number = pageWidth - 2 * margin) => {
@@ -104,24 +104,31 @@ export async function generatePdf(questions: QuestionFromPdf[]) {
       return lines;
     };
 
-    const addText = (text: string, x: number, y: number, bold = false, maxWidth: number = pageWidth - 2 * margin) => {
-        const lines = splitLines(text, maxWidth);
-        const fontToUse = bold ? boldFont : font;
-        const lineHeight = 18; // Altezza di ogni linea
-        const totalHeight = lines.length * lineHeight;
+    const addText = (
+      text: string,
+      x: number,
+      y: number,
+      bold = false,
+      maxWidth: number = pageWidth - 2 * margin
+    ) => {
+      const lines = splitLines(text, maxWidth);
+      const fontToUse = bold ? boldFont : font;
+      const lineHeight = 18; // Altezza di ogni linea
+      const totalHeight = lines.length * lineHeight;
 
-        lines.forEach((line, index) => {
-            page.drawText(line, {
-                x,
-                y: y - index * lineHeight,
-                size: 12,
-                font: fontToUse,
-                color: rgb(0, 0, 0),
-            });
+      lines.forEach((line, index) => {
+        page.drawText(line, {
+          x,
+          y: y - index * lineHeight,
+          size: 12,
+          font: fontToUse,
+          color: rgb(0, 0, 0),
         });
-        return totalHeight;
+      });
+      return totalHeight;
     };
 
+    // Ordina le domande per lezione e numero
     const sortedQuestions = questions.sort((a, b) => {
       const lecA = parseInt(a.lecture.split(' ')[1]);
       const lecB = parseInt(b.lecture.split(' ')[1]);
@@ -130,40 +137,44 @@ export async function generatePdf(questions: QuestionFromPdf[]) {
 
     let currentLecture = '';
     const printedLectures = new Set<string>();
+    let lectureQuestionCount = 1; // Contatore per numerare le domande per ogni lezione
 
     for (const question of sortedQuestions) {
-        const spaceNeededForQuestion =
-        18 + // question text
-        (question.type === 'multiple-choice'
-          ? question.options.length * 18 + 18 + (question.explanation ? 18 : 0)
-          : 0) + //options + correctAnswer and explanation
-        (question.type === 'open' ? 18 + 54 : 0) + //openAnswer + margine
-        36 + // Spacing between questions
-        (question.lecture !== currentLecture ? 36 + 18 : 0); //Space for the lecture + question title
-        
-        // Check if there is enough space for the next question, including margins
-        if (y - spaceNeededForQuestion < margin) {
-            page = pdfDoc.addPage([pageWidth, pageHeight]);
-            y = pageHeight - margin;
-            currentPage++;
-        }
-
+      // Se cambio lezione, resetto il contatore delle domande
       if (question.lecture !== currentLecture) {
         currentLecture = question.lecture;
-        if (!printedLectures.has(currentLecture)) {
-          y -= addText(`${question.lecture}`, margin, y, true) + 36;
-          printedLectures.add(currentLecture);
-        }
-      }
-      
-      const questionLines = question.question.split(/\r?\n/);
-
-      // Formattazione della domanda
-      for (const qText of questionLines) {
-          y -= addText(qText.replace(/^\d+\.?\s*/, '').trim(), margin, y, true) + 18;
+        lectureQuestionCount = 1;
       }
 
-      // Aggiunta opzioni
+      const spaceNeededForQuestion =
+        18 + // spazio per il testo della domanda (prefisso + domanda)
+        (question.type === 'multiple-choice'
+          ? question.options.length * 18 + 18 + (question.explanation ? 18 : 0)
+          : 0) + // spazio per opzioni, risposta ed eventuale spiegazione
+        (question.type === 'open' ? 18 + 54 : 0) + // spazio per domande aperte
+        36 + // Spazio tra le domande
+        (question.lecture !== currentLecture ? 36 + 18 + 36 : 0); // Spazio per il titolo della lezione, se necessario
+
+      // Verifica se c'è spazio sufficiente sulla pagina
+      if (y - spaceNeededForQuestion < margin) {
+        page = pdfDoc.addPage([pageWidth, pageHeight]);
+        y = pageHeight - margin;
+        currentPage++;
+      }
+
+      // Se è una nuova lezione, stampa il titolo della lezione
+      if (!printedLectures.has(currentLecture)) {
+        // Ad esempio, stampa "Lezione 001"
+        const lessonText = `Lezione ${currentLecture.split(" ")[1]}`;
+        y -= addText(lessonText, margin, y, true) + 36;
+        printedLectures.add(currentLecture);
+      }
+
+      // Unisce il prefisso e il testo della domanda in una sola stringa
+      const fullQuestionText = `${question.type === "multiple-choice" ? `Domanda multipla ${lectureQuestionCount}:` : `Domanda aperta ${lectureQuestionCount}:`} ${question.question.replace(/^\d+\.?\s*/, '').trim()}`;
+      y -= addText(fullQuestionText, margin, y, true) + 18;
+
+      // Aggiunta delle opzioni (per domande a scelta multipla)
       if (question.type === 'multiple-choice') {
         question.options.forEach((option, i) => {
           const optText = `${String.fromCharCode(65 + i)}) ${option}`;
@@ -171,11 +182,11 @@ export async function generatePdf(questions: QuestionFromPdf[]) {
         });
         y -= 18;
 
-        // Visualizzazione della risposta corretta comprensiva della lettera, se disponibile
+        // Visualizzazione della risposta corretta
         if (question.correctAnswer && question.correctAnswer !== 'Errore: Risposta non determinabile') {
           let answerDisplay;
           if (question.answerLetter) {
-            answerDisplay = question.answerLetter; // Mostra solo la lettera
+            answerDisplay = question.answerLetter;
           } else {
             answerDisplay = question.correctAnswer;
           }
@@ -184,7 +195,6 @@ export async function generatePdf(questions: QuestionFromPdf[]) {
             y -= addText(`Risposta corretta: ${question.correctAnswer}`, margin, y, true) + 18;
           }
           // Aggiunta della spiegazione, se presente
-
           if (question.explanation && !question.explanation.startsWith(question.correctAnswer)) {
             y -= addText(`Spiegazione: ${question.explanation}`, margin, y) + 18;
           }
@@ -194,7 +204,7 @@ export async function generatePdf(questions: QuestionFromPdf[]) {
       } else if (question.type === 'open') {
         // Per domande aperte
         if (question.openAnswer) {
-          y -= addText(`Risposta: ${question.openAnswer}`, margin, y) + 18 + 36; // Aggiunto spazio di 36 tra risposta e domanda successiva
+          y -= addText(`Risposta: ${question.openAnswer}`, margin, y) + 18 + 36;
         } else {
           y -= addText('⚠️ Risposta aperta non disponibile', margin, y, true) + 18;
           y -= 36;
@@ -203,6 +213,7 @@ export async function generatePdf(questions: QuestionFromPdf[]) {
 
       // Spaziatura tra domande
       y -= 36;
+      lectureQuestionCount++;
     }
 
     const pdfBytes = await pdfDoc.save();
@@ -216,3 +227,4 @@ export async function generatePdf(questions: QuestionFromPdf[]) {
     throw error;
   }
 }
+export default generatePdf;
