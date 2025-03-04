@@ -1,8 +1,9 @@
+// components/ActiveQuizScreen.tsx
 import React from "react";
 import ProgressBar from "../components/common/ProgressBar.tsx";
 import TimerDisplay from "../components/common/TimerDisplay.tsx";
 import QuestionInfo from "../components/common/QuestionInfo.tsx";
-import ExplanationSection from "../components/ExplanationSection.tsx"; 
+import ExplanationSection from "../components/ExplanationSection.tsx";
 import type { Question } from "../components/type/Types.tsx";
 
 const styles = `
@@ -29,32 +30,31 @@ const styles = `
 type OptionSquareProps = {
   option: string;
   selected: boolean;
-  onSelect: () => void;
+  onSelect: (option: string) => void;
 };
 
-const OptionSquare: React.FC<OptionSquareProps> = ({
-  option,
-  selected,
-  onSelect,
-}) => {
+// Function to normalize text
+const normalizeText = (text: string): string => {
+  return text.replace(/\s+/g, ' ').trim();
+};
+
+const OptionSquare: React.FC<OptionSquareProps> = ({ option, selected, onSelect }) => {
+  const normalizedOption = normalizeText(option);
   return (
     <div
       className="flex items-center cursor-pointer group w-full"
-      onClick={onSelect}
+      onClick={() => onSelect(normalizedOption)}
     >
       <div
         className={`flex items-center w-full p-2 sm:p-3 rounded-md transition-all duration-200
-        ${
-          selected
-            ? "highlighted border-yellow-400"
-            : "hover:bg-gray-50"
-        }`}
+          ${selected ? "highlighted border-yellow-400" : "hover:bg-gray-50"}`}
       >
         <span
-          className={`text-base sm:text-lg relative z-10 flex-1
-          ${selected ? "text-gray-800 font-medium" : "text-gray-700"}`}
+          className={`text-base sm:text-lg relative z-10 flex-1 ${
+            selected ? "text-gray-800 font-medium" : "text-gray-700"
+          }`}
         >
-          {option}
+          {normalizedOption}
         </span>
       </div>
     </div>
@@ -111,12 +111,11 @@ const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
         )}
       </div>
 
-      {/* QuestionInfo ora visualizza il punteggio dinamico */}
       <QuestionInfo
         currentQuestionIndex={currentQuestionIndex}
         totalQuestions={totalQuestions}
         className="flex-col sm:flex-row items-start sm:items-center"
-        score={score} // Pass the score to QuestionInfo
+        score={score}
       />
 
       <div className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 leading-tight">
@@ -128,12 +127,8 @@ const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
           <OptionSquare
             key={idx}
             option={option}
-            selected={selectedAnswer === option}
-            onSelect={() => {
-              if (!showExplanation) {
-                handleAnswer(option);
-              }
-            }}
+            selected={selectedAnswer === normalizeText(option)} // Confronta le opzioni normalizzate
+            onSelect={handleAnswer}
           />
         ))}
       </div>
@@ -141,8 +136,8 @@ const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
       {showExplanation && (
         <ExplanationSection
           selectedAnswer={selectedAnswer}
-          correctAnswer={question.correctAnswer}
-          explanation={question.explanation}
+          correctAnswer={normalizeText(question.correctAnswer)} // Normalizza anche la risposta corretta
+          explanation={normalizeText(question.explanation)} // Normalizza la spiegazione
           nextQuestion={nextQuestion}
         />
       )}

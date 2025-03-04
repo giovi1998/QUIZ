@@ -56,33 +56,46 @@ const QuizManager = ({
     }
   }, [timerActive, timeRemaining]);
 
-  const handleAnswer = useCallback((answer: string | null) => {
-    console.log("[QuizManager] handleAnswer called with:", answer);
-    if (!showExplanation) {
-      setSelectedAnswer(answer);
-      setShowExplanation(true);
-      if (answer && questions[currentQuestionIndex].correctAnswer === answer) {
-        console.log("[QuizManager] Correct answer!");
-        setScore((prevScore) => {
-          const newScore = prevScore + 1;
-          console.log("[QuizManager] Score updated:", newScore);
-          return newScore;
-        });
-        setAnswers((prev) => {
-          const newAnswers = [...prev];
-          newAnswers[currentQuestionIndex] = answer;
-          return newAnswers;
-        });
-      } else {
-        console.log("[QuizManager] Incorrect answer");
-        setAnswers((prev) => {
-          const newAnswers = [...prev];
-          newAnswers[currentQuestionIndex] = answer || "Nessuna risposta";
-          return newAnswers;
-        });
+  // Function to normalize answers for comparison
+  const normalizeAnswer = (answer: string): string => {
+    return answer.replace(/[^a-z0-9]/gi, "").toLowerCase();
+  };
+  // Function to check if the selected answer is correct
+  const checkAnswer = (selectedAnswer: string, correctAnswer: string): boolean => {
+    return normalizeAnswer(selectedAnswer) === normalizeAnswer(correctAnswer);
+  };
+
+  const handleAnswer = useCallback(
+    (answer: string | null) => {
+      console.log("[QuizManager] handleAnswer called with:", answer);
+      if (!showExplanation) {
+        const currentQuestion = questions[currentQuestionIndex];
+        setSelectedAnswer(answer);
+        setShowExplanation(true);
+        if (answer && checkAnswer(answer, currentQuestion.correctAnswer)) {
+          console.log("[QuizManager] Correct answer!");
+          setScore((prevScore) => {
+            const newScore = prevScore + 1;
+            console.log("[QuizManager] Score updated:", newScore);
+            return newScore;
+          });
+           setAnswers((prev) => {
+             const newAnswers = [...prev];
+             newAnswers[currentQuestionIndex] = answer || "Nessuna risposta";
+             return newAnswers;
+           });
+        } else {
+          console.log("[QuizManager] Incorrect answer");
+          setAnswers((prev) => {
+            const newAnswers = [...prev];
+            newAnswers[currentQuestionIndex] = answer || "Nessuna risposta";
+            return newAnswers;
+          });
+        }
       }
-    }
-  }, [showExplanation, currentQuestionIndex, questions]);
+    },
+    [showExplanation, currentQuestionIndex, questions]
+  );
 
   useEffect(() => {
     console.log("[QuizManager] useEffect - quizStatus changed to:", quizStatus);
@@ -149,7 +162,7 @@ const QuizManager = ({
     console.log("[QuizManager] generateReport called");
     const totalQuestions = questions.length;
     const correctAnswers = answers.filter((answer, index) => {
-      return answer === questions[index].correctAnswer;
+      return checkAnswer(answer,questions[index].correctAnswer);
     }).length;
     const percentage =
       totalQuestions > 0
@@ -165,7 +178,7 @@ const QuizManager = ({
             }))
             .filter(
               (_, idx) =>
-                answers[idx] && answers[idx] !== questions[idx].correctAnswer
+                answers[idx] && !checkAnswer(answers[idx], questions[idx].correctAnswer)
             )
         : [];
     console.log("[QuizManager] Report generated");
@@ -223,6 +236,7 @@ const QuizManager = ({
 
   return <>{content}</>;
 };
+
 export default QuizManager;
 
 export type QuizManagerType = {
