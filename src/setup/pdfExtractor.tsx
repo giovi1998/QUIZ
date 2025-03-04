@@ -32,6 +32,8 @@ const SPECIAL_CHARS_MAP: { [key: string]: string } = {
   'Π': 'pi'
 };
 
+const skipRegex = /^Powered by TCPDF \(www\.tcpdf\.org\)$/;
+
 
 export interface QuestionFromPdf {
   question: string;
@@ -60,11 +62,19 @@ export async function extractFromPdf(file: File): Promise<QuestionFromPdf[]> {
     }).promise;
 
     let fullText = '';
+     const skipRegex = /^Powered by TCPDF \(www\.tcpdf\.org\)$/;
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i);
       const textContent = await page.getTextContent();
       const pageText = textContent.items
-        .map(item => (item as TextItem).str)
+        .map(item => {
+          const textItem = item as { str: string };
+             if (skipRegex.test(textItem.str)) {
+                  console.log(`⏩ Riga saltata perché corrisponde a "Powered by TCPDF" in pagina ${i}`);
+                  return ""; // Skip the line
+                }
+            return textItem.str
+        })
         .join('\n');
       fullText += pageText + '\n\n';
       console.log(`✅ Pagina ${i} processata con successo`);
@@ -76,7 +86,7 @@ export async function extractFromPdf(file: File): Promise<QuestionFromPdf[]> {
     console.error('🚨 Errore critico durante l\'estrazione:', error);
     throw new Error(`Estrazione fallita: ${error instanceof Error ? error.message : 'Errore sconosciuto'}`);
   }
-}
+};
 
 async function processPdfText(text: string): Promise<QuestionFromPdf[]> {
   const cleanedText = text

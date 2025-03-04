@@ -77,9 +77,10 @@ export async function generatePdf(questions: QuestionFromPdf[]) {
     const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     const pageWidth = 595;
     const pageHeight = 842;
-    const margin = 50; // Impostazione del margine
+    const margin = 50; // Margine per lato e in alto
+    const bottomMargin = 50; // Margine extra in fondo al documento
     let page = pdfDoc.addPage([pageWidth, pageHeight]);
-    let y = pageHeight - margin; // Inizia dall'alto
+    let y = pageHeight - margin; // Inizio dalla parte alta
     let currentPage = 1;
 
     const splitLines = (text: string, maxWidth: number = pageWidth - 2 * margin) => {
@@ -147,18 +148,18 @@ export async function generatePdf(questions: QuestionFromPdf[]) {
       }
 
       const spaceNeededForQuestion =
-        18 + // spazio per il testo della domanda (prefisso + domanda)
+        18 + // Spazio per il testo della domanda (prefisso + domanda)
         (question.type === 'multiple-choice'
           ? question.options.length * 18 + 18 + (question.explanation ? 18 : 0)
-          : 0) + // spazio per opzioni, risposta ed eventuale spiegazione
-        (question.type === 'open' ? 18 + 54 : 0) + // spazio per domande aperte
+          : 0) + // Spazio per opzioni, risposta ed eventuale spiegazione
+        (question.type === 'open' ? 18 + 54 : 0) + // Spazio per domande aperte
         36 + // Spazio tra le domande
         (question.lecture !== currentLecture ? 36 + 18 + 36 : 0); // Spazio per il titolo della lezione, se necessario
 
-      // Verifica se c'è spazio sufficiente sulla pagina
-      if (y - spaceNeededForQuestion < margin) {
+      // Modifica: verifica se c'è spazio sufficiente sulla pagina considerando anche il bottomMargin
+      if (y - spaceNeededForQuestion < margin + bottomMargin) {
         page = pdfDoc.addPage([pageWidth, pageHeight]);
-        y = pageHeight - margin;
+        y = pageHeight - margin; // Nuova pagina: inizia dall'alto
         currentPage++;
       }
 
@@ -216,6 +217,9 @@ export async function generatePdf(questions: QuestionFromPdf[]) {
       lectureQuestionCount++;
     }
 
+    // Aggiungi un margine inferiore extra alla fine del documento
+    y -= bottomMargin;
+
     const pdfBytes = await pdfDoc.save();
     const blob = new Blob([pdfBytes], { type: 'application/pdf' });
     const link = document.createElement('a');
@@ -227,4 +231,5 @@ export async function generatePdf(questions: QuestionFromPdf[]) {
     throw error;
   }
 }
+
 export default generatePdf;

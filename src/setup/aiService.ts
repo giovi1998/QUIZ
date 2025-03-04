@@ -16,7 +16,7 @@ const openai = new OpenAI({
 export const getAiAnswer = async (
   question: string,
   options: string[],
-  model: string = "gpt-3.5-turbo",
+  model: string = "gpt-4",
   maxTokens: number = 1000
 ): Promise<{ text: string; letter?: string }> => { // Modificato il return type
   const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
