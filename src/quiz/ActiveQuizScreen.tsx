@@ -3,7 +3,7 @@ import ProgressBar from "../components/common/ProgressBar.tsx";
 import TimerDisplay from "../components/common/TimerDisplay.tsx";
 import QuestionInfo from "../components/common/QuestionInfo.tsx";
 import ExplanationSection from "../components/ExplanationSection.tsx"; 
-import type { Question } from "../components/type/types.tsx";
+import type { Question } from "../components/type/Types.tsx";
 
 const styles = `
 @keyframes highlightAnim {
@@ -107,7 +107,6 @@ const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
             timerEnabled={timerEnabled}
             timerActive={timerActive}
             timeRemaining={timeRemaining}
-            className="text-base sm:text-lg"
           />
         )}
       </div>
@@ -144,8 +143,7 @@ const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
           selectedAnswer={selectedAnswer}
           correctAnswer={question.correctAnswer}
           explanation={question.explanation}
-          nextQuestion={nextQuestion} 
-          className="mt-4 sm:mt-6"
+          nextQuestion={nextQuestion}
         />
       )}
     </div>

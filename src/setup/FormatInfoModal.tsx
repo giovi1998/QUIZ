@@ -1,7 +1,7 @@
 // components/FormatInfoModal.tsx
 import React from "react";
 import { X } from "lucide-react";
-import { FormatInfoModalProps } from "../components/type/types";
+import { FormatInfoModalProps } from "../components/type/Types";
 
 // Componente per visualizzare le informazioni sul formato JSON richiesto
 export const FormatInfoModal: React.FC<FormatInfoModalProps> = ({ onClose }) => {

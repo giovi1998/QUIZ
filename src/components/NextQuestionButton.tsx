@@ -1,6 +1,10 @@
 // components/NextQuestionButton.tsx
 import React from "react";
-import { NextQuestionButtonProps } from "../components/type/types.tsx";
+
+export interface NextQuestionButtonProps {
+  nextQuestion: () => void;
+}
+
 
 
 

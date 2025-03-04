@@ -1,7 +1,12 @@
 // components/TimerDisplay.tsx
 import React from "react";
-import { Clock } from "lucide-react";
-import { TimerDisplayProps } from "../type/types.tsx";
+import { Clock } from "lucide-react"; 
+
+export interface TimerDisplayProps {
+  timerEnabled: boolean;
+  timerActive: boolean;
+  timeRemaining: number;
+}
 
 const TimerDisplay: React.FC<TimerDisplayProps> = ({
   timerEnabled,

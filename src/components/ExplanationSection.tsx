@@ -1,7 +1,13 @@
 // ExplanationSection.tsx
 import React from "react";
 import { Check, X } from "lucide-react";
-import { ExplanationSectionProps } from "../components/type/types.tsx";
+
+export interface ExplanationSectionProps {
+  selectedAnswer: string | null;
+  correctAnswer: string;
+  explanation: string;
+  nextQuestion: () => void;
+}
 
 
 

@@ -23,7 +23,7 @@ export const getAiAnswer = async (
     // Modifica il system message
     { 
       role: "system", 
-      content: "Sei un esperto di Computer Vision. Rispondi in italiano tecnico. Per le domande a scelta multipla rispondi con: 1) La lettera corretta preceduta da 'Risposta: ' 2) Una spiegazione dettagliata iniziante con 'Spiegazione: '" 
+      content: "Sei un esperto di Computer Vision. Rispondi in italiano tecnico. Per le domande a scelta multipla rispondi con: 1) La lettera corretta preceduta da 'Risposta: ' 2) Una spiegazione dettagliata non superiore ai cinque righe e iniziante con 'Spiegazione: '" 
     },
     {
       role: "user",

@@ -6,14 +6,13 @@ import React, {
   Dispatch,
   SetStateAction,
 } from "react";
-import { Question, Report, QuizStatus } from "../components/type/types.tsx";
+import { Question, Report, QuizStatus } from "../components/type/Types.tsx";
 import ActiveQuizScreen from "./ActiveQuizScreen.tsx";
 import { CompletedScreen } from "./CompletedScreen.tsx";
 
 interface QuizManagerProps {
   quizName: string;
   questions: Question[];
-  setQuestions: Dispatch<SetStateAction<Question[]>>;
   quizStatus: QuizStatus;
   setQuizStatus: Dispatch<SetStateAction<QuizStatus>>;
   timerEnabled: boolean;
@@ -24,7 +23,6 @@ interface QuizManagerProps {
 const QuizManager = ({
   quizName,
   questions,
-  setQuestions,
   quizStatus,
   setQuizStatus,
   timerEnabled,
@@ -136,24 +134,16 @@ const QuizManager = ({
     setTimeRemaining(timerDuration);
     setTimerActive(timerEnabled);
     setQuizStatus("active");
-    setQuestions([]);
     setScore(0); // Reset score on quiz reset
     console.log("[QuizManager] Quiz reset");
-  }, [timerDuration, timerEnabled, setQuizStatus, setQuestions]);
+  }, [timerDuration, timerEnabled, setQuizStatus]);
 
   const clearQuestions = useCallback(() => {
     console.log("[QuizManager] clearQuestions called");
-    setQuestions([]);
-    setCurrentQuestionIndex(0);
-    setAnswers([]);
-    setShowExplanation(false);
-    setSelectedAnswer(null);
-    setTimeRemaining(timerDuration);
-    setTimerActive(false);
     setQuizStatus("empty");
     setScore(0);
     console.log("[QuizManager] Questions cleared, status:", quizStatus);
-  }, [setQuestions, setQuizStatus, timerDuration]);
+  }, [setQuizStatus]);
 
   const generateReport = useCallback((): Report => {
     console.log("[QuizManager] generateReport called");

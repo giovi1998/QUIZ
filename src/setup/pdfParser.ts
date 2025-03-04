@@ -1,12 +1,14 @@
-// pdfParser.ts
-import { Question } from '../components/type/types';
+// setup/pdfParser.ts
+import { Question } from "../components/type/Types";
 
-export const extractQuestionsFromPdfContent = async (pdfContent: string): Promise<Question[]> => {
+export const extractQuestionsFromPdfContent = async (
+  pdfContent: string
+): Promise<Question[]> => {
   console.log("🚀 Inizio parsing del contenuto del PDF");
   const lines = pdfContent
-    .split('\n')
-    .map(line => line.trim())
-    .filter(line => line !== "");
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line !== "");
   console.log("✅ Righe estratte:", lines);
 
   const questions: Question[] = [];
@@ -19,6 +21,7 @@ export const extractQuestionsFromPdfContent = async (pdfContent: string): Promis
   const optionRegex = /^([A-D])[\)\.]?\s+/i;
   const answerRegex = /^Risposta\s+corretta:\s*([A-D])/i;
   const explanationRegex = /^Spiegazione:\s*(.*)/i;
+  const questionNumberRegex = /^\d+\.?\s*/;
 
   for (const line of lines) {
     // Salta le righe che iniziano con "Lezione ..."
@@ -29,11 +32,16 @@ export const extractQuestionsFromPdfContent = async (pdfContent: string): Promis
     // Gestione delle multilinee per la spiegazione
     if (isExplanationActive) {
       // Se la linea corrente sembra iniziare un nuovo marker, interrompiamo la spiegazione
-      if (optionRegex.test(line) || answerRegex.test(line) || explanationRegex.test(line)) {
+      if (
+        optionRegex.test(line) ||
+        answerRegex.test(line) ||
+        explanationRegex.test(line)
+      ) {
         isExplanationActive = false;
       } else {
-        currentQuestion.explanation = (currentQuestion.explanation || "") + " " + line;
-        if (line.endsWith('.')) {
+        currentQuestion.explanation =
+          (currentQuestion.explanation || "") + " " + line;
+        if (line.endsWith(".")) {
           isExplanationActive = false;
         }
         continue;
@@ -44,10 +52,14 @@ export const extractQuestionsFromPdfContent = async (pdfContent: string): Promis
     if (optionRegex.test(line)) {
       if (!isQuestionActive) {
         // Se non è ancora attiva una domanda, inizializziamo una domanda vuota
-        currentQuestion = { question: "", correctAnswer: "", explanation: "" };
+        currentQuestion = {
+          question: "",
+          correctAnswer: "",
+          explanation: "",
+        };
         isQuestionActive = true;
       }
-      const cleanedLine = line.replace(optionRegex, '').trim();
+      const cleanedLine = line.replace(optionRegex, "").trim();
       currentOptions.push(cleanedLine);
       continue;
     }
@@ -71,7 +83,7 @@ export const extractQuestionsFromPdfContent = async (pdfContent: string): Promis
       if (match?.[1]) {
         currentQuestion.explanation = match[1];
         // Se la linea non termina con un punto, assumiamo che la spiegazione prosegua su più righe
-        isExplanationActive = !line.endsWith('.');
+        isExplanationActive = !line.endsWith(".");
       }
       continue;
     }
@@ -80,8 +92,8 @@ export const extractQuestionsFromPdfContent = async (pdfContent: string): Promis
     if (isQuestionActive) {
       if (currentOptions.length === 0) {
         // Se non sono ancora state aggiunte opzioni, la linea è una continuazione del testo della domanda
-        currentQuestion.question = currentQuestion.question 
-          ? currentQuestion.question + " " + line 
+        currentQuestion.question = currentQuestion.question
+          ? currentQuestion.question + " " + line
           : line;
       } else {
         // Se sono già state aggiunte opzioni, la linea viene considerata come continuazione dell'ultima opzione
@@ -91,6 +103,9 @@ export const extractQuestionsFromPdfContent = async (pdfContent: string): Promis
       // Se non è ancora attiva una domanda, inizializza una nuova domanda con il testo corrente
       currentQuestion = { question: line, correctAnswer: "", explanation: "" };
       isQuestionActive = true;
+      currentQuestion.userAnswer = "";
+      currentQuestion.options = [];
+      currentQuestion.type = "multiple-choice";
     }
   }
 
@@ -103,17 +118,28 @@ export const extractQuestionsFromPdfContent = async (pdfContent: string): Promis
   return questions;
 };
 
-function saveQuestion(currentQuestion: Partial<Question>, options: string[], questions: Question[]) {
+function saveQuestion(
+  currentQuestion: Partial<Question>,
+  options: string[],
+  questions: Question[]
+) {
   // Salva la domanda solo se esiste del testo, sono presenti almeno 2 opzioni e una risposta corretta
-  if (currentQuestion.question && options.length >= 2 && currentQuestion.correctAnswer) {
+  if (
+    currentQuestion.question &&
+    options.length >= 2 &&
+    currentQuestion.correctAnswer
+  ) {
     questions.push({
       id: questions.length.toString(),
       question: currentQuestion.question.trim(),
-      options: options.map(opt => opt.trim()),
+      options: options.map((opt) => opt.trim()),
       correctAnswer: currentQuestion.correctAnswer.trim(),
-      explanation: (currentQuestion.explanation || "Nessuna spiegazione disponibile").trim(),
+      explanation: (
+        currentQuestion.explanation || "Nessuna spiegazione disponibile"
+      ).trim(),
       type: "multiple-choice",
-      userAnswer: ""
+      userAnswer: "",
     });
   }
 }
+

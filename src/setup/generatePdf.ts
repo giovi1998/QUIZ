@@ -53,14 +53,15 @@ const SPECIAL_CHARS_MAP: { [key: string]: string } = {
   'φ': 'phi',
   'χ': 'chi',
   'ψ': 'psi',
-  'ω': 'omega'
+  'ω': 'omega',
+  '⊕':  ''
 }
 
 const sanitizeText = (text: string) => {
   return text
     .replace(/[\n\r\x00-\x1F\x7F-\x9F]/g, ' ') // Rimuove caratteri di controllo
     .replace(
-      /[≥≤−×÷≠≈±Δ→•○▪▸⚠⚠️δλγϕΩΣπΠ∫∞∈αβεζηθικμνξορστυφχψω\u26A0-\u26FF\uFE00-\uFE0F]/g,
+      /[≥≤−×÷≠≈±Δ→•○▪▸⚠⚠️δλγϕΩΣπΠ∫∞∈αβεζηθικμνξορστυφχψω⊕\u26A0-\u26FF\uFE00-\uFE0F]/g,
       (match) => (SPECIAL_CHARS_MAP.hasOwnProperty(match) ? SPECIAL_CHARS_MAP[match] : '')
     );
 };

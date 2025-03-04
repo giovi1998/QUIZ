@@ -1,6 +1,10 @@
 // components/AnswerButton.tsx
 import React from "react";
-import { AnswerButtonProps } from "../components/type/types.tsx";
+
+export interface AnswerButtonProps {
+  selectedAnswer: string | null;
+  handleAnswer: (answer: string | null) => void;
+}
  
 
 const AnswerButton: React.FC<AnswerButtonProps> = ({

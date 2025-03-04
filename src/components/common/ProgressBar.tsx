@@ -1,6 +1,10 @@
 // components/ProgressBar.tsx
 import React from "react";
-import {ProgressBarProps} from "../type/types.tsx";
+
+export interface ProgressBarProps {
+  progress: number;
+}
+
 
 
 
