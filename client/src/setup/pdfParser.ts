@@ -10,9 +10,16 @@ if (typeof window !== "undefined") {
 
 export const extractQuestionsFromPdfContent = async (
   file: File
-): Promise<Question[]> => {
-  console.log("🚀 Inizio parsing del contenuto del PDF in extractQuestionsFromPdfContent");
+): Promise<{
+  validQuestions: Question[];
+  skippedOpenQuestions: string[];
+  invalidQuestions: Partial<Question>[];
+}> => {
+  console.log("🚀 Inizio parsing del contenuto del PDF");
 
+  const skippedOpenQuestions: string[] = [];
+  const invalidQuestions: Partial<Question>[] = [];
+  const tempQuestions: Question[] = [];
   const fileData = await new Promise<Uint8Array>((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
@@ -29,6 +36,7 @@ export const extractQuestionsFromPdfContent = async (
   const pdf = await getDocument({ data: fileData }).promise;
   let fullText = "";
 
+  // Estrae il testo da tutte le pagine
   for (let i = 1; i <= pdf.numPages; i++) {
     const page = await pdf.getPage(i);
     const content = await page.getTextContent();
@@ -38,8 +46,9 @@ export const extractQuestionsFromPdfContent = async (
       .join("\n");
   }
 
-  console.log("✅ Testo estratto:", fullText);
+  console.log("📝 Testo estratto:", fullText);
 
+  // Normalizza il testo per assicurarsi che ogni "Domanda multipla" inizi su una nuova riga
   fullText = fullText.replace(/(\S)(Domanda multipla)/g, "$1\n$2");
 
   const lines = fullText
@@ -47,165 +56,169 @@ export const extractQuestionsFromPdfContent = async (
     .map((line) => line.trim())
     .filter((line) => line !== "");
 
-  const questions: Question[] = [];
-  let currentQuestion: Partial<Question> = {
-    question: "",
-    options: [],
-    correctAnswer: "",
-    explanation: "",
-    userAnswer: "",
-    type: "multiple-choice",
-  };
-
+  // Inizializzazione variabili per il parsing
+  let currentQuestion: Partial<Question> = defaultQuestion();
   let currentField: "question" | "option" | "answer" | "explanation" = "question";
 
-  const optionRegex = /^([A-D])\)\s+(.+)/i;
+  // Regex unificata per catturare sia domande aperte che multiple (cattura tipo, numero e testo)
+  const domandaRegex = /^Domanda\s+(aperta|multipla)\s+(\d+):\s*(.*)$/i;
+  const optionRegex = /^([A-D])\)\s+(.*?)(?=\s+[A-D]\)|$)/i;
   const answerRegex = /^Risposta\s+corretta:\s*([A-D])/i;
   const explanationRegex = /^Spiegazione:\s*(.*)/i;
-  const domandaMultiplaRegex = /^Domanda multipla\s*\d+:\s*(.*)/i;
 
   for (const line of lines) {
     console.log(`🔍 Analizzo la riga: "${line}"`);
 
+    // Salta intestazioni e footer
     if (/^Lezione\s+\d+/i.test(line) || /^Powered by TCPDF/i.test(line)) {
-      console.log(`⏩ Riga saltata: "${line}"`);
+      console.log(`⏩ Riga di intestazione/footer saltata: "${line}"`);
       continue;
     }
 
-    if (line.toLowerCase().startsWith("domanda aperta")) {
-      console.log("❌ Domanda aperta rilevata, salto");
-      currentQuestion = {
-        question: "",
-        options: [],
-        correctAnswer: "",
-        explanation: "",
-        userAnswer: "",
-        type: "multiple-choice",
-      };
-      currentField = "question";
-      continue;
-    }
+    // Se la linea corrisponde a una domanda (aperta o multipla)
+    const domandaMatch = line.match(domandaRegex);
+    if (domandaMatch) {
+      const tipo = domandaMatch[1].toLowerCase(); // "aperta" oppure "multipla"
+      // const numero = domandaMatch[2]; // se serve il numero
+      const testo = domandaMatch[3].trim();
 
-    if (line.toLowerCase().startsWith("domanda multipla")) {
-      if (currentQuestion.question && currentQuestion.correctAnswer) {
-        saveQuestion(currentQuestion, questions);
-        if (questions.length >= 24) {
-          console.log("🎯 Quiz di 24 domande completato");
-          break;
-        }
-        currentQuestion = {
-          question: "",
-          options: [],
-          correctAnswer: "",
-          explanation: "",
-          userAnswer: "",
-          type: "multiple-choice",
-        };
-      }
-
-      currentField = "question";
-      const match = line.match(domandaMultiplaRegex);
-      if (match && match[1]) {
-        currentQuestion.question = match[1].trim();
+      if (tipo === "aperta") {
+        console.log("❌ Domanda aperta rilevata - salvata in lista scartate");
+        skippedOpenQuestions.push(line);
+        // Resetta la domanda corrente per evitare conflitti
+        currentQuestion = defaultQuestion();
+        currentField = "question";
+        continue;
       } else {
-        currentQuestion.question = line;
+        // Prima di iniziare una nuova domanda multipla, salva quella corrente se valida
+        if (currentQuestion.question && currentQuestion.correctAnswer) {
+          saveQuestion(currentQuestion, tempQuestions, invalidQuestions);
+        }
+        // Resetta la domanda corrente e imposta il campo "question"
+        currentQuestion = defaultQuestion();
+        currentField = "question";
+        currentQuestion.question = testo;
+        continue;
       }
-      continue;
     }
 
-    if (optionRegex.test(line)) {
-      console.log(`🔖 Trovata opzione: "${line}"`);
+    // Se la riga corrisponde a un'opzione
+    const optionMatch = line.match(optionRegex);
+    if (optionMatch) {
       currentField = "option";
-      const match = line.match(optionRegex);
-      if (match && match[2]) {
-        currentQuestion.options?.push(match[2]); // Senza .trim()
-      }
+      currentQuestion.options = currentQuestion.options || [];
+      currentQuestion.options.push(optionMatch[2].trim());
       continue;
     }
 
+    // Se la riga contiene la risposta corretta
     if (answerRegex.test(line)) {
-      console.log(`✅ Risposta corretta trovata: "${line}"`);
       currentField = "answer";
       const match = line.match(answerRegex);
       if (match?.[1]) {
         const letter = match[1].toUpperCase();
         const answerIndex = letter.charCodeAt(0) - 65;
         if (currentQuestion.options && currentQuestion.options[answerIndex]) {
-          // Normalizza il testo della risposta corretta
-          currentQuestion.correctAnswer = `${currentQuestion.options[answerIndex].trim()}`;
+          currentQuestion.correctAnswer = currentQuestion.options[answerIndex].trim();
         }
       }
       continue;
     }
 
+    // Se la riga contiene la spiegazione
     if (explanationRegex.test(line)) {
-      console.log(`💡 Trovata spiegazione: "${line}"`);
       currentField = "explanation";
       const match = line.match(explanationRegex);
-      if (match) {
-        currentQuestion.explanation = match[1].trim();
-      }
+      currentQuestion.explanation = match ? match[1].trim() : "";
       continue;
     }
 
+    // Gestione dei contenuti su più righe in base al campo corrente
     switch (currentField) {
       case "question":
         currentQuestion.question += " " + line;
         break;
       case "option":
-        if (currentQuestion.options && currentQuestion.options.length > 0) {
+        if (currentQuestion.options?.length) {
           currentQuestion.options[currentQuestion.options.length - 1] += " " + line;
-        } else {
-          currentQuestion.question += " " + line;
         }
         break;
       case "explanation":
         currentQuestion.explanation += " " + line;
         break;
-      case "answer":
-        currentQuestion.question += " " + line;
-        break;
     }
   }
 
+  // Salva l'ultima domanda se valida
   if (currentQuestion.question && currentQuestion.correctAnswer) {
-    saveQuestion(currentQuestion, questions);
+    saveQuestion(currentQuestion, tempQuestions, invalidQuestions);
   }
 
-  if (questions.length > 24) {
-    questions.splice(24);
-    console.log("🎯 Limitato a 24 domande");
-  }
+  // Statistiche finali
+  console.log(`
+    📊 Risultati parsing:
+    - Domande aperte scartate: ${skippedOpenQuestions.length}
+    - Domande non valide: ${invalidQuestions.length}
+    - Domande multiple valide trovate: ${tempQuestions.length}
+  `);
 
-  console.log(`✅ ${questions.length} domande valide estratte`);
-  return questions;
+  // Seleziona al massimo 24 domande per il quiz
+  const validQuestions = tempQuestions.slice(0, 24);
+  console.log(`✅ Selezionate ${validQuestions.length}/24 domande per il quiz`);
+
+  return {
+    validQuestions,
+    skippedOpenQuestions,
+    invalidQuestions,
+  };
 };
 
+// Helper per inizializzare una nuova domanda
+const defaultQuestion = (): Partial<Question> => ({
+  question: "",
+  options: [],
+  correctAnswer: "",
+  explanation: "",
+  userAnswer: "",
+  type: "multiple-choice",
+});
+
+// Funzione di salvataggio con validazione migliorata
 function saveQuestion(
   currentQuestion: Partial<Question>,
-  questions: Question[]
+  validQuestions: Question[],
+  invalidQuestions: Partial<Question>[]
 ) {
-  console.log("💾 Salvataggio domanda");
+  console.log("💾 Salvataggio domanda in corso...");
+
   if (
-    currentQuestion.question &&
-    currentQuestion.options &&
-    currentQuestion.options.length >= 2 &&
-    currentQuestion.correctAnswer
+    !currentQuestion.question ||
+    !currentQuestion.options ||
+    currentQuestion.options.length < 2 ||
+    currentQuestion.options.length > 4 ||
+    !currentQuestion.correctAnswer
   ) {
-    questions.push({
-      id: questions.length.toString(),
-      question: currentQuestion.question.trim(),
-      options: currentQuestion.options, // Senza .map(opt => opt.trim())
-      correctAnswer: currentQuestion.correctAnswer.trim(), // Normalizza qui
-      explanation: (currentQuestion.explanation || "Nessuna spiegazione").trim(),
-      type: "multiple-choice",
-      userAnswer: "",
-    });
-    console.log("✅ Domanda salvata con successo");
-  } else {
-    console.log("❌ Domanda non valida");
-    console.log("Domanda:", currentQuestion.question);
-    console.log("Opzioni:", currentQuestion.options);
-    console.log("Risposta corretta:", currentQuestion.correctAnswer);
+    console.log("❌ Domanda non valida - requisiti non soddisfatti");
+    invalidQuestions.push({ ...currentQuestion });
+    return;
   }
+
+  if (!currentQuestion.options.includes(currentQuestion.correctAnswer)) {
+    console.log("❌ Risposta corretta non presente nelle opzioni");
+    invalidQuestions.push({ ...currentQuestion });
+    return;
+  }
+
+  const newQuestion: Question = {
+    id: validQuestions.length.toString(),
+    question: currentQuestion.question.trim(),
+    options: currentQuestion.options.map((opt) => opt.trim()),
+    correctAnswer: currentQuestion.correctAnswer.trim(),
+    explanation: currentQuestion.explanation?.trim() || "Nessuna spiegazione",
+    type: "multiple-choice",
+    userAnswer: "",
+  };
+
+  validQuestions.push(newQuestion);
+  console.log("✅ Domanda valida salvata:", newQuestion);
 }

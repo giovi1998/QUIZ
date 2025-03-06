@@ -90,13 +90,13 @@ function QuizLoader({ showTemporaryAlert }: QuizLoaderProps) {
           let parsedData: Omit<Question, "id" | "type" | "userAnswer">[] =
             JSON.parse(content);
           let parsedDataWithId: Question[] = parsedData.map((q, index) => ({
-            ...(q as Question),
+            ...q,
             id: index.toString(),
             type: "multiple-choice",
             userAnswer: "",
           }));
 
-          // let parsedData: Question[] = JSON.parse(content);
+          
           console.log(`Found ${parsedData.length} questions in JSON file.`);
 
           if (!Array.isArray(parsedData)) {
@@ -162,15 +162,17 @@ function QuizLoader({ showTemporaryAlert }: QuizLoaderProps) {
         const extractedQuestions = await extractQuestionsFromPdfContent(file); // Pass the file object
         console.log(
           "extractQuestionsFromPdfContent completed:",
-          extractedQuestions.length,
+          extractedQuestions.validQuestions.length,
           "questions extracted"
-        ); // Added log
-        if (extractedQuestions.length === 0) {
+        );
+        if (extractedQuestions.validQuestions.length === 0) {
           throw new Error("No questions extracted.");
         }
-        const shuffledQuestions = shuffleArray(extractedQuestions);
+        const shuffledQuestions = shuffleArray(extractedQuestions.validQuestions);
         const selectedQuestions = shuffledQuestions.slice(0, 24);
-        setQuestions(selectedQuestions as Question[]);
+        setQuestions(selectedQuestions.map(q => ({
+          ...q,
+        })) as Question[]);
         setExternalLoaded(true);
         showTemporaryAlert(`Caricate ${selectedQuestions.length} domande`);
       } catch (error) {
