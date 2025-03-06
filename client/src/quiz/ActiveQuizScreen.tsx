@@ -1,4 +1,3 @@
-// components/ActiveQuizScreen.tsx
 import React from "react";
 import ProgressBar from "../components/common/ProgressBar.tsx";
 import TimerDisplay from "../components/common/TimerDisplay.tsx";
@@ -25,10 +24,15 @@ const styles = `
     animation: none;
   }
 }
+
+.question-text {
+  font-weight: 700 !important;
+}
 `;
 
 type OptionSquareProps = {
   option: string;
+  index: number;
   selected: boolean;
   onSelect: (option: string) => void;
 };
@@ -38,24 +42,31 @@ const normalizeText = (text: string): string => {
   return text.replace(/\s+/g, ' ').trim();
 };
 
-const OptionSquare: React.FC<OptionSquareProps> = ({ option, selected, onSelect }) => {
+const OptionSquare: React.FC<OptionSquareProps> = ({ option, index, selected, onSelect }) => {
   const normalizedOption = normalizeText(option);
+  const letter = String.fromCharCode(65 + index);
+  
   return (
     <div
-      className="flex items-center cursor-pointer group w-full"
+      className="flex items-center cursor-pointer group w-full mb-4 pl-12"
       onClick={() => onSelect(normalizedOption)}
     >
       <div
-        className={`flex items-center w-full p-2 sm:p-3 rounded-md transition-all duration-200
-          ${selected ? "highlighted border-yellow-400" : "hover:bg-gray-50"}`}
+        className={`flex items-center w-full p-4 rounded-md transition-all duration-200 border
+          ${selected 
+            ? "highlighted border-yellow-400 shadow-md" 
+            : "border-gray-200 hover:bg-gray-50 hover:border-gray-300"}`}
       >
-        <span
-          className={`text-base sm:text-lg relative z-10 flex-1 ${
-            selected ? "text-gray-800 font-medium" : "text-gray-700"
-          }`}
-        >
-          {normalizedOption}
-        </span>
+        <div className="flex items-center w-full">
+          <span className="text-lg font-medium mr-2">{letter}.</span>
+          <span
+            className={`text-base sm:text-lg relative z-10 ${
+              selected ? "text-gray-800 font-medium" : "text-gray-700"
+            }`}
+          >
+            {normalizedOption}
+          </span>
+        </div>
       </div>
     </div>
   );
@@ -93,12 +104,12 @@ const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
   const progress = (currentQuestionIndex / totalQuestions) * 100;
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 max-w-2xl mx-4 sm:mx-auto">
+    <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 lg:p-8 space-y-6 max-w-2xl mx-4 sm:mx-auto">
       <style>{styles}</style>
 
       <ProgressBar progress={progress} />
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b pb-4 border-gray-100">
         <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 break-words max-w-[70%]">
           {quizName}
         </h1>
@@ -118,16 +129,17 @@ const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
         score={score}
       />
 
-      <div className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6 leading-tight">
-        {question.question}
+      <div className="question-text text-lg sm:text-xl mb-6 leading-tight bg-gray-50 p-5 rounded-lg border-l-4 border-blue-500 ml-4">
+        <strong>{question.question}</strong>
       </div>
 
-      <div className="space-y-2 sm:space-y-3">
+      <div className="mt-8">
         {question.options.map((option, idx) => (
           <OptionSquare
             key={idx}
+            index={idx}
             option={option}
-            selected={selectedAnswer === normalizeText(option)} // Confronta le opzioni normalizzate
+            selected={selectedAnswer === normalizeText(option)}
             onSelect={handleAnswer}
           />
         ))}
@@ -136,8 +148,8 @@ const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
       {showExplanation && (
         <ExplanationSection
           selectedAnswer={selectedAnswer}
-          correctAnswer={normalizeText(question.correctAnswer)} // Normalizza anche la risposta corretta
-          explanation={normalizeText(question.explanation)} // Normalizza la spiegazione
+          correctAnswer={normalizeText(question.correctAnswer)}
+          explanation={normalizeText(question.explanation)}
           nextQuestion={nextQuestion}
         />
       )}
