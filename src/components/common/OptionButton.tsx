@@ -1,12 +1,13 @@
-// components/OptionButton.tsx
+// components/common/OptionButton.tsx
 import React from "react";
-type OptionButtonProps = {
+
+interface OptionButtonProps {
   option: string;
   selectedAnswer: string | null;
   showExplanation: boolean;
-  setSelectedAnswer: (answer: string | null) => void;
+  setSelectedAnswer: (answer: string) => void;
   correctAnswer: string;
-};
+}
 
 const OptionButton: React.FC<OptionButtonProps> = ({
   option,
@@ -20,13 +21,13 @@ const OptionButton: React.FC<OptionButtonProps> = ({
   const isDisabled = showExplanation;
 
   const className = `
-    w-full px-6 py-4 rounded-lg text-left transition-all
-    ${isSelected ? "bg-blue-100 text-blue-600" : 
-    showExplanation ? (isCorrect ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600") : "bg-white hover:bg-gray-100"}
+    w-full px-6 py-4 rounded-lg text-left transition-all border
+    ${isSelected ? "bg-blue-100 text-blue-600 border-blue-300" : 
+    showExplanation ? (isCorrect ? "bg-green-100 text-green-600 border-green-300" : "bg-red-100 text-red-600 border-red-300") : "bg-white hover:bg-gray-100 border-gray-200"}
   `;
 
   const boxShadow = isSelected 
-    ? "0 4px 6px rgba(66, 153, 225, 0.1)" 
+    ? "0 4px 6px rgba(66, 153, 225, 0.2)" 
     : showExplanation 
       ? isCorrect 
         ? "0 4px 6px rgba(34, 197, 94, 0.15)" 
@@ -34,7 +35,7 @@ const OptionButton: React.FC<OptionButtonProps> = ({
       : "none";
 
   return (
-    <button
+    <button 
       key={option}
       className={className}
       onClick={() => !showExplanation && setSelectedAnswer(option)}

@@ -1,0 +1,57 @@
+[
+  {
+    "question": "Qual è l'obiettivo principale della visione artificiale?",
+    "options": [
+      "Creare programmi computer",
+      "Abilitare i computer ad interpretare e comprendere informazioni visive",
+      "Progettare hardware computer",
+      "Sviluppare algoritmi software"
+    ],
+    "correctAnswer": "Abilitare i computer ad interpretare e comprendere informazioni visive",
+    "explanation": "La visione artificiale ha lo scopo di abilitare i computer ad interpretare e comprendere informazioni visive dal mondo."
+  },
+  {
+    "question": "Cos'è una rete neurale convoluzionale (CNN) in visione artificiale?",
+    "options": [
+      "Un tipo di sensore ottico",
+      "Una rete neurale progettata per elaborare dati con struttura a griglia, come immagini",
+      "Un algoritmo per la compressione delle immagini",
+      "Un metodo per l'analisi del testo"
+    ],
+    "correctAnswer": "Una rete neurale progettata per elaborare dati con struttura a griglia, come immagini",
+    "explanation": "Le CNN sono un tipo di rete neurale particolarmente efficace per l'analisi delle immagini."
+  },
+  {
+    "question": "Quale tecnica è comunemente usata per l'object detection in visione artificiale?",
+    "options": [
+      "Regressione lineare",
+      "Segmentazione semantica",
+      "Trasformata di Fourier",
+      "Clustering K-means"
+    ],
+    "correctAnswer": "Segmentazione semantica",
+    "explanation": "La segmentazione semantica è una tecnica usata per l'object detection."
+  },
+  {
+    "question": "Cos'è il Machine Learning?",
+    "options": [
+      "Un linguaggio di programmazione",
+      "Un algoritmo per i giochi",
+      "La capacità dei computer di imparare dai dati",
+      "Un sistema operativo"
+    ],
+    "correctAnswer": "La capacità dei computer di imparare dai dati",
+    "explanation": "Il Machine Learning è la capacità dei computer di imparare dai dati senza essere esplicitamente programmati."
+  },
+  {
+    "question": "Cosa si intende per Deep Learning?",
+    "options": [
+      "Apprendimento automatico profondo",
+      "Un insieme di algoritmi complessi",
+      "Un sottoinsieme del Machine Learning basato su reti neurali profonde",
+      "L'analisi di dati dettagliati"
+    ],
+    "correctAnswer": "Un sottoinsieme del Machine Learning basato su reti neurali profonde",
+    "explanation": "Il Deep Learning è un sottoinsieme del Machine Learning che utilizza reti neurali con più livelli."
+  }
+]

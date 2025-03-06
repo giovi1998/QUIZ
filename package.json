@@ -1,23 +1,27 @@
 {
   "name": "quiz",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "private": true,
+  "homepage": "https://giovi1998.github.io/QUIZ/",
   "dependencies": {
-    "@testing-library/dom": "^10.4.0",
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.2.0",
-    "@testing-library/user-event": "^13.5.0",
+    "@huggingface/inference": "^3.4.1",
+    "dotenv": "^16.4.7",
     "lucide-react": "^0.476.0",
+    "node-fetch": "^3.3.2",
+    "openai": "^4.86.1",
+    "pdfjs-dist": "^3.11.174",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-scripts": "5.0.1",
-    "web-vitals": "^2.1.4"
+    "react-router-dom": "^6.30.0",
+    "react-scripts": "5.0.1"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [
@@ -38,8 +42,23 @@
     ]
   },
   "devDependencies": {
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
     "autoprefixer": "^10.4.20",
+    "gh-pages": "^6.1.1",
     "postcss": "^8.5.3",
     "tailwindcss": "^4.0.8"
+  },
+  "description": "Ecco un bel **README.md** per il tuo progetto, con le informazioni chiave e la lista delle funzionalità da implementare:",
+  "main": "testAi.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/giovi1998/QUIZ.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/giovi1998/QUIZ/issues"
   }
 }

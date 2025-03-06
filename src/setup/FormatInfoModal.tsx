@@ -1,42 +1,57 @@
 // components/FormatInfoModal.tsx
 import React from "react";
 import { X } from "lucide-react";
+import { FormatInfoModalProps } from "../components/type/Types";
 
-type FormatInfoModalProps = {
-  onClose: () => void;
-};
-
+// Componente per visualizzare le informazioni sul formato JSON richiesto
 export const FormatInfoModal: React.FC<FormatInfoModalProps> = ({ onClose }) => {
+  console.log("FormatInfoModal opened");
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50">
+      {/* Contenitore principale del modal */}
       <div className="modal-container bg-white p-6 rounded-lg shadow-lg max-w-md mx-auto mt-20">
-        {/* Bottone Chiudi */}
+        {/* Header con pulsante di chiusura */}
         <div className="flex justify-end">
           <X
+            onClick={() => {
+              console.log("Close button clicked");
+              onClose();
+            }}
             size={24}
             className="cursor-pointer text-gray-500 hover:text-gray-700 transition"
-            onClick={onClose}
           />
         </div>
 
-        {/* Contenuto del modal */}
+        {/* Contenuto informativo */}
         <h2 className="text-2xl font-semibold mb-4 text-center">
           Formato file JSON richiesto
         </h2>
 
         <div className="space-y-6">
+          {/* Descrizione struttura base */}
           <p className="text-gray-600">
             Il file deve essere in formato JSON e contenere un array di oggetti.
             Ogni oggetto (domanda) deve avere:
           </p>
 
+          {/* Lista dei campi obbligatori */}
           <ul className="list-disc pl-6 text-gray-600">
-            <li><strong>question:</strong> Testo della domanda (stringa)</li>
-            <li><strong>options:</strong> Array di opzioni di risposta (string[])</li>
-            <li><strong>correctAnswer:</strong> Risposta corretta (stringa)</li>
-            <li><strong>explanation:</strong> Spiegazione della risposta (stringa)</li>
+            <li>
+              <strong>question:</strong> Testo della domanda (stringa)
+            </li>
+            <li>
+              <strong>options:</strong> Array di opzioni di risposta (string[])
+            </li>
+            <li>
+              <strong>correctAnswer:</strong> Risposta corretta (stringa)
+            </li>
+            <li>
+              <strong>explanation:</strong> Spiegazione della risposta (stringa)
+            </li>
           </ul>
 
+          {/* Esempio di JSON corretto */}
           <div className="bg-gray-100 p-4 rounded-lg">
             <pre className="whitespace-pre-wrap text-sm text-gray-700">
               {`[
@@ -50,6 +65,7 @@ export const FormatInfoModal: React.FC<FormatInfoModalProps> = ({ onClose }) => 
             </pre>
           </div>
 
+          {/* Sezione esempio testo non formattato */}
           <p className="text-gray-600">
             Se hai domande formattate in questo modo:
           </p>
@@ -67,6 +83,7 @@ export const FormatInfoModal: React.FC<FormatInfoModalProps> = ({ onClose }) => 
             Risposta corretta: Anni '40
           </div>
 
+          {/* Istruzioni per la trasformazione in JSON */}
           <p className="text-gray-600">
             Puoi usare questo prompt per trasformare il testo nel formato JSON
             richiesto:
@@ -91,7 +108,7 @@ export const FormatInfoModal: React.FC<FormatInfoModalProps> = ({ onClose }) => 
             Risposta corretta: Anni '40
           </div>
 
-          {/* Bottone Chiudi */}
+          {/* Pulsante di chiusura secondario */}
           <div className="flex justify-center mt-6">
             <button
               onClick={onClose}
