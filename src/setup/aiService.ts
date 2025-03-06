@@ -18,13 +18,12 @@ export const getAiAnswer = async (
   options: string[],
   model: string = "gpt-4",
   maxTokens: number = 1000
-): Promise<{ text: string; letter?: string }> => { // Modificato il return type
+): Promise<{ text: string; letter?: string }> => {
+  const systemMessage = options.length > 0
+    ? `Sei un esperto di Computer Vision. Rispondi in italiano tecnico. Per le domande a scelta multipla rispondi con: 1) La lettera corretta preceduta da 'Risposta: ' 2) Una spiegazione dettagliata non superiore alle cinque righe e iniziante con 'Spiegazione: ' `
+    : `Sei un esperto di Computer Vision. Rispondi in italiano tecnico e in massimo 5 righe alla domanda.`; // Modified system message
   const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
-    // Modifica il system message
-    { 
-      role: "system", 
-      content: "Sei un esperto di Computer Vision. Rispondi in italiano tecnico. Per le domande a scelta multipla rispondi con: 1) La lettera corretta preceduta da 'Risposta: ' 2) Una spiegazione dettagliata non superiore ai cinque righe e iniziante con 'Spiegazione: '" 
-    },
+    { role: "system", content: systemMessage },
     {
       role: "user",
       content: `${question}\nOpzioni:\n${options.map((opt, i) => `${String.fromCharCode(65 + i)}) ${opt}`).join('\n')}`
@@ -36,7 +35,7 @@ export const getAiAnswer = async (
       model,
       messages,
       max_tokens: maxTokens,
-      temperature: 0.2, // Temperatura più bassa per risposte più focalizzate
+      temperature: 0.3,
     });
 
     const answerText = response.choices[0].message?.content?.trim() || "";
@@ -48,14 +47,13 @@ export const getAiAnswer = async (
 
     // Estrazione testo completo
     const fullAnswer = options.find(opt => 
-      opt.startsWith(answerLetter ? `studiare il mondo 3D, di localizzare e riconoscere` : "")
+      opt.startsWith(answerLetter ? answerText : "")
     );
 
     return {
       text: fullAnswer || answerText,
       letter: answerLetter
     };
-    
   } catch (error: any) {
     // Gestione errori migliorata
     if (error.message.includes("rate limit")) {

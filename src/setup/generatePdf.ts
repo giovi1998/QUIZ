@@ -66,7 +66,7 @@ const sanitizeText = (text: string) => {
     );
 };
 
-export async function generatePdf(questions: QuestionFromPdf[]) {
+export async function generatePdf(questions: QuestionFromPdf[], quizName: string) {
   if (questions.length === 0) {
     throw new Error('Nessuna domanda da convertire in PDF');
   }
@@ -224,7 +224,7 @@ export async function generatePdf(questions: QuestionFromPdf[]) {
     const blob = new Blob([pdfBytes], { type: 'application/pdf' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = 'domande_ordinate.pdf';
+    link.download = `domande_${quizName}.pdf`; // Modified download filename
     link.click();
   } catch (error) {
     console.error('Errore generazione PDF:', error);

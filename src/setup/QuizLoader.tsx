@@ -183,7 +183,7 @@ function QuizLoader({ showTemporaryAlert }: QuizLoaderProps) {
           console.log("Falling back to extractFromPdf"); // Added log
           const extractedData = await extractFromPdf(file);
           const pdfQuestions = shuffleArray(extractedData);
-          await generatePdf(pdfQuestions);
+          await generatePdf(pdfQuestions,quizName);
           showTemporaryAlert("PDF generato correttamente");
           setQuestions(defaultQuestions as Question[]);
           setExternalLoaded(false);
@@ -242,7 +242,7 @@ function QuizLoader({ showTemporaryAlert }: QuizLoaderProps) {
             `After shuffling, using ${pdfQuestions.length} questions for PDF generation.`
           );
           // Genera il PDF con le domande estratte, passando anche la funzione showTemporaryAlert
-          await generatePdf(pdfQuestions);
+          await generatePdf(pdfQuestions,quizName);
           showTemporaryAlert("PDF generato correttamente");
           console.log(
             "Ricarico le domande di default, poiché le domande PDF non contengono risposta."
