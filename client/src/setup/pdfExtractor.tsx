@@ -1,8 +1,8 @@
 import * as pdfjsLib from 'pdfjs-dist';
 import { TextItem } from 'pdfjs-dist/types/src/display/api';
-import { getAiAnswer } from './aiService'; // Assicurati che il path sia corretto
+import { getAiAnswer } from '../setup/aiService.ts'; // Assicurati che il path sia corretto
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjscd.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
 const SPECIAL_CHARS_MAP: { [key: string]: string } = {
   '≥': '>=',

@@ -1,0 +1,12 @@
+# Dipendenze
+/node_modules
+
+# File di configurazione locale
+.env
+
+# File temporanei
+*.log
+*.tmp
+
+# File di output
+/dist

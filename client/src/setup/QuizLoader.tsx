@@ -13,7 +13,7 @@ import { EmptyScreen } from "./EmptyScreen.tsx";
 import { generatePdf } from "./generatePdf.ts";
 import { extractFromPdf } from "./pdfExtractor.tsx";
 import { extractQuestionsFromPdfContent } from "./pdfParser.ts"; // Import pdfParser for the fallback
-import { QuizStatus, Question } from "../components/type/Types.ts";
+import { QuizStatus, Question } from "../components/type/Types.tsx";
 
 function shuffleArray<T>(array: T[]): T[] {
   console.log(`Shuffling ${array.length} questions`);

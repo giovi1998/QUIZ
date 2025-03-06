@@ -10,7 +10,7 @@
     "strict": true,
     "resolveJsonModule": true,
     "paths": { 
-      "@/*": ["./src/*"]
+      "@/*": ["client/src/*"]
     }
   },
   "ts-node": {

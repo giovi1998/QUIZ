@@ -1,71 +1,75 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# File e cartelle del sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+Directory.ole
+$RECYCLE.BIN
+.Trashes
+.Spotlight-V100
 
-# Dipendenze e package manager
-/node_modules
-/yarn-error.log
-/yarn.lock
-/package-lock.json
+# File di log e temporanei
+*.log
+*.swp
+*.swo
+*.tmp
+
+# File generati da IDE e editor
+.vscode/
+*.code-workspace
+*.idea/
+.sublime-project
+.sublime-workspace
+
+# File di configurazione locale
+.env
+.env.*.local
+secrets.json
+
+# Cartelle e file di dipendenze
+node_modules/
+package-lock.json
+yarn-error.log
+yarn.lock
 .pnp.js
 .pnp.cjs
-/.pnp
+.pnp/
 
-# Build e distribuzione
-/build
-/dist
-/out
-/public/static
-/docs
+# Output di build
+build/
+dist/
+out/
+docs/
 
-# Ambiente e configurazione locale
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-/secrets.json
+# Cartelle e file del frontend (client)
+client/node_modules/
+client/build/
+client/coverage/
+client/.next/
+client/.cache/
 
-# Editor e IDE
-/.vscode
-*.code-workspace
-*.sublime-project
-*.sublime-workspace
-/.idea
-/.DS_Store
- Thumbs.db
-/desktop.ini
+# Cartelle e file del backend (server)
+server/node_modules/
+server/.env
+server/dist
 
-# File temporanei
-/*.log
-/*.swp
-/*.swo
-/*.tmp
-/coverage
-
-# File di sistema operativo
-Directory.ole
-ehthumbs.db
-robots.txt~
-/.Spotlight-V100
-/.Trashes
-/$RECYCLE.BIN
+# Cartelle e file dell'api proxy
+api_proxy/node_modules/
+api_proxy/dist
+api_proxy/.env
 
 # Tools di sviluppo
 /node_debug.log
-/.next
 /.server
 /.vercel
 /.firebase
-
-# File generati da React
 /coverage
 /build-reports
+/.next
 /.cache
-/*.map
-/*.d.ts
-/tsconfig.tsbuildinfo
 
-# Altro
+# Altri file e cartelle da ignorare
 /.gitignore_global
-/Dockerfile.ignore
+Dockerfile.ignore
 *.starter
 *.template

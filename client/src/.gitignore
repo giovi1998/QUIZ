@@ -1,0 +1,9 @@
+# Build e distribuzione
+/build
+/coverage
+
+# File generati da React
+.cache/
+*.map
+*.d.ts
+tsconfig.tsbuildinfo

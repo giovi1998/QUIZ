@@ -1,68 +1,50 @@
-// File: aiService.ts
-import OpenAI from "openai";
+ // File: aiService.ts
+ import axios from 'axios';
 
-// Gestione API Key
-const apiKey = process.env.REACT_APP_OPENAI_TOKEN;
-if (!apiKey) {
-  throw new Error("OpenAI API Key mancante");
-}
+ export const getAiAnswer = async (
+   question: string,
+   options: string[],
+   model: string = "gpt-4",
+   maxTokens: number = 1000
+ ): Promise<{ text: string; letter?: string }> => {
+   try {
+     const response = await axios.post('http://localhost:3001/api/generate', {
+       prompt: question,
+       options: options,
+       model: model,
+       maxTokens: maxTokens,
+     });
+     const answer = response.data;
+     if (!answer || !answer.message) { // Controllo aggiuntivo
+       throw new Error('Formato della risposta non valido');
+     }
+     const answerText = answer.message.content?.trim() || ""; //estraggo la stringa corretta
+     console.log("Risposta grezza del modello:", answerText);
+ 
+     // Estrazione lettera con regex migliorata
+     const letterMatch = answerText.match(/^Risposta:\s*([A-D])/i) || answerText.match(/([A-D])\)/i);
+     const answerLetter = letterMatch?.[1]?.toUpperCase();
+ 
+     // Estrazione testo completo
+     const fullAnswer = options.find(opt => 
+       opt.startsWith(answerLetter ? answerText : "")
+     );
+ 
+     return {
+       text: fullAnswer || answerText,
+       letter: answerLetter
+     };
+   } catch (error:any) {
+     // Gestione errori migliorata
+     if (error.message.includes("rate limit")) {
+       await new Promise(r => setTimeout(r, 2000));
+       return getAiAnswer(question, options, model, maxTokens);
+     }
+     throw new Error(`Errore AI: ${error.message}`);
+   }
+ };
+ 
 
-const openai = new OpenAI({
-  apiKey,
-  dangerouslyAllowBrowser: true,
-  timeout: 30000,
-});
-
-export const getAiAnswer = async (
-  question: string,
-  options: string[],
-  model: string = "gpt-4",
-  maxTokens: number = 1000
-): Promise<{ text: string; letter?: string }> => {
-  const systemMessage = options.length > 0
-    ? `Sei un esperto di Computer Vision. Rispondi in italiano tecnico. Per le domande a scelta multipla rispondi con: 1) La lettera corretta preceduta da 'Risposta: ' 2) Una spiegazione dettagliata non superiore alle cinque righe e iniziante con 'Spiegazione: ' `
-    : `Sei un esperto di Computer Vision. Rispondi in italiano tecnico e in massimo 5 righe alla domanda.`; // Modified system message
-  const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
-    { role: "system", content: systemMessage },
-    {
-      role: "user",
-      content: `${question}\nOpzioni:\n${options.map((opt, i) => `${String.fromCharCode(65 + i)}) ${opt}`).join('\n')}`
-    }
-  ];
-
-  try {
-    const response = await openai.chat.completions.create({
-      model,
-      messages,
-      max_tokens: maxTokens,
-      temperature: 0.3,
-    });
-
-    const answerText = response.choices[0].message?.content?.trim() || "";
-    console.log("Risposta grezza del modello:", answerText);
-
-    // Estrazione lettera con regex migliorata
-    const letterMatch = answerText.match(/^Risposta:\s*([A-D])/i) || answerText.match(/([A-D])\)/i);
-    const answerLetter = letterMatch?.[1]?.toUpperCase();
-
-    // Estrazione testo completo
-    const fullAnswer = options.find(opt => 
-      opt.startsWith(answerLetter ? answerText : "")
-    );
-
-    return {
-      text: fullAnswer || answerText,
-      letter: answerLetter
-    };
-  } catch (error: any) {
-    // Gestione errori migliorata
-    if (error.message.includes("rate limit")) {
-      await new Promise(r => setTimeout(r, 2000));
-      return getAiAnswer(question, options, model, maxTokens);
-    }
-    throw new Error(`Errore AI: ${error.message}`);
-  }
-};
 // import { HfInference } from '@huggingface/inference';
 
 // // Gestione API Key con validazione
