@@ -87,19 +87,19 @@ function QuizLoader({ showTemporaryAlert }: QuizLoaderProps) {
         try {
           const content = event.target?.result as string;
           console.log("JSON file content loaded.");
-          let parsedData: Omit<Question, "id" | "type" | "userAnswer">[] =
+          let parsedData: Omit<Question, "id" | "type" | "userAnswer">[] = 
             JSON.parse(content);
           let parsedDataWithId: Question[] = parsedData.map((q, index) => ({
-            ...q,
-            id: index.toString(),
+            ...(q as Question),
+              id: index.toString(),
             type: "multiple-choice",
             userAnswer: "",
           }));
 
-          
+          // let parsedData: Question[] = JSON.parse(content);
           console.log(`Found ${parsedData.length} questions in JSON file.`);
 
-          if (!Array.isArray(parsedData)) {
+          if (!Array.isArray(parsedData) ) {
             throw new Error(
               "Formato file non valido: il file JSON non contiene un array."
             );
@@ -160,19 +160,21 @@ function QuizLoader({ showTemporaryAlert }: QuizLoaderProps) {
       try {
         console.log("Calling extractQuestionsFromPdfContent"); // Added log
         const extractedQuestions = await extractQuestionsFromPdfContent(file); // Pass the file object
+        
         console.log(
           "extractQuestionsFromPdfContent completed:",
           extractedQuestions.validQuestions.length,
           "questions extracted"
-        );
+        ); // Added log
         if (extractedQuestions.validQuestions.length === 0) {
           throw new Error("No questions extracted.");
         }
-        const shuffledQuestions = shuffleArray(extractedQuestions.validQuestions);
+        
+        const validQuestions = extractedQuestions.validQuestions;
+
+        const shuffledQuestions = shuffleArray(validQuestions);
         const selectedQuestions = shuffledQuestions.slice(0, 24);
-        setQuestions(selectedQuestions.map(q => ({
-          ...q,
-        })) as Question[]);
+        setQuestions(selectedQuestions as Question[]);
         setExternalLoaded(true);
         showTemporaryAlert(`Caricate ${selectedQuestions.length} domande`);
       } catch (error) {

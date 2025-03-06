@@ -8,6 +8,15 @@ if (typeof window !== "undefined") {
     "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 }
 
+// Funzione per mescolare un array (algoritmo di Fisher-Yates)
+function shuffleArray<T>(array: T[]): T[] {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
 export const extractQuestionsFromPdfContent = async (
   file: File
 ): Promise<{
@@ -79,7 +88,6 @@ export const extractQuestionsFromPdfContent = async (
     const domandaMatch = line.match(domandaRegex);
     if (domandaMatch) {
       const tipo = domandaMatch[1].toLowerCase(); // "aperta" oppure "multipla"
-      // const numero = domandaMatch[2]; // se serve il numero
       const testo = domandaMatch[3].trim();
 
       if (tipo === "aperta") {
@@ -162,8 +170,8 @@ export const extractQuestionsFromPdfContent = async (
     - Domande multiple valide trovate: ${tempQuestions.length}
   `);
 
-  // Seleziona al massimo 24 domande per il quiz
-  const validQuestions = tempQuestions.slice(0, 24);
+  // Mescola l'array delle domande e seleziona al massimo 24 domande per il quiz
+  const validQuestions = shuffleArray(tempQuestions).slice(0, 24);
   console.log(`✅ Selezionate ${validQuestions.length}/24 domande per il quiz`);
 
   return {
