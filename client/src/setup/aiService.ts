@@ -1,6 +1,9 @@
  // File: aiService.ts
  import axios from 'axios';
 
+ // Variabile d'ambiente per l'URL del backend
+ const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001'; // URL di default per lo sviluppo
+
  export const getAiAnswer = async (
    question: string,
    options: string[],
@@ -8,7 +11,7 @@
    maxTokens: number = 1000
  ): Promise<{ text: string; letter?: string }> => {
    try {
-     const response = await axios.post('http://localhost:3001/api/generate', {
+     const response = await axios.post(`${backendUrl}/api/generate`, { //utilizzo l'url dinamico
        prompt: question,
        options: options,
        model: model,

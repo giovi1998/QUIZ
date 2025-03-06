@@ -7,12 +7,12 @@
     "start": "concurrently \"npm run start:proxy\" \"npm run start:client\"",
     "start:client": "cd client && npm start",
     "start:proxy": "cd api_proxy && node server.js",
-    "build": "cd client && npm run build",
-    "test": "cd client && npm run test",
-    "eject": "cd client && npm run eject",
-    "predeploy": "cd client && npm run build",
-    "deploy": "gh-pages -d build"
-  },
+        "build": "cd client && npm run build", 
+        "test": "cd client && npm run test",   
+        "eject": "cd client && npm run eject",
+        "predeploy": "npm run build",
+        "deploy": "gh-pages -d client/build"
+    },
   "description": "Applicazione per la generazione di quiz",
   "repository": {
     "type": "git",
