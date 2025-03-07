@@ -11,6 +11,8 @@ export interface Question {
   explanation: string;
   type: "multiple-choice" | "open";
   userAnswer: string;
+  aiScore?: number; // Aggiungi questo per memorizzare il punteggio AI
+  aiExplanation?: string; // Aggiungi questo per la spiegazione dell'AI
 }
 
 export interface QuestionFromPdf {
@@ -47,3 +49,6 @@ export interface EmptyScreenProps {
   setQuizStatus: React.Dispatch<React.SetStateAction<QuizStatus>>;
   setShowFormatInfo: (show: boolean) => void;
 }
+
+// Aggiungi un nuovo tipo alla definizione dei tipi
+type QuestionType = "multiple-choice" | "open-ended";

@@ -22,11 +22,13 @@ export const extractQuestionsFromPdfContent = async (
 ): Promise<{
   validQuestions: Question[];
   skippedOpenQuestions: string[];
+  openQuestions: Question[]; // New array for open questions
   invalidQuestions: Partial<Question>[];
 }> => {
   console.log("🚀 Inizio parsing del contenuto del PDF");
 
   const skippedOpenQuestions: string[] = [];
+  const openQuestions: Question[] = []; // Initialize openQuestions
   const invalidQuestions: Partial<Question>[] = [];
   const tempQuestions: Question[] = [];
   const fileData = await new Promise<Uint8Array>((resolve, reject) => {
@@ -75,6 +77,10 @@ export const extractQuestionsFromPdfContent = async (
   const answerRegex = /^Risposta\s+corretta:\s*([A-D])/i;
   const explanationRegex = /^Spiegazione:\s*(.*)/i;
 
+    // Contatori per domande aperte e multiple
+    let openQuestionCount = 0;
+    let multipleQuestionCount = 0;
+
   for (const line of lines) {
     console.log(`🔍 Analizzo la riga: "${line}"`);
 
@@ -91,22 +97,44 @@ export const extractQuestionsFromPdfContent = async (
       const testo = domandaMatch[3].trim();
 
       if (tipo === "aperta") {
-        console.log("❌ Domanda aperta rilevata - salvata in lista scartate");
-        skippedOpenQuestions.push(line);
+        if(openQuestionCount < 2){
+          console.log("✅ Domanda aperta rilevata - salvata in lista");
+          
+          openQuestions.push({
+            id: (openQuestions.length).toString(),
+            question: testo,
+            options: [],
+            correctAnswer: "",
+            explanation: "",
+            type: "open",
+            userAnswer: "",
+          });
+          openQuestionCount++;
+        }else {
+          console.log("❌ Domanda aperta rilevata - salvata in lista scartate");
+          skippedOpenQuestions.push(line);
+        }
+        
         // Resetta la domanda corrente per evitare conflitti
         currentQuestion = defaultQuestion();
         currentField = "question";
         continue;
       } else {
-        // Prima di iniziare una nuova domanda multipla, salva quella corrente se valida
-        if (currentQuestion.question && currentQuestion.correctAnswer) {
-          saveQuestion(currentQuestion, tempQuestions, invalidQuestions);
-        }
-        // Resetta la domanda corrente e imposta il campo "question"
-        currentQuestion = defaultQuestion();
-        currentField = "question";
-        currentQuestion.question = testo;
-        continue;
+         if (multipleQuestionCount < 24){
+            // Prima di iniziare una nuova domanda multipla, salva quella corrente se valida
+            if (currentQuestion.question && currentQuestion.correctAnswer) {
+              saveQuestion(currentQuestion, tempQuestions, invalidQuestions);
+              multipleQuestionCount++;
+            }
+            // Resetta la domanda corrente e imposta il campo "question"
+            currentQuestion = defaultQuestion();
+            currentField = "question";
+            currentQuestion.question = testo;
+            continue;
+          } else{
+            console.log("❌ Domanda multipla rilevata - salvata in lista scartate");
+            continue;
+          }
       }
     }
 
@@ -168,15 +196,18 @@ export const extractQuestionsFromPdfContent = async (
     - Domande aperte scartate: ${skippedOpenQuestions.length}
     - Domande non valide: ${invalidQuestions.length}
     - Domande multiple valide trovate: ${tempQuestions.length}
+    - Domande aperte valide trovate: ${openQuestions.length}
   `);
 
   // Mescola l'array delle domande e seleziona al massimo 24 domande per il quiz
   const validQuestions = shuffleArray(tempQuestions).slice(0, 24);
-  console.log(`✅ Selezionate ${validQuestions.length}/24 domande per il quiz`);
+  console.log(`✅ Selezionate ${validQuestions.length}/24 domande multiple per il quiz`);
+  console.log(`✅ Selezionate ${openQuestions.length}/2 domande aperte per il quiz`);
 
   return {
     validQuestions,
     skippedOpenQuestions,
+    openQuestions, // Return openQuestions
     invalidQuestions,
   };
 };
