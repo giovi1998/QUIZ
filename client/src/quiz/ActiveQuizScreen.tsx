@@ -1,4 +1,5 @@
-import React from "react";
+// quiz/ActiveQuizScreen.tsx
+import React, { useState, useEffect } from "react";
 import ProgressBar from "../components/common/ProgressBar.tsx";
 import TimerDisplay from "../components/common/TimerDisplay.tsx";
 import QuestionInfo from "../components/common/QuestionInfo.tsx";
@@ -35,27 +36,46 @@ type OptionSquareProps = {
   index: number;
   selected: boolean;
   onSelect: (option: string) => void;
+  showExplanation: boolean;
+};
+type OpenAnswerProps = {
+  answer: string;
+  handleAnswerChange: (answer: string) => void;
+  nextQuestion: () => void;
+  questionId: string;
+  showExplanation: boolean;
+  isLastQuestion:boolean;
 };
 
 // Function to normalize text
 const normalizeText = (text: string): string => {
-  return text.replace(/\s+/g, ' ').trim();
+  return text.replace(/\s+/g, " ").trim();
 };
 
-const OptionSquare: React.FC<OptionSquareProps> = ({ option, index, selected, onSelect }) => {
+const OptionSquare: React.FC<OptionSquareProps> = ({
+  option,
+  index,
+  selected,
+  onSelect,
+  showExplanation,
+}) => {
   const normalizedOption = normalizeText(option);
   const letter = String.fromCharCode(65 + index);
-  
+
   return (
     <div
       className="flex items-center cursor-pointer group w-full mb-4 pl-12"
-      onClick={() => onSelect(normalizedOption)}
+      onClick={() => {
+        onSelect(normalizedOption);
+      }}
     >
       <div
         className={`flex items-center w-full p-4 rounded-md transition-all duration-200 border
-          ${selected 
-            ? "highlighted border-yellow-400 shadow-md" 
-            : "border-gray-200 hover:bg-gray-50 hover:border-gray-300"}`}
+          ${
+            selected
+              ? "highlighted border-yellow-400 shadow-md"
+              : "border-gray-200 hover:bg-gray-50 hover:border-gray-300"
+          }`}
       >
         <div className="flex items-center w-full">
           <span className="text-lg font-medium mr-2">{letter}.</span>
@@ -71,28 +91,59 @@ const OptionSquare: React.FC<OptionSquareProps> = ({ option, index, selected, on
     </div>
   );
 };
+const OpenAnswer: React.FC<OpenAnswerProps> = ({
+  answer,
+  handleAnswerChange,
+  nextQuestion,
+  questionId,
+  showExplanation,
+  isLastQuestion
+}) => {
+    const handleNext = () => {
+        console.log(`Answer for question ${questionId}:`, answer);
+        nextQuestion();
+      };
+    
+      return (
+        <div className="mb-6 w-full">
+          <textarea
+            className="w-full p-4 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Scrivi qui la tua risposta"
+            value={answer}
+            onChange={(e) => handleAnswerChange(e.target.value)}
+            rows={5}
+          />
+          <div className="flex justify-end">
+            <button
+              onClick={handleNext}
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            >
+              {isLastQuestion ? "Termina quiz" : "Prossima domanda"}
+            </button>
+          </div>
+        </div>
+      );
+    };
 
 type ActiveQuizScreenProps = {
   quizName: string;
+  questions: Question[];
   currentQuestionIndex: number;
-  totalQuestions: number;
-  question: Question;
-  selectedAnswer: string | null;
-  handleAnswer: (answer: string | null) => void;
+  handleAnswer: (questionId: string, answer: string | null) => void;
   showExplanation: boolean;
   nextQuestion: () => void;
   timeRemaining: number;
   timerActive: boolean;
   timerEnabled: boolean;
   score: number;
+  isQuizCompleted: boolean;
+  setShowExplanation: (show: boolean) => void;
 };
 
 const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
   quizName,
+  questions,
   currentQuestionIndex,
-  totalQuestions,
-  question,
-  selectedAnswer,
   handleAnswer,
   showExplanation,
   nextQuestion,
@@ -100,8 +151,36 @@ const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
   timerActive,
   timerEnabled,
   score,
+  isQuizCompleted,
+  setShowExplanation,
 }) => {
+  const totalQuestions = questions.length;
   const progress = (currentQuestionIndex / totalQuestions) * 100;
+  const currentQuestion = questions[currentQuestionIndex];
+  const selectedAnswer = currentQuestion.userAnswer;
+  const isLastQuestion = currentQuestionIndex === totalQuestions - 1;
+
+  useEffect(() => {
+    console.log(`currentQuestionIndex: ${currentQuestionIndex}`);
+    console.log("selectedAnswer", selectedAnswer);
+  }, [currentQuestionIndex, selectedAnswer]);
+
+  // Early return if questions is undefined or empty
+  if (!questions || questions.length === 0) {
+    return (
+      <div className="p-4 text-center text-lg font-semibold">
+        Nessuna domanda disponibile. Carica un file JSON o PDF per iniziare il
+        quiz.
+      </div>
+    );
+  }
+
+  const handleOptionSelect = (value: string) => {
+    handleAnswer(currentQuestion.id, value);
+    if (currentQuestion.type === "multiple-choice") {
+      setShowExplanation(true);
+    }
+  };
 
   return (
     <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 lg:p-8 space-y-6 max-w-2xl mx-4 sm:mx-auto">
@@ -130,27 +209,40 @@ const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
       />
 
       <div className="question-text text-lg sm:text-xl mb-6 leading-tight bg-gray-50 p-5 rounded-lg border-l-4 border-blue-500 ml-4">
-        <strong>{question.question}</strong>
+        <strong>{currentQuestion.question}</strong>
       </div>
-
-      <div className="mt-8">
-        {question.options.map((option, idx) => (
-          <OptionSquare
-            key={idx}
-            index={idx}
-            option={option}
-            selected={selectedAnswer === normalizeText(option)}
-            onSelect={handleAnswer}
-          />
-        ))}
-      </div>
-
-      {showExplanation && (
-        <ExplanationSection
-          selectedAnswer={selectedAnswer}
-          correctAnswer={normalizeText(question.correctAnswer)}
-          explanation={normalizeText(question.explanation)}
+      {currentQuestion.type === "multiple-choice" && (
+        <div className="mt-8">
+          {currentQuestion.options.map((option, idx) => (
+            <OptionSquare
+              key={idx}
+              index={idx}
+              option={option}
+              selected={selectedAnswer === normalizeText(option)}
+              onSelect={handleOptionSelect}
+              showExplanation={showExplanation}
+            />
+          ))}
+          {showExplanation && (
+            <ExplanationSection
+              selectedAnswer={selectedAnswer}
+              correctAnswer={normalizeText(currentQuestion.correctAnswer)}
+              explanation={normalizeText(currentQuestion.explanation)}
+              nextQuestion={nextQuestion}
+            />
+          )}
+        </div>
+      )}
+      {currentQuestion.type === "open" && (
+        <OpenAnswer
+          answer={selectedAnswer || ""}
+          handleAnswerChange={(value) =>
+            handleAnswer(currentQuestion.id, value)
+          }
           nextQuestion={nextQuestion}
+          questionId={currentQuestion.id}
+          showExplanation={showExplanation}
+          isLastQuestion={isLastQuestion}
         />
       )}
     </div>

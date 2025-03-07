@@ -1,209 +1,184 @@
-// components/QuizManager.tsx
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-  Dispatch,
-  SetStateAction,
-} from "react";
-import { Question, Report, QuizStatus } from "../components/type/Types.tsx";
+// quiz/QuizManager.tsx
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import ActiveQuizScreen from "./ActiveQuizScreen.tsx";
-import { CompletedScreen } from "./CompletedScreen.tsx";
+import ReportQuiz from "../components/common/ReportQuiz.tsx";
+import { QuizStatus, Question, Report } from "../components/type/Types.tsx";
+
+interface MissedQuestion {
+  question: string;
+  yourAnswer: string;
+  correctAnswer: string;
+}
 
 interface QuizManagerProps {
   quizName: string;
   questions: Question[];
   quizStatus: QuizStatus;
-  setQuizStatus: Dispatch<SetStateAction<QuizStatus>>;
+  setQuizStatus: React.Dispatch<React.SetStateAction<QuizStatus>>;
   timerEnabled: boolean;
   timerDuration: number;
   showTemporaryAlert: (message: string) => void;
 }
 
-const QuizManager = ({
+const QuizManager: React.FC<QuizManagerProps> = ({
   quizName,
-  questions,
+  questions: initialQuestions,
   quizStatus,
   setQuizStatus,
   timerEnabled,
   timerDuration,
   showTemporaryAlert,
-}: QuizManagerProps) => {
-  console.log("[QuizManager] Component rendered");
-
+}) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [showExplanation, setShowExplanation] = useState(false);
-  const [answers, setAnswers] = useState<string[]>([]);
   const [timeRemaining, setTimeRemaining] = useState(timerDuration);
-  const [timerActive, setTimerActive] = useState(false);
-  const [score, setScore] = useState(0); // Added score state
+  const [timerActive, setTimerActive] = useState(timerEnabled);
+  const [userAnswers, setUserAnswers] = useState<{ [questionId: string]: string }>({});
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const [score, setScore] = useState(0);
+  const [report, setReport] = useState<Report | null>(null);
+  const [isQuizCompleted, setIsQuizCompleted] = useState(false);
+  const [questions, setQuestions] = useState<Question[]>(initialQuestions);
+
+  // Sincronizza le domande quando cambiano le initialQuestions
+  useEffect(() => {
+    setQuestions(initialQuestions);
+  }, [initialQuestions]);
+
+  const checkAnswer = (userAnswer: string, correctAnswer: string) => {
+    return userAnswer.trim().toLowerCase() === correctAnswer.trim().toLowerCase();
+  };
+
+  const nextQuestion = useCallback(() => {
+    const currentQuestion = questions[currentQuestionIndex];
+    
+    // Aggiorna il punteggio
+    if (currentQuestion) {
+      const userAnswer = userAnswers[currentQuestion.id];
+      
+      if (currentQuestion.type === "multiple-choice") {
+        if (userAnswer && checkAnswer(userAnswer, currentQuestion.correctAnswer)) {
+          setScore(prev => prev + 1);
+        }
+      } else if (currentQuestion.type === "open" && userAnswer) {
+        setScore(prev => prev + 1);
+      }
+    }
+
+    // Reset timer e indice
+    setTimeRemaining(timerDuration);
+    
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex(prev => prev + 1);
+      setShowExplanation(false);
+    } else {
+      calculateReport();
+    }
+  }, [currentQuestionIndex, questions, userAnswers, timerDuration]);
 
   useEffect(() => {
-    console.log("[QuizManager] useEffect - timerActive or timeRemaining changed");
-    if (timerActive && timeRemaining > 0) {
-      const timer = setTimeout(() => {
-        setTimeRemaining((prev) => prev - 1);
-        console.log("[QuizManager] Time remaining:", timeRemaining - 1);
+    if (timerEnabled && timerActive && timeRemaining > 0) {
+      timerRef.current = setTimeout(() => {
+        setTimeRemaining(prev => prev - 1);
       }, 1000);
-      return () => {
-        console.log("[QuizManager] Clearing timer");
-        clearTimeout(timer);
-      };
-    } else if (timerActive && timeRemaining === 0) {
-      console.log("[QuizManager] Timer reached 0, calling handleAnswer");
-      handleAnswer(null);
+    } else if (timeRemaining === 0) {
+      calculateReport();
     }
-  }, [timerActive, timeRemaining]);
 
-  // Function to normalize answers for comparison
-  const normalizeAnswer = (answer: string): string => {
-    return answer.replace(/[^a-z0-9]/gi, "").toLowerCase();
-  };
-  // Function to check if the selected answer is correct
-  const checkAnswer = (selectedAnswer: string, correctAnswer: string): boolean => {
-    return normalizeAnswer(selectedAnswer) === normalizeAnswer(correctAnswer);
-  };
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [timeRemaining, timerEnabled, timerActive]);
 
-  const handleAnswer = useCallback(
-    (answer: string | null) => {
-      console.log("[QuizManager] handleAnswer called with:", answer);
-      if (!showExplanation) {
-        const currentQuestion = questions[currentQuestionIndex];
-        setSelectedAnswer(answer);
-        setShowExplanation(true);
-        if (answer && checkAnswer(answer, currentQuestion.correctAnswer)) {
-          console.log("[QuizManager] Correct answer!");
-          setScore((prevScore) => {
-            const newScore = prevScore + 1;
-            console.log("[QuizManager] Score updated:", newScore);
-            return newScore;
-          });
-           setAnswers((prev) => {
-             const newAnswers = [...prev];
-             newAnswers[currentQuestionIndex] = answer || "Nessuna risposta";
-             return newAnswers;
-           });
+  const handleAnswer = useCallback((questionId: string, answer: string | null) => {
+    setUserAnswers(prev => ({ 
+      ...prev, 
+      [questionId]: answer || "" 
+    }));
+    
+    setQuestions(prev => 
+      prev.map(q => 
+        q.id === questionId ? { ...q, userAnswer: answer || "" } : q
+      )
+    );
+  }, []);
+
+  const generateReport = useCallback((): Report => {
+    const missed: MissedQuestion[] = [];
+    let correctAnswers = 0;
+
+    questions.forEach(q => {
+      const userAnswer = userAnswers[q.id];
+      
+      if (q.type === "multiple-choice") {
+        if (userAnswer && checkAnswer(userAnswer, q.correctAnswer)) {
+          correctAnswers++;
         } else {
-          console.log("[QuizManager] Incorrect answer");
-          setAnswers((prev) => {
-            const newAnswers = [...prev];
-            newAnswers[currentQuestionIndex] = answer || "Nessuna risposta";
-            return newAnswers;
+          missed.push({
+            question: q.question,
+            yourAnswer: userAnswer || "Nessuna risposta",
+            correctAnswer: q.correctAnswer
+          });
+        }
+      } else if (q.type === "open") {
+        if (userAnswer) {
+          correctAnswers++;
+        } else {
+          missed.push({
+            question: q.question,
+            yourAnswer: "Nessuna risposta",
+            correctAnswer: "Domanda aperta - risposta libera"
           });
         }
       }
-    },
-    [showExplanation, currentQuestionIndex, questions]
-  );
+    });
 
-  useEffect(() => {
-    console.log("[QuizManager] useEffect - quizStatus changed to:", quizStatus);
-    if (quizStatus === "active" && questions.length > 0) {
-      setTimeRemaining(timerDuration);
-      setTimerActive(timerEnabled);
-      console.log(
-        "[QuizManager] Timer reset to:",
-        timerDuration,
-        "and set to:",
-        timerEnabled
-      );
-    }
-  }, [currentQuestionIndex, timerEnabled, timerDuration, quizStatus, questions]);
+    return {
+      totalQuestions: questions.length,
+      correctAnswers,
+      percentage: Math.round((correctAnswers / questions.length) * 100),
+      missed
+    };
+  }, [questions, userAnswers]);
 
-  const nextQuestion = useCallback(() => {
-    console.log("[QuizManager] nextQuestion called");
-    setTimeRemaining(timerDuration);
-    setTimerActive(timerEnabled);
-    setSelectedAnswer(null);
-    setShowExplanation(false);
+  const calculateReport = useCallback(() => {
+    if (report) return;
+    
+    const generatedReport = generateReport();
+    setReport(generatedReport);
+    setTimerActive(false);
+    setIsQuizCompleted(true);
+    setQuizStatus("completed");
+  }, [generateReport, report, setQuizStatus]);
 
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex((prevIndex) => {
-        const newIndex = prevIndex + 1;
-        console.log("[QuizManager] Moving to next question, index:", newIndex);
-        return newIndex;
-      });
-    } else {
-      console.log("[QuizManager] Last question reached. Completing quiz.");
-      setTimeout(() => {
-        setQuizStatus("completed");
-      }, 0);
-    }
-  }, [
-    currentQuestionIndex,
-    questions.length,
-    timerDuration,
-    timerEnabled,
-    setQuizStatus,
-  ]);
-
-  const resetQuiz = useCallback(() => {
-    console.log("[QuizManager] resetQuiz called");
-    setCurrentQuestionIndex(0);
-    setAnswers([]);
-    setShowExplanation(false);
-    setSelectedAnswer(null);
-    setTimeRemaining(timerDuration);
-    setTimerActive(timerEnabled);
-    setQuizStatus("active");
-    setScore(0); // Reset score on quiz reset
-    console.log("[QuizManager] Quiz reset");
-  }, [timerDuration, timerEnabled, setQuizStatus]);
-
-  const clearQuestions = useCallback(() => {
-    console.log("[QuizManager] clearQuestions called");
-    setQuizStatus("empty");
-    setScore(0);
-    console.log("[QuizManager] Questions cleared, status:", quizStatus);
-  }, [setQuizStatus]);
-
-  const generateReport = useCallback((): Report => {
-    console.log("[QuizManager] generateReport called");
-    const totalQuestions = questions.length;
-    const correctAnswers = answers.filter((answer, index) => {
-      return checkAnswer(answer,questions[index].correctAnswer);
-    }).length;
-    const percentage =
-      totalQuestions > 0
-        ? Math.round((correctAnswers / totalQuestions) * 100)
-        : 0;
-    const missed =
-      questions.length > 0
-        ? questions
-            .map((q, idx) => ({
-              question: q.question,
-              yourAnswer: answers[idx] || "Nessuna risposta",
-              correctAnswer: q.correctAnswer,
-            }))
-            .filter(
-              (_, idx) =>
-                answers[idx] && !checkAnswer(answers[idx], questions[idx].correctAnswer)
-            )
-        : [];
-    console.log("[QuizManager] Report generated");
-    return { totalQuestions, correctAnswers, percentage, missed };
-  }, [questions, answers]);
-
-  const backToSetup = useCallback(() => {
-    console.log("[QuizManager] backToSetup called");
-    clearQuestions();
+  const restartQuiz = useCallback(() => {
     setQuizStatus("setup");
-  }, [clearQuestions, setQuizStatus]);
+    setReport(null);
+    setCurrentQuestionIndex(0);
+    setScore(0);
+    setShowExplanation(false);
+    setTimeRemaining(timerDuration);
+    setTimerActive(timerEnabled);
+    setUserAnswers({});
+    setIsQuizCompleted(false);
+    setQuestions(initialQuestions.map(q => ({ ...q, userAnswer: "" })));
+  }, [initialQuestions, timerDuration, timerEnabled, setQuizStatus]);
 
-  // Rendering condizionale
-  let content;
-  console.log("[QuizManager] Rendering content with quizStatus:", quizStatus);
+  if (!questions?.length) {
+    return (
+      <div className="p-4 text-center text-lg font-semibold">
+        Nessuna domanda disponibile
+      </div>
+    );
+  }
 
-  if (quizStatus === "active") {
-    if (questions.length > 0) {
-      content = (
+  return (
+    <div>
+      {quizStatus === "active" && (
         <ActiveQuizScreen
           quizName={quizName}
+          questions={questions}
           currentQuestionIndex={currentQuestionIndex}
-          totalQuestions={questions.length}
-          question={questions[currentQuestionIndex]}
-          selectedAnswer={selectedAnswer}
           handleAnswer={handleAnswer}
           showExplanation={showExplanation}
           nextQuestion={nextQuestion}
@@ -211,35 +186,16 @@ const QuizManager = ({
           timerActive={timerActive}
           timerEnabled={timerEnabled}
           score={score}
+          isQuizCompleted={isQuizCompleted}
+          setShowExplanation={setShowExplanation}
         />
-      );
-    } else {
-      content = (
-        <div className="p-4 text-center text-lg font-semibold">
-          Nessuna domanda disponibile. Carica un file JSON o PDF per iniziare
-          il quiz.
-        </div>
-      );
-    }
-  } else if (quizStatus === "completed") {
-    content = (
-      <CompletedScreen
-        quizName={quizName}
-        report={generateReport()}
-        resetQuiz={resetQuiz}
-        backToSetup={backToSetup}
-      />
-    );
-  } else {
-    content = null;
-  }
+      )}
 
-  return <>{content}</>;
+      {quizStatus === "completed" && report && (
+        <ReportQuiz report={report} onRestart={restartQuiz} />
+      )}
+    </div>
+  );
 };
 
 export default QuizManager;
-
-export type QuizManagerType = {
-  resetQuiz: () => void;
-  backToSetup: () => void;
-};

@@ -42,14 +42,18 @@ function QuizLoader({ showTemporaryAlert }: QuizLoaderProps) {
   const [pdfLoading, setPdfLoading] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null!);
   const pdfInputRef = React.useRef<HTMLInputElement>(null!);
+  const openQuestionsLimit = 2;
+  const multipleChoiceQuestionsLimit = 24;
 
   const defaultQuestions = useMemo(() => {
-    return shuffleArray(questionsDefaults).slice(0, 24).map((q, index) => ({
-      ...q,
-      id: index.toString(),
-      type: "multiple-choice",
-      userAnswer: "",
-    }));
+    return shuffleArray(questionsDefaults)
+      .slice(0, multipleChoiceQuestionsLimit)
+      .map((q, index) => ({
+        ...q,
+        id: index.toString(),
+        type: "multiple-choice",
+        userAnswer: "",
+      }));
   }, []);
 
   // Se non sono state caricate domande esterne, carica le domande di default
@@ -87,11 +91,11 @@ function QuizLoader({ showTemporaryAlert }: QuizLoaderProps) {
         try {
           const content = event.target?.result as string;
           console.log("JSON file content loaded.");
-          let parsedData: Omit<Question, "id" | "type" | "userAnswer">[] = 
+          let parsedData: Omit<Question, "id" | "type" | "userAnswer">[] =
             JSON.parse(content);
           let parsedDataWithId: Question[] = parsedData.map((q, index) => ({
             ...(q as Question),
-              id: index.toString(),
+            id: index.toString(),
             type: "multiple-choice",
             userAnswer: "",
           }));
@@ -99,16 +103,15 @@ function QuizLoader({ showTemporaryAlert }: QuizLoaderProps) {
           // let parsedData: Question[] = JSON.parse(content);
           console.log(`Found ${parsedData.length} questions in JSON file.`);
 
-          if (!Array.isArray(parsedData) ) {
+          if (!Array.isArray(parsedData)) {
             throw new Error(
               "Formato file non valido: il file JSON non contiene un array."
             );
           }
 
-          const MAX_QUESTIONS = 24;
           parsedDataWithId = shuffleArray(parsedDataWithId).slice(
             0,
-            MAX_QUESTIONS
+            multipleChoiceQuestionsLimit
           );
           console.log(
             `After shuffling, selected ${parsedDataWithId.length} questions.`
@@ -145,7 +148,7 @@ function QuizLoader({ showTemporaryAlert }: QuizLoaderProps) {
       };
       reader.readAsText(file);
     },
-    [showTemporaryAlert]
+    [showTemporaryAlert, multipleChoiceQuestionsLimit]
   );
   const handleFileChangePdfSpecial = useCallback(
     async (file: File) => {
@@ -160,23 +163,42 @@ function QuizLoader({ showTemporaryAlert }: QuizLoaderProps) {
       try {
         console.log("Calling extractQuestionsFromPdfContent"); // Added log
         const extractedQuestions = await extractQuestionsFromPdfContent(file); // Pass the file object
-        
+
         console.log(
           "extractQuestionsFromPdfContent completed:",
           extractedQuestions.validQuestions.length,
-          "questions extracted"
+          "multiple-choice questions extracted"
         ); // Added log
-        if (extractedQuestions.validQuestions.length === 0) {
+        console.log(
+          "extractQuestionsFromPdfContent completed:",
+          extractedQuestions.openQuestions.length,
+          "open-ended questions extracted"
+        ); // Added log
+        if (
+          extractedQuestions.validQuestions.length === 0 &&
+          extractedQuestions.openQuestions.length === 0
+        ) {
           throw new Error("No questions extracted.");
         }
-        
+
         const validQuestions = extractedQuestions.validQuestions;
+        const openQuestions = extractedQuestions.openQuestions;
 
         const shuffledQuestions = shuffleArray(validQuestions);
-        const selectedQuestions = shuffledQuestions.slice(0, 24);
-        setQuestions(selectedQuestions as Question[]);
+        const selectedQuestions = shuffledQuestions.slice(
+          0,
+          multipleChoiceQuestionsLimit
+        );
+
+        const completeQuestions: Question[] = [
+          ...selectedQuestions,
+          ...openQuestions,
+        ];
+        setQuestions(completeQuestions as Question[]);
         setExternalLoaded(true);
-        showTemporaryAlert(`Caricate ${selectedQuestions.length} domande`);
+        showTemporaryAlert(
+          `Caricate ${selectedQuestions.length} domande multiple e ${openQuestions.length} domande aperte.`
+        );
       } catch (error) {
         console.error(
           "Error during special PDF processing, falling back to extractFromPdf:",
@@ -187,15 +209,12 @@ function QuizLoader({ showTemporaryAlert }: QuizLoaderProps) {
           console.log("Falling back to extractFromPdf"); // Added log
           const extractedData = await extractFromPdf(file);
           const pdfQuestions = shuffleArray(extractedData);
-          await generatePdf(pdfQuestions,quizName);
+          await generatePdf(pdfQuestions, quizName);
           showTemporaryAlert("PDF generato correttamente");
           setQuestions(defaultQuestions as Question[]);
           setExternalLoaded(false);
         } catch (fallbackError) {
-          console.error(
-            "Error during fallback PDF extraction:",
-            fallbackError
-          );
+          console.error("Error during fallback PDF extraction:", fallbackError);
           showTemporaryAlert(
             `Errore PDF (fallback): ${
               (fallbackError as Error).message || "Errore sconosciuto"
@@ -209,9 +228,13 @@ function QuizLoader({ showTemporaryAlert }: QuizLoaderProps) {
         setPdfLoading(false);
       }
     },
-    [defaultQuestions, showTemporaryAlert, setQuestions]
+    [
+      defaultQuestions,
+      showTemporaryAlert,
+      multipleChoiceQuestionsLimit,
+      quizName,
+    ]
   );
-
 
   // Gestione upload file PDF
   const handleFileChangePdf = useCallback(
@@ -246,7 +269,7 @@ function QuizLoader({ showTemporaryAlert }: QuizLoaderProps) {
             `After shuffling, using ${pdfQuestions.length} questions for PDF generation.`
           );
           // Genera il PDF con le domande estratte, passando anche la funzione showTemporaryAlert
-          await generatePdf(pdfQuestions,quizName);
+          await generatePdf(pdfQuestions, quizName);
           showTemporaryAlert("PDF generato correttamente");
           console.log(
             "Ricarico le domande di default, poiché le domande PDF non contengono risposta."
@@ -279,7 +302,7 @@ function QuizLoader({ showTemporaryAlert }: QuizLoaderProps) {
       showTemporaryAlert,
       defaultQuestions,
       handleFileChangePdfSpecial,
-      setQuestions,
+      quizName,
     ]
   );
 
@@ -297,7 +320,6 @@ function QuizLoader({ showTemporaryAlert }: QuizLoaderProps) {
     setQuizStatus("active");
     console.log("Quiz status changed to active.");
   }
-
 
   return (
     <div>
