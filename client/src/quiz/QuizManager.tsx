@@ -45,6 +45,18 @@ const QuizManager: React.FC<QuizManagerProps> = ({
     setQuestions(initialQuestions);
   }, [initialQuestions]);
 
+  const handleAnswer = useCallback((questionId: string, answer: string | null) => {
+    setUserAnswers(prev => ({ 
+      ...prev, 
+      [questionId]: answer || "" 
+    }));
+    
+    setQuestions(prev => 
+      prev.map(q => 
+        q.id === questionId ? { ...q, userAnswer: answer || "" } : q
+      )
+    );
+  }, []);
   const checkAnswer = (userAnswer: string, correctAnswer: string) => {
     return userAnswer.trim().toLowerCase() === correctAnswer.trim().toLowerCase();
   };
@@ -81,27 +93,30 @@ const QuizManager: React.FC<QuizManagerProps> = ({
       timerRef.current = setTimeout(() => {
         setTimeRemaining(prev => prev - 1);
       }, 1000);
-    } else if (timeRemaining === 0) {
-      calculateReport();
+    } else if (timerEnabled && timerActive && timeRemaining === 0) {
+      // Il tempo è scaduto per la domanda corrente.
+      const currentQuestion = questions[currentQuestionIndex];
+      // Se non è stata fornita una risposta, la registra come vuota (quindi sbagliata)
+      if (!userAnswers[currentQuestion.id]) {
+        handleAnswer(currentQuestion.id, "");
+      }
+      // Ferma il timer e mostra la sezione di spiegazione (che segnala l'errore)
+      setTimerActive(false);
+      setShowExplanation(true);
     }
-
+  
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [timeRemaining, timerEnabled, timerActive]);
+  }, [
+    timeRemaining,
+    timerEnabled,
+    timerActive,
+    questions,
+    currentQuestionIndex,
+    userAnswers,
+  ]);
 
-  const handleAnswer = useCallback((questionId: string, answer: string | null) => {
-    setUserAnswers(prev => ({ 
-      ...prev, 
-      [questionId]: answer || "" 
-    }));
-    
-    setQuestions(prev => 
-      prev.map(q => 
-        q.id === questionId ? { ...q, userAnswer: answer || "" } : q
-      )
-    );
-  }, []);
 
   const generateReport = useCallback((): Report => {
     const missed: MissedQuestion[] = [];

@@ -30,7 +30,7 @@ export const extractQuestionsFromPdfContent = async (
   const openQuestions: Question[] = [];
   const invalidQuestions: Partial<Question>[] = [];
   const tempQuestions: Question[] = [];
-  
+
   const fileData = await new Promise<Uint8Array>((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
@@ -68,7 +68,8 @@ export const extractQuestionsFromPdfContent = async (
 
   const domandaRegex = /^Domanda\s+(aperta|multipla)\s+(\d+):\s*(.*)$/i;
   const optionRegex = /^([A-D])\)\s+(.*?)(?=\s+[A-D]\)|$)/i;
-  const answerRegex = /^Risposta\s+corretta:\s*([A-D])/i;
+  const answerRegexMulti = /^Risposta\s+corretta:\s*([A-D])/i;
+  const answerRegexOpen= /^Risposta:\s/i;
   const explanationRegex = /^Spiegazione:\s*(.*)/i;
 
   let openQuestionCount = 0;
@@ -83,7 +84,20 @@ export const extractQuestionsFromPdfContent = async (
       const testo = domandaMatch[3].trim();
 
       if (tipo === "aperta") {
+        console.log(`pdfParser: Open question detected: ${testo}`); // Added log
         if (openQuestionCount < 2) {
+          if (answerRegexOpen.test(line)) {
+            currentField = "answer";
+            const match = line.match(answerRegexOpen);
+            if (match?.[1]) {
+              const letter = match[1].toUpperCase();
+              const answerIndex = letter.charCodeAt(0) - 65;
+              if (currentQuestion.options?.[answerIndex]) {
+                currentQuestion.correctAnswer = currentQuestion.options[answerIndex].trim();
+              }
+            }
+            continue;
+          }
           openQuestions.push({
             id: openQuestions.length.toString(),
             question: testo,
@@ -97,11 +111,13 @@ export const extractQuestionsFromPdfContent = async (
         } else {
           skippedOpenQuestions.push(line);
         }
+        console.log("pdfParser: Current openQuestions:", openQuestions); // Added log
         currentQuestion = defaultQuestion();
         currentField = "question";
         continue;
       } else {
         if (currentQuestion.question && currentQuestion.correctAnswer) {
+          console.log("pdfParser: Saving multiple-choice question:", currentQuestion.question); // Added log
           saveQuestion(currentQuestion, tempQuestions, invalidQuestions);
           multipleQuestionCount++;
         }
@@ -116,19 +132,6 @@ export const extractQuestionsFromPdfContent = async (
       currentField = "option";
       currentQuestion.options = currentQuestion.options || [];
       currentQuestion.options.push(optionMatch[2].trim());
-      continue;
-    }
-
-    if (answerRegex.test(line)) {
-      currentField = "answer";
-      const match = line.match(answerRegex);
-      if (match?.[1]) {
-        const letter = match[1].toUpperCase();
-        const answerIndex = letter.charCodeAt(0) - 65;
-        if (currentQuestion.options?.[answerIndex]) {
-          currentQuestion.correctAnswer = currentQuestion.options[answerIndex].trim();
-        }
-      }
       continue;
     }
 
@@ -155,6 +158,7 @@ export const extractQuestionsFromPdfContent = async (
   }
 
   if (currentQuestion.question && currentQuestion.correctAnswer) {
+    console.log("pdfParser: Saving the last multiple-choice question."); // Added log
     saveQuestion(currentQuestion, tempQuestions, invalidQuestions);
   }
 
@@ -171,6 +175,8 @@ export const extractQuestionsFromPdfContent = async (
     - Domande aperte selezionate: ${openQuestions.length}/2
   `);
 
+  console.log("pdfParser: tempQuestions after parsing:", tempQuestions); // Added log
+  console.log("pdfParser: openQuestions after parsing:", openQuestions); // Added log
   return {
     validQuestions,
     skippedOpenQuestions,
@@ -204,7 +210,7 @@ function saveQuestion(
     invalidQuestions.push({ ...currentQuestion });
     return;
   }
-
+    console.log('pdfParser: Current question after parsing:', currentQuestion);
   validQuestions.push({
     id: validQuestions.length.toString(),
     question: currentQuestion.question.trim(),
@@ -215,3 +221,4 @@ function saveQuestion(
     userAnswer: "",
   });
 }
+

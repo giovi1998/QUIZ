@@ -1,52 +1,95 @@
- // File: aiService.ts
- import axios from 'axios';
+// File: aiService.ts
+import axios from 'axios';
+import { Question } from "../components/type/Types";
 
- // Variabile d'ambiente per l'URL del backend
- const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001'; // URL di default per lo sviluppo
+// Environment variable for the backend URL
+const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001'; // Default URL for development
 
- export const getAiAnswer = async (
-   question: string,
-   options: string[],
-   model: string = "gpt-4",
-   maxTokens: number = 1000
- ): Promise<{ text: string; letter?: string }> => {
-   try {
-     const response = await axios.post(`${backendUrl}/api/generate`, { //utilizzo l'url dinamico
-       prompt: question,
-       options: options,
-       model: model,
-       maxTokens: maxTokens,
-     });
-     const answer = response.data;
-     if (!answer || !answer.message) { // Controllo aggiuntivo
-       throw new Error('Formato della risposta non valido');
-     }
-     const answerText = answer.message.content?.trim() || ""; //estraggo la stringa corretta
-     console.log("Risposta grezza del modello:", answerText);
- 
-     // Estrazione lettera con regex migliorata
-     const letterMatch = answerText.match(/^Risposta:\s*([A-D])/i) || answerText.match(/([A-D])\)/i);
-     const answerLetter = letterMatch?.[1]?.toUpperCase();
- 
-     // Estrazione testo completo
-     const fullAnswer = options.find(opt => 
-       opt.startsWith(answerLetter ? answerText : "")
-     );
- 
-     return {
-       text: fullAnswer || answerText,
-       letter: answerLetter
-     };
-   } catch (error:any) {
-     // Gestione errori migliorata
-     if (error.message.includes("rate limit")) {
-       await new Promise(r => setTimeout(r, 2000));
-       return getAiAnswer(question, options, model, maxTokens);
-     }
-     throw new Error(`Errore AI: ${error.message}`);
-   }
- };
- 
+export const getAiAnswer = async (
+  question: string,
+  options: string[],
+  model: string = "gpt-4",
+  maxTokens: number = 1000
+): Promise<{ text: string; letter?: string }> => {
+  try {
+    const response = await axios.post(`${backendUrl}/api/generate`, {
+      // Use the dynamic URL
+      prompt: question,
+      options: options,
+      model: model,
+      maxTokens: maxTokens,
+    });
+    const answer = response.data;
+    if (!answer || !answer.message) {
+      // Additional check
+      throw new Error('Invalid response format');
+    }
+    const answerText = answer.message.content?.trim() || ""; // Extract the correct string
+    console.log("Raw response from the model:", answerText);
+
+    // Extract letter with improved regex
+    const letterMatch = answerText.match(/^Risposta:\s*([A-D])/i) || answerText.match(/([A-D])\)/i);
+    const answerLetter = letterMatch?.[1]?.toUpperCase();
+
+    // Extract full text
+    const fullAnswer = options.find(opt =>
+      opt.startsWith(answerLetter ? answerText : "")
+    );
+
+    return {
+      text: fullAnswer || answerText,
+      letter: answerLetter
+    };
+  } catch (error: any) {
+    // Improved error handling
+    if (error.message.includes("rate limit")) {
+      await new Promise(r => setTimeout(r, 2000));
+      return getAiAnswer(question, options, model, maxTokens);
+    }
+    throw new Error(`AI Error: ${error.message}`);
+  }
+};
+
+export const evaluateAnswer = async (
+  question: string,
+  userAnswer: string,
+  correctAnswer: string
+): Promise<number> => {
+  try {
+    const response = await axios.post(`${backendUrl}/api/evaluate`, {
+      userAnswer: userAnswer.trim(),
+      correctAnswer: correctAnswer.trim(),
+      question: question.trim(),
+    });
+
+    const data = response.data;
+    const score = parseFloat(data.score);
+
+    if (isNaN(score) || score < 0 || score > 3) {
+      console.error("Invalid score returned from AI:", score);
+      return 0; // Default to 0 if invalid
+    }
+    return Math.round(score); // Round to nearest integer
+  } catch (error) {
+    console.error("Error in evaluateAnswer:", error);
+        if (error.response) {
+          // The request was made and the server responded with a status code
+          // that falls out of the range of 2xx
+          console.error("Server Response:", error.response.data);
+          console.error("Server Status:", error.response.status);
+          console.error("Server Headers:", error.response.headers);
+        } else if (error.request) {
+          // The request was made but no response was received
+          console.error("Request:", error.request);
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          console.error("Error:", error.message);
+        }
+    return 0;
+  }
+};
+
+
 
 // import { HfInference } from '@huggingface/inference';
 

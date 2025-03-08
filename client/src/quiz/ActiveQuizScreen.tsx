@@ -5,6 +5,7 @@ import TimerDisplay from "../components/common/TimerDisplay.tsx";
 import QuestionInfo from "../components/common/QuestionInfo.tsx";
 import ExplanationSection from "../components/ExplanationSection.tsx";
 import type { Question } from "../components/type/Types.tsx";
+import { Loader2 } from "lucide-react";
 
 const styles = `
 @keyframes highlightAnim {
@@ -44,7 +45,14 @@ type OpenAnswerProps = {
   nextQuestion: () => void;
   questionId: string;
   showExplanation: boolean;
-  isLastQuestion:boolean;
+  isLastQuestion: boolean;
+  isLoadingAi: boolean;
+  aiScore?: number;
+  isDisabled: boolean;
+};
+type AiEvaluationProps = {
+  aiScore: number | undefined;
+  isLoading: boolean;
 };
 
 // Function to normalize text
@@ -91,45 +99,86 @@ const OptionSquare: React.FC<OptionSquareProps> = ({
     </div>
   );
 };
+
+const AiEvaluation: React.FC<AiEvaluationProps> = ({ aiScore, isLoading }) => {
+  return (
+    <div className="flex justify-between items-center mt-4">
+      <div className="flex items-center">
+        {isLoading && <Loader2 className="animate-spin h-6 w-6 mr-2" />}
+        <span className="text-gray-600">
+          {isLoading
+            ? "Valutazione AI in corso..."
+            : aiScore !== undefined
+            ? `Valutazione AI: ${aiScore}/3`
+            : ""}
+        </span>
+      </div>
+    </div>
+  );
+};
+
 const OpenAnswer: React.FC<OpenAnswerProps> = ({
   answer,
   handleAnswerChange,
   nextQuestion,
   questionId,
   showExplanation,
-  isLastQuestion
+  isLastQuestion,
+  isLoadingAi,
+  aiScore,
+  isDisabled,
 }) => {
-    const handleNext = () => {
-        console.log(`Answer for question ${questionId}:`, answer);
-        nextQuestion();
-      };
-    
-      return (
-        <div className="mb-6 w-full">
-          <textarea
-            className="w-full p-4 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Scrivi qui la tua risposta"
-            value={answer}
-            onChange={(e) => handleAnswerChange(e.target.value)}
-            rows={5}
-          />
-          <div className="flex justify-end">
-            <button
-              onClick={handleNext}
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            >
-              {isLastQuestion ? "Termina quiz" : "Prossima domanda"}
-            </button>
-          </div>
-        </div>
-      );
-    };
+  const handleNext = () => {
+    console.log(
+      `ActiveQuizScreen.tsx:130 Answer for question ${questionId}:`,
+      answer
+    );
+    nextQuestion();
+  };
+  useEffect(() => {
+    console.log(
+      `OpenAnswer: answer changed - questionId: ${questionId}, answer: ${answer}, isDisabled: ${isDisabled}`
+    );
+  }, [answer, questionId, isDisabled]);
+  return (
+    <div className="mb-6 w-full">
+      <textarea
+        className="w-full p-4 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+        placeholder="Scrivi qui la tua risposta"
+        value={answer}
+        onChange={(e) => {
+          console.log(
+            `OpenAnswer: handleAnswerChange - questionId: ${questionId}, new value: ${e.target.value}`
+          );
+          handleAnswerChange(e.target.value);
+        }}
+        rows={5}
+        disabled={isDisabled}
+      />
+      <AiEvaluation aiScore={aiScore} isLoading={isLoadingAi} />
+
+      <div className="flex justify-end">
+        <button
+          onClick={handleNext}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:bg-blue-300"
+          disabled={isLoadingAi || isDisabled}
+        >
+          {isLastQuestion ? "Termina quiz" : "Prossima domanda"}
+        </button>
+      </div>
+    </div>
+  );
+};
 
 type ActiveQuizScreenProps = {
   quizName: string;
   questions: Question[];
   currentQuestionIndex: number;
-  handleAnswer: (questionId: string, answer: string | null) => void;
+  handleAnswer: (
+    questionId: string,
+    answer: string | null,
+    aiAnswer: string | null,
+  ) => void;
   showExplanation: boolean;
   nextQuestion: () => void;
   timeRemaining: number;
@@ -154,15 +203,28 @@ const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
   isQuizCompleted,
   setShowExplanation,
 }) => {
+  const [isLoadingAi, setIsLoadingAi] = useState(false);
   const totalQuestions = questions.length;
   const progress = (currentQuestionIndex / totalQuestions) * 100;
   const currentQuestion = questions[currentQuestionIndex];
   const selectedAnswer = currentQuestion.userAnswer;
   const isLastQuestion = currentQuestionIndex === totalQuestions - 1;
+  const aiScore = currentQuestion.aiScore;
+  const isDisabled = isQuizCompleted || (timerEnabled && timeRemaining === 0);
 
   useEffect(() => {
-    console.log(`currentQuestionIndex: ${currentQuestionIndex}`);
-    console.log("selectedAnswer", selectedAnswer);
+    console.log(`ActiveQuizScreen.tsx:200 currentQuestionIndex: ${currentQuestionIndex}`);
+    console.log(
+      `ActiveQuizScreen.tsx:201 selectedAnswer`,
+      selectedAnswer
+    );
+    if (currentQuestion.type === "open") {
+      console.log("Current question type: open");
+    } else if (currentQuestion.type === "multiple-choice") {
+      console.log("Current question type: multiple-choice");
+    }
+
+    setIsLoadingAi(false);
   }, [currentQuestionIndex, selectedAnswer]);
 
   // Early return if questions is undefined or empty
@@ -176,7 +238,7 @@ const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
   }
 
   const handleOptionSelect = (value: string) => {
-    handleAnswer(currentQuestion.id, value);
+    handleAnswer(currentQuestion.id, value, currentQuestion.explanation);
     if (currentQuestion.type === "multiple-choice") {
       setShowExplanation(true);
     }
@@ -192,13 +254,15 @@ const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
         <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 break-words max-w-[70%]">
           {quizName}
         </h1>
-        {timerEnabled && timerActive && (
-          <TimerDisplay
-            timerEnabled={timerEnabled}
-            timerActive={timerActive}
-            timeRemaining={timeRemaining}
-          />
-        )}
+        {timerEnabled &&
+          timerActive &&
+          currentQuestion.type === "multiple-choice" && (
+            <TimerDisplay
+              timerEnabled={timerEnabled}
+              timerActive={timerActive}
+              timeRemaining={timeRemaining}
+            />
+          )}
       </div>
 
       <QuestionInfo
@@ -237,12 +301,15 @@ const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
         <OpenAnswer
           answer={selectedAnswer || ""}
           handleAnswerChange={(value) =>
-            handleAnswer(currentQuestion.id, value)
+            handleAnswer(currentQuestion.id, value, currentQuestion.explanation)
           }
           nextQuestion={nextQuestion}
           questionId={currentQuestion.id}
           showExplanation={showExplanation}
           isLastQuestion={isLastQuestion}
+          isLoadingAi={isLoadingAi}
+          aiScore={aiScore}
+          isDisabled={isDisabled}
         />
       )}
     </div>
