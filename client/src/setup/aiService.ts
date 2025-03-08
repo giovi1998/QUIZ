@@ -1,9 +1,63 @@
-// File: aiService.ts
+// File: aiService.ts - Fixed version
+
 import axios from 'axios';
 import { Question } from "../components/type/Types";
 
 // Environment variable for the backend URL
-const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001'; // Default URL for development
+const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
+
+export const evaluateAnswer = async (
+  question: string,
+  userAnswer: string,
+  correctAnswer: string
+): Promise<number> => {
+  if (!userAnswer || userAnswer.trim() === '') {
+    console.log("Empty answer, returning score 0");
+    return 0;
+  }
+  
+  try {
+    console.log("Sending evaluation request for:", { 
+      question,
+      userAnswer: userAnswer.trim(),
+      correctAnswer: correctAnswer.trim()
+    });
+    
+    const response = await axios.post(`${backendUrl}/api/evaluate`, {
+      userAnswer: userAnswer.trim(),
+      correctAnswer: correctAnswer.trim(),
+      question: question.trim(),
+    });
+
+    console.log("Received evaluation response:", response.data);
+    
+    const data = response.data;
+    const score = parseFloat(data.score);
+
+    if (isNaN(score) || score < 0 || score > 3) {
+      console.error("Invalid score returned from AI:", score);
+      // Default to 1 if there's an answer but score is invalid
+      return userAnswer.trim() ? 1 : 0;
+    }
+    
+    return Math.round(score); // Round to nearest integer
+  } catch (error: any) {
+    console.error("Error in evaluateAnswer:", error);
+    
+    if (error.response) {
+      console.error("Server Response:", error.response.data);
+      console.error("Server Status:", error.response.status);
+      console.error("Server Headers:", error.response.headers);
+    } else if (error.request) {
+      console.error("Request made but no response received:", error.request);
+    } else {
+      console.error("Error setting up request:", error.message);
+    }
+    
+    // Default to 1 if there's an answer but evaluation failed
+    return userAnswer.trim() ? 1 : 0;
+  }
+};
 
 export const getAiAnswer = async (
   question: string,
@@ -13,18 +67,18 @@ export const getAiAnswer = async (
 ): Promise<{ text: string; letter?: string }> => {
   try {
     const response = await axios.post(`${backendUrl}/api/generate`, {
-      // Use the dynamic URL
       prompt: question,
       options: options,
       model: model,
       maxTokens: maxTokens,
     });
+    
     const answer = response.data;
     if (!answer || !answer.message) {
-      // Additional check
       throw new Error('Invalid response format');
     }
-    const answerText = answer.message.content?.trim() || ""; // Extract the correct string
+    
+    const answerText = answer.message.content?.trim() || "";
     console.log("Raw response from the model:", answerText);
 
     // Extract letter with improved regex
@@ -47,45 +101,6 @@ export const getAiAnswer = async (
       return getAiAnswer(question, options, model, maxTokens);
     }
     throw new Error(`AI Error: ${error.message}`);
-  }
-};
-
-export const evaluateAnswer = async (
-  question: string,
-  userAnswer: string,
-  correctAnswer: string
-): Promise<number> => {
-  try {
-    const response = await axios.post(`${backendUrl}/api/evaluate`, {
-      userAnswer: userAnswer.trim(),
-      correctAnswer: correctAnswer.trim(),
-      question: question.trim(),
-    });
-
-    const data = response.data;
-    const score = parseFloat(data.score);
-
-    if (isNaN(score) || score < 0 || score > 3) {
-      console.error("Invalid score returned from AI:", score);
-      return 0; // Default to 0 if invalid
-    }
-    return Math.round(score); // Round to nearest integer
-  } catch (error) {
-    console.error("Error in evaluateAnswer:", error);
-        if (error.response) {
-          // The request was made and the server responded with a status code
-          // that falls out of the range of 2xx
-          console.error("Server Response:", error.response.data);
-          console.error("Server Status:", error.response.status);
-          console.error("Server Headers:", error.response.headers);
-        } else if (error.request) {
-          // The request was made but no response was received
-          console.error("Request:", error.request);
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          console.error("Error:", error.message);
-        }
-    return 0;
   }
 };
 

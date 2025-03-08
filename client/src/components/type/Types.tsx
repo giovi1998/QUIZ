@@ -11,8 +11,7 @@ export interface Question {
   explanation: string;
   type: "multiple-choice" | "open";
   userAnswer: string;
-  aiScore?: number; // Aggiungi questo per memorizzare il punteggio AI
-  aiExplanation?: string; // Aggiungi questo per la spiegazione dell'AI
+  aiScore?: number; // Punteggio da 0 a 3 assegnato dall'AI
 }
 
 export interface QuestionFromPdf {

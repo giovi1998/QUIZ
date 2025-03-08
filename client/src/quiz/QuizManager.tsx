@@ -1,8 +1,8 @@
-// quiz/QuizManager.tsx
-import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import ActiveQuizScreen from "./ActiveQuizScreen.tsx";
 import ReportQuiz from "../components/common/ReportQuiz.tsx";
 import { QuizStatus, Question, Report } from "../components/type/Types.tsx";
+import { evaluateAnswer } from "../setup/aiService.ts";
 
 interface MissedQuestion {
   question: string;
@@ -33,50 +33,27 @@ const QuizManager: React.FC<QuizManagerProps> = ({
   const [showExplanation, setShowExplanation] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(timerDuration);
   const [timerActive, setTimerActive] = useState(timerEnabled);
-  const [userAnswers, setUserAnswers] = useState<{ [questionId: string]: string }>({});
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const [score, setScore] = useState(0);
   const [report, setReport] = useState<Report | null>(null);
   const [isQuizCompleted, setIsQuizCompleted] = useState(false);
   const [questions, setQuestions] = useState<Question[]>(initialQuestions);
+  const [isLoadingAi, setIsLoadingAi] = useState(false);
 
   // Sincronizza le domande quando cambiano le initialQuestions
   useEffect(() => {
     setQuestions(initialQuestions);
   }, [initialQuestions]);
 
-  const handleAnswer = useCallback((questionId: string, answer: string | null) => {
-    setUserAnswers(prev => ({ 
-      ...prev, 
-      [questionId]: answer || "" 
-    }));
-    
-    setQuestions(prev => 
-      prev.map(q => 
-        q.id === questionId ? { ...q, userAnswer: answer || "" } : q
-      )
+  const handleAnswer = useCallback(async (questionId: string, answer: string | null, explanation: string | null) => {
+    // Aggiorna la risposta dell'utente nella domanda, ma non valuta immediatamente
+    const updatedQuestions = questions.map(q => 
+      q.id === questionId ? { ...q, userAnswer: answer || "" } : q
     );
-  }, []);
-  const checkAnswer = (userAnswer: string, correctAnswer: string) => {
-    return userAnswer.trim().toLowerCase() === correctAnswer.trim().toLowerCase();
-  };
+    setQuestions(updatedQuestions);
+  }, [questions]);
 
   const nextQuestion = useCallback(() => {
-    const currentQuestion = questions[currentQuestionIndex];
-    
-    // Aggiorna il punteggio
-    if (currentQuestion) {
-      const userAnswer = userAnswers[currentQuestion.id];
-      
-      if (currentQuestion.type === "multiple-choice") {
-        if (userAnswer && checkAnswer(userAnswer, currentQuestion.correctAnswer)) {
-          setScore(prev => prev + 1);
-        }
-      } else if (currentQuestion.type === "open" && userAnswer) {
-        setScore(prev => prev + 1);
-      }
-    }
-
     // Reset timer e indice
     setTimeRemaining(timerDuration);
     
@@ -84,9 +61,10 @@ const QuizManager: React.FC<QuizManagerProps> = ({
       setCurrentQuestionIndex(prev => prev + 1);
       setShowExplanation(false);
     } else {
+      // Ultima domanda, calcola il report
       calculateReport();
     }
-  }, [currentQuestionIndex, questions, userAnswers, timerDuration]);
+  }, [currentQuestionIndex, questions, timerDuration]);
 
   useEffect(() => {
     if (timerEnabled && timerActive && timeRemaining > 0) {
@@ -96,9 +74,9 @@ const QuizManager: React.FC<QuizManagerProps> = ({
     } else if (timerEnabled && timerActive && timeRemaining === 0) {
       // Il tempo è scaduto per la domanda corrente.
       const currentQuestion = questions[currentQuestionIndex];
-      // Se non è stata fornita una risposta, la registra come vuota (quindi sbagliata)
-      if (!userAnswers[currentQuestion.id]) {
-        handleAnswer(currentQuestion.id, "");
+      // Se non è stata fornita una risposta, la registra come vuota
+      if (!currentQuestion.userAnswer) {
+        handleAnswer(currentQuestion.id, "", "");
       }
       // Ferma il timer e mostra la sezione di spiegazione (che segnala l'errore)
       setTimerActive(false);
@@ -114,16 +92,62 @@ const QuizManager: React.FC<QuizManagerProps> = ({
     timerActive,
     questions,
     currentQuestionIndex,
-    userAnswers,
+    handleAnswer
   ]);
 
+  const evaluateAllOpenAnswers = async (questionsToEvaluate: Question[]): Promise<Question[]> => {
+    setIsLoadingAi(true);
+    const evaluatedQuestions = [...questionsToEvaluate];
+    
+    try {
+      // Collect all open questions that need evaluation
+      const openQuestions = evaluatedQuestions.filter(
+        q => q.type === "open" && q.userAnswer && !q.aiScore
+      );
+      
+      // Evaluate each open question
+      for (const question of openQuestions) {
+        try {
+          const aiScore = await evaluateAnswer(
+            question.question,
+            question.userAnswer || "",
+            question.correctAnswer || question.explanation || ""
+          );
+          
+          // Update the question with AI score
+          const index = evaluatedQuestions.findIndex(q => q.id === question.id);
+          if (index !== -1) {
+            evaluatedQuestions[index] = { ...evaluatedQuestions[index], aiScore };
+          }
+        } catch (error) {
+          console.error(`Errore durante la valutazione della domanda ${question.id}:`, error);
+          // Set a default score of 1 if there's an answer
+          const index = evaluatedQuestions.findIndex(q => q.id === question.id);
+          if (index !== -1 && evaluatedQuestions[index].userAnswer) {
+            evaluatedQuestions[index] = { ...evaluatedQuestions[index], aiScore: 1 };
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Errore durante la valutazione delle risposte:", error);
+      showTemporaryAlert("Errore nella valutazione AI. Verrà utilizzato il punteggio predefinito.");
+    } finally {
+      setIsLoadingAi(false);
+    }
+    
+    return evaluatedQuestions;
+  };
 
-  const generateReport = useCallback((): Report => {
+  const checkAnswer = (userAnswer: string, correctAnswer: string) => {
+    return userAnswer.trim().toLowerCase() === correctAnswer.trim().toLowerCase();
+  };
+
+  const generateReport = useCallback((evaluatedQuestions: Question[]): Report => {
     const missed: MissedQuestion[] = [];
     let correctAnswers = 0;
 
-    questions.forEach(q => {
-      const userAnswer = userAnswers[q.id];
+    evaluatedQuestions.forEach(q => {
+      const userAnswer = q.userAnswer || "";
       
       if (q.type === "multiple-choice") {
         if (userAnswer && checkAnswer(userAnswer, q.correctAnswer)) {
@@ -136,35 +160,69 @@ const QuizManager: React.FC<QuizManagerProps> = ({
           });
         }
       } else if (q.type === "open") {
-        if (userAnswer) {
-          correctAnswers++;
-        } else {
+        // Per le domande aperte, usa il punteggio AI
+        const aiScore = q.aiScore !== undefined ? q.aiScore : (userAnswer ? 1 : 0);
+        correctAnswers += aiScore;
+        
+        if (aiScore === 0) {
           missed.push({
             question: q.question,
-            yourAnswer: "Nessuna risposta",
-            correctAnswer: "Domanda aperta - risposta libera"
+            yourAnswer: userAnswer || "Nessuna risposta",
+            correctAnswer: "Nessuna risposta corretta, domanda aperta."
           });
         }
       }
     });
 
     return {
-      totalQuestions: questions.length,
+      totalQuestions: evaluatedQuestions.length,
       correctAnswers,
-      percentage: Math.round((correctAnswers / questions.length) * 100),
+      percentage: Math.round((correctAnswers / evaluatedQuestions.length) * 100),
       missed
     };
-  }, [questions, userAnswers]);
+  }, []);
 
-  const calculateReport = useCallback(() => {
+  const calculateReport = useCallback(async () => {
     if (report) return;
     
-    const generatedReport = generateReport();
-    setReport(generatedReport);
-    setTimerActive(false);
-    setIsQuizCompleted(true);
-    setQuizStatus("completed");
-  }, [generateReport, report, setQuizStatus]);
+    setIsLoadingAi(true);
+    showTemporaryAlert("Valutazione delle risposte in corso...");
+    
+    try {
+      // Evaluate all open answers at once
+      const evaluatedQuestions = await evaluateAllOpenAnswers(questions);
+      
+      // Generate report with evaluated questions
+      const generatedReport = generateReport(evaluatedQuestions);
+      setReport(generatedReport);
+      setQuestions(evaluatedQuestions); // Update questions with AI scores
+      
+      // Update the total score based on the evaluations
+      let totalScore = 0;
+      evaluatedQuestions.forEach(q => {
+        if (q.type === "multiple-choice") {
+          if (q.userAnswer && checkAnswer(q.userAnswer, q.correctAnswer)) {
+            totalScore++;
+          }
+        } else if (q.type === "open") {
+          totalScore += q.aiScore !== undefined ? q.aiScore : (q.userAnswer ? 1 : 0);
+        }
+      });
+      setScore(totalScore);
+    } catch (error) {
+      console.error("Errore durante il calcolo del report:", error);
+      showTemporaryAlert("Errore nel calcolo del report. Utilizzando valutazione predefinita.");
+      
+      // Fallback to basic report if AI evaluation fails
+      const generatedReport = generateReport(questions);
+      setReport(generatedReport);
+    } finally {
+      setIsLoadingAi(false);
+      setTimerActive(false);
+      setIsQuizCompleted(true);
+      setQuizStatus("completed");
+    }
+  }, [generateReport, questions, report, setQuizStatus, showTemporaryAlert]);
 
   const restartQuiz = useCallback(() => {
     setQuizStatus("setup");
@@ -174,9 +232,9 @@ const QuizManager: React.FC<QuizManagerProps> = ({
     setShowExplanation(false);
     setTimeRemaining(timerDuration);
     setTimerActive(timerEnabled);
-    setUserAnswers({});
+    setIsLoadingAi(false);
     setIsQuizCompleted(false);
-    setQuestions(initialQuestions.map(q => ({ ...q, userAnswer: "" })));
+    setQuestions(initialQuestions.map(q => ({ ...q, userAnswer: "", aiScore: undefined })));
   }, [initialQuestions, timerDuration, timerEnabled, setQuizStatus]);
 
   if (!questions?.length) {
@@ -190,7 +248,7 @@ const QuizManager: React.FC<QuizManagerProps> = ({
   return (
     <div>
       {quizStatus === "active" && (
-        <ActiveQuizScreen
+        <ActiveQuizScreen 
           quizName={quizName}
           questions={questions}
           currentQuestionIndex={currentQuestionIndex}
@@ -203,6 +261,7 @@ const QuizManager: React.FC<QuizManagerProps> = ({
           score={score}
           isQuizCompleted={isQuizCompleted}
           setShowExplanation={setShowExplanation}
+          isLoadingAi={isLoadingAi}
         />
       )}
 

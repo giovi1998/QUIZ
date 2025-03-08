@@ -1,4 +1,3 @@
-// quiz/ActiveQuizScreen.tsx
 import React, { useState, useEffect } from "react";
 import ProgressBar from "../components/common/ProgressBar.tsx";
 import TimerDisplay from "../components/common/TimerDisplay.tsx";
@@ -177,7 +176,7 @@ type ActiveQuizScreenProps = {
   handleAnswer: (
     questionId: string,
     answer: string | null,
-    aiAnswer: string | null,
+    explanation: string | null
   ) => void;
   showExplanation: boolean;
   nextQuestion: () => void;
@@ -187,6 +186,7 @@ type ActiveQuizScreenProps = {
   score: number;
   isQuizCompleted: boolean;
   setShowExplanation: (show: boolean) => void;
+  isLoadingAi: boolean;
 };
 
 const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
@@ -202,8 +202,8 @@ const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
   score,
   isQuizCompleted,
   setShowExplanation,
+  isLoadingAi,
 }) => {
-  const [isLoadingAi, setIsLoadingAi] = useState(false);
   const totalQuestions = questions.length;
   const progress = (currentQuestionIndex / totalQuestions) * 100;
   const currentQuestion = questions[currentQuestionIndex];
@@ -223,9 +223,7 @@ const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
     } else if (currentQuestion.type === "multiple-choice") {
       console.log("Current question type: multiple-choice");
     }
-
-    setIsLoadingAi(false);
-  }, [currentQuestionIndex, selectedAnswer]);
+  }, [currentQuestionIndex, selectedAnswer, currentQuestion.type]);
 
   // Early return if questions is undefined or empty
   if (!questions || questions.length === 0) {
