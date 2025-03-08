@@ -1,4 +1,3 @@
-// setup/pdfParser.ts
 import { Question } from "../components/type/Types";
 import { getDocument } from "pdfjs-dist";
 import * as pdfjsLib from "pdfjs-dist";
@@ -27,7 +26,7 @@ export const extractQuestionsFromPdfContent = async (
   console.log("🚀 Inizio parsing del contenuto del PDF");
 
   const skippedOpenQuestions: string[] = [];
-  const openQuestions: Question[] = [];
+  const tempOpenQuestions: Question[] = [];
   const invalidQuestions: Partial<Question>[] = [];
   const tempQuestions: Question[] = [];
 
@@ -84,45 +83,50 @@ export const extractQuestionsFromPdfContent = async (
       const testo = domandaMatch[3].trim();
 
       if (tipo === "aperta") {
-        console.log(`pdfParser: Open question detected: ${testo}`); // Added log
-        if (openQuestionCount < 2) {
-          if (answerRegexOpen.test(line)) {
-            currentField = "answer";
-            const match = line.match(answerRegexOpen);
-            if (match?.[1]) {
-              const letter = match[1].toUpperCase();
-              const answerIndex = letter.charCodeAt(0) - 65;
-              if (currentQuestion.options?.[answerIndex]) {
-                currentQuestion.correctAnswer = currentQuestion.options[answerIndex].trim();
-              }
-            }
-            continue;
-          }
-          openQuestions.push({
-            id: openQuestions.length.toString(),
-            question: testo,
+        console.log(`pdfParser: Open question detected: ${testo}`);
+        
+        // Salva la domanda aperta precedente se esiste
+        if (currentQuestion.question && currentQuestion.type === "open") {
+          tempOpenQuestions.push({
+            id: tempOpenQuestions.length.toString(),
+            question: currentQuestion.question.trim(),
             options: [],
-            correctAnswer: "",
-            explanation: "",
+            correctAnswer: currentQuestion.correctAnswer || "",
+            explanation: currentQuestion.explanation?.trim() || "",
             type: "open",
             userAnswer: "",
           });
-          openQuestionCount++;
-        } else {
-          skippedOpenQuestions.push(line);
         }
-        console.log("pdfParser: Current openQuestions:", openQuestions); // Added log
+        
+        // Inizia una nuova domanda aperta
         currentQuestion = defaultQuestion();
+        currentQuestion.type = "open";
+        currentQuestion.question = testo;
         currentField = "question";
         continue;
       } else {
-        if (currentQuestion.question && currentQuestion.correctAnswer) {
-          console.log("pdfParser: Saving multiple-choice question:", currentQuestion.question); // Added log
-          saveQuestion(currentQuestion, tempQuestions, invalidQuestions);
-          multipleQuestionCount++;
+        // È una domanda a scelta multipla
+        if (currentQuestion.question) {
+          // Se c'era una domanda precedente (sia aperta che multipla), salvala
+          if (currentQuestion.type === "open") {
+            tempOpenQuestions.push({
+              id: tempOpenQuestions.length.toString(),
+              question: currentQuestion.question.trim(),
+              options: [],
+              correctAnswer: currentQuestion.correctAnswer || "",
+              explanation: currentQuestion.explanation?.trim() || "",
+              type: "open",
+              userAnswer: "",
+            });
+          } else if (currentQuestion.correctAnswer) {
+            saveQuestion(currentQuestion, tempQuestions, invalidQuestions);
+          }
         }
+        
+        // Inizia una nuova domanda a scelta multipla
         currentQuestion = defaultQuestion();
         currentQuestion.question = testo;
+        currentField = "question";
         continue;
       }
     }
@@ -132,6 +136,24 @@ export const extractQuestionsFromPdfContent = async (
       currentField = "option";
       currentQuestion.options = currentQuestion.options || [];
       currentQuestion.options.push(optionMatch[2].trim());
+      continue;
+    }
+
+    const answerMatch = line.match(answerRegexMulti);
+    if (answerMatch) {
+      currentField = "answer";
+      const letter = answerMatch[1].toUpperCase();
+      const answerIndex = letter.charCodeAt(0) - 65;
+      if (currentQuestion.options?.[answerIndex]) {
+        currentQuestion.correctAnswer = currentQuestion.options[answerIndex].trim();
+      }
+      continue;
+    }
+
+    if (answerRegexOpen.test(line)) {
+      currentField = "answer";
+      const cleanedLine = line.replace(answerRegexOpen, "").trim();
+      currentQuestion.correctAnswer = cleanedLine;
       continue;
     }
 
@@ -151,32 +173,51 @@ export const extractQuestionsFromPdfContent = async (
           currentQuestion.options[currentQuestion.options.length - 1] += " " + line;
         }
         break;
+      case "answer":
+        if (currentQuestion.type === "open") {
+          currentQuestion.correctAnswer = (currentQuestion.correctAnswer || "") + " " + line;
+        }
+        break;
       case "explanation":
         currentQuestion.explanation += " " + line;
         break;
     }
   }
 
-  if (currentQuestion.question && currentQuestion.correctAnswer) {
-    console.log("pdfParser: Saving the last multiple-choice question."); // Added log
-    saveQuestion(currentQuestion, tempQuestions, invalidQuestions);
+  // Salva l'ultima domanda se esiste
+  if (currentQuestion.question) {
+    if (currentQuestion.type === "open") {
+      tempOpenQuestions.push({
+        id: tempOpenQuestions.length.toString(),
+        question: currentQuestion.question.trim(),
+        options: [],
+        correctAnswer: currentQuestion.correctAnswer || "",
+        explanation: currentQuestion.explanation?.trim() || "",
+        type: "open",
+        userAnswer: "",
+      });
+    } else if (currentQuestion.correctAnswer) {
+      saveQuestion(currentQuestion, tempQuestions, invalidQuestions);
+    }
   }
 
+  // Esegui lo shuffle e seleziona solo 2 domande aperte
+  const openQuestions = shuffleArray([...tempOpenQuestions]).slice(0, 2);
+  
+  // Per le domande multiple, mantieni la logica esistente
   const validQuestions = shuffleArray(tempQuestions).slice(0, 24);
 
   console.log(`
     📊 Risultati parsing:
-    - Domande totali aperte rilevate: ${openQuestions.length + skippedOpenQuestions.length}
-    - Domande aperte scartate: ${skippedOpenQuestions.length}
+    - Domande totali aperte rilevate: ${tempOpenQuestions.length}
+    - Domande aperte selezionate: ${openQuestions.length}/2
+    - Domande aperte scartate: ${tempOpenQuestions.length - openQuestions.length}
     - Domande non valide: ${invalidQuestions.length}
     - Domande multiple valide trovate: ${tempQuestions.length}
     - Domande multiple selezionate per il quiz: ${validQuestions.length}/24
     - Domande multiple scartate per limite: ${tempQuestions.length - validQuestions.length}
-    - Domande aperte selezionate: ${openQuestions.length}/2
   `);
 
-  console.log("pdfParser: tempQuestions after parsing:", tempQuestions); // Added log
-  console.log("pdfParser: openQuestions after parsing:", openQuestions); // Added log
   return {
     validQuestions,
     skippedOpenQuestions,
@@ -210,7 +251,7 @@ function saveQuestion(
     invalidQuestions.push({ ...currentQuestion });
     return;
   }
-    console.log('pdfParser: Current question after parsing:', currentQuestion);
+  
   validQuestions.push({
     id: validQuestions.length.toString(),
     question: currentQuestion.question.trim(),
@@ -221,4 +262,3 @@ function saveQuestion(
     userAnswer: "",
   });
 }
-
