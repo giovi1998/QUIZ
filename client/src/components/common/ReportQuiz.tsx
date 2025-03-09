@@ -1,12 +1,17 @@
 import React from "react";
-import { Report } from "../type/Types.tsx";
+import { Report, Question } from "../type/Types.tsx";
 
 interface ReportQuizProps {
   report: Report;
   backToSetup: () => void;
+  questions: Question[]; // Add questions prop here
 }
 
-const ReportQuiz: React.FC<ReportQuizProps> = ({ report, backToSetup }) => {
+const ReportQuiz: React.FC<ReportQuizProps> = ({
+  report,
+  backToSetup,
+  questions, // Destructure questions prop
+}) => {
   const formattedDate = new Date().toLocaleDateString("it-IT", {
     day: "2-digit",
     month: "2-digit",
@@ -14,7 +19,41 @@ const ReportQuiz: React.FC<ReportQuizProps> = ({ report, backToSetup }) => {
   });
 
   const handleDownloadCSV = () => {
-    // Implementazione del download CSV (uguale a CompletedScreen)
+    const escapeCsv = (str: string) => `"${str.replace(/"/g, '""')}"`;
+
+    const csvContent = [
+      ["Quiz", "Computer Vision"], // Hardcoded quiz name
+      ["Data completamento", formattedDate],
+      ["Punteggio", `${report.correctAnswers}/${report.totalQuestions} (${report.percentage}%)`],
+      [],
+      ["Domanda", "Tua risposta", "Risposta corretta", "Punteggio AI (Se Applicabile)"],
+      ...report.missed.map(item => {
+        const question = questions.find(q => q.question === item.question);
+        const aiScore = question?.aiScore !== undefined ? question.aiScore : "N/A";
+        return [
+          escapeCsv(item.question),
+          escapeCsv(item.yourAnswer),
+          escapeCsv(item.correctAnswer),
+          aiScore
+        ];
+      })
+    ]
+    .map(row => row.join(","))
+    .join("\r\n");
+  
+    const blob = new Blob(["\ufeff", csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    
+    link.href = url;
+    link.download = `Computer_Vision_report.csv`;
+    document.body.appendChild(link);
+    link.click();
+    
+    setTimeout(() => {
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }, 100);
   };
 
   const getResultMessage = (percentage: number) => {
@@ -43,24 +82,36 @@ const ReportQuiz: React.FC<ReportQuizProps> = ({ report, backToSetup }) => {
       {report.missed.length > 0 && (
         <div className="mb-6">
           <h2 className="text-xl font-semibold mb-4">
-            Domande sbagliate ({report.missed.length}):
+            Domande da rivedere ({report.missed.length}):
           </h2>
           <div className="space-y-4">
-            {report.missed.map((missed, index) => (
-              <div key={index} className="border border-gray-200 rounded-lg p-4">
-                <p className="font-bold mb-2">{missed.question}</p>
-                <p className="text-red-600 mb-1">
-                  <span className="emoji mr-2" aria-hidden="true">❌</span>
-                  Tua risposta: <span className="font-normal">{missed.yourAnswer}</span>
-                </p>
-                {missed.correctAnswer && (
-                  <p className="text-green-600">
-                    <span className="emoji mr-2" aria-hidden="true">✅</span>
-                    Risposta corretta: <span className="font-normal">{missed.correctAnswer}</span>
+            {report.missed.map((missed, index) => {
+              // Find the corresponding question object
+              const question = questions.find(q => q.question === missed.question);
+              // Get the aiScore from the question object
+              const aiScore = question?.aiScore;
+              return (
+                <div key={index} className="border border-gray-200 rounded-lg p-4">
+                  <p className="font-bold mb-2">{missed.question}</p>
+                  <p className="text-red-600 mb-1">
+                    <span className="emoji mr-2" aria-hidden="true">❌</span>
+                    Tua risposta: <span className="font-normal">{missed.yourAnswer}</span>
                   </p>
-                )}
-              </div>
-            ))}
+                  {missed.correctAnswer && (
+                    <p className="text-green-600 mb-1">
+                      <span className="emoji mr-2" aria-hidden="true">✅</span>
+                      Risposta corretta: <span className="font-normal">{missed.correctAnswer}</span>
+                    </p>
+                  )}
+                  {aiScore !== undefined && (
+                    <p className="text-blue-600">
+                      <span className="emoji mr-2" aria-hidden="true">🤖</span>
+                      Punteggio AI: <span className="font-normal">{aiScore}/3</span>
+                    </p>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
@@ -71,12 +122,6 @@ const ReportQuiz: React.FC<ReportQuizProps> = ({ report, backToSetup }) => {
           className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded flex-1"
         >
           Nuovo Quiz
-        </button>
-        <button
-          onClick={handleDownloadCSV}
-          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex-1"
-        >
-          Scarica Report CSV
         </button>
       </div>
     </div>

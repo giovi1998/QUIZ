@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import ActiveQuizScreen from "./ActiveQuizScreen.tsx";
-import ReportQuiz from "../components/common/ReportQuiz.tsx";
+import CompletedScreen from "./CompletedScreen.tsx";
 import { QuizStatus, Question, Report } from "../components/type/Types.tsx";
 import { evaluateAnswer } from "../setup/aiService.ts";
 
@@ -8,6 +8,7 @@ interface MissedQuestion {
   question: string;
   yourAnswer: string;
   correctAnswer: string;
+  aiScore: number; //added aiScore
 }
 
 interface QuizManagerProps {
@@ -148,7 +149,8 @@ const QuizManager: React.FC<QuizManagerProps> = ({
 
     evaluatedQuestions.forEach(q => {
       const userAnswer = q.userAnswer || "";
-      
+      const aiScore = q.aiScore !== undefined ? q.aiScore : (userAnswer ? 1 : 0);
+
       if (q.type === "multiple-choice") {
         if (userAnswer && checkAnswer(userAnswer, q.correctAnswer)) {
           correctAnswers++;
@@ -156,21 +158,20 @@ const QuizManager: React.FC<QuizManagerProps> = ({
           missed.push({
             question: q.question,
             yourAnswer: userAnswer || "Nessuna risposta",
-            correctAnswer: q.correctAnswer
+            correctAnswer: q.correctAnswer,
+            aiScore:0,
           });
         }
       } else if (q.type === "open") {
         // Per le domande aperte, usa il punteggio AI
-        const aiScore = q.aiScore !== undefined ? q.aiScore : (userAnswer ? 1 : 0);
         correctAnswers += aiScore;
         
-        if (aiScore === 0) {
-          missed.push({
-            question: q.question,
-            yourAnswer: userAnswer || "Nessuna risposta",
-            correctAnswer: "Nessuna risposta corretta, domanda aperta."
-          });
-        }
+        missed.push({
+          question: q.question,
+          yourAnswer: userAnswer || "Nessuna risposta",
+          correctAnswer: q.correctAnswer || "Nessuna risposta corretta, domanda aperta.", // Use the actual correctAnswer if available
+          aiScore:aiScore
+        });
       }
     });
 
@@ -267,7 +268,7 @@ const QuizManager: React.FC<QuizManagerProps> = ({
       )}
 
       {quizStatus === "completed" && report && (
-        <ReportQuiz report={report} backToSetup={restartQuiz} />
+        <CompletedScreen report={report} backToSetup={restartQuiz} quizName={quizName} questions={questions} />
       )}
     </div>
   );

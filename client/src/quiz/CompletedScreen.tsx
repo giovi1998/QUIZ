@@ -1,17 +1,19 @@
 import React from "react";
 import { Smile, Download, FilePlus } from "lucide-react";
-import { Report } from "../components/type/Types.tsx";
+import { Report, Question } from "../components/type/Types.tsx";
 
 interface CompletedScreenProps {
   quizName: string;
   report: Report;
   backToSetup: () => void;
+  questions:Question[]; //add question
 }
 
 const CompletedScreen: React.FC<CompletedScreenProps> = ({
   quizName,
   report,
   backToSetup,
+  questions,//add question
 }) => {
   const formattedDate = new Date().toLocaleDateString("it-IT", {
     day: "2-digit",
@@ -27,12 +29,17 @@ const CompletedScreen: React.FC<CompletedScreenProps> = ({
       ["Data completamento", formattedDate],
       ["Punteggio", `${report.correctAnswers}/${report.totalQuestions} (${report.percentage}%)`],
       [],
-      ["Domanda", "Tua risposta", "Risposta corretta"],
-      ...report.missed.map(item => [
-        escapeCsv(item.question),
-        escapeCsv(item.yourAnswer),
-        escapeCsv(item.correctAnswer)
-      ])
+      ["Domanda", "Tua risposta", "Risposta corretta","Punteggio AI (Se Applicabile)"],
+      ...report.missed.map(item => {
+        const question = questions.find(q => q.question === item.question);
+        const aiScore = question?.aiScore !== undefined ? question.aiScore : "N/A";
+        return [
+          escapeCsv(item.question),
+          escapeCsv(item.yourAnswer),
+          escapeCsv(item.correctAnswer),
+          aiScore,
+        ];
+      })
     ]
     .map(row => row.join(","))
     .join("\r\n");
@@ -145,7 +152,12 @@ const CompletedScreen: React.FC<CompletedScreenProps> = ({
             Domande da rivedere ({report.missed.length})
           </h2>
           <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
-            {report.missed.map((item, index) => (
+            {report.missed.map((item, index) => {
+              // Find the corresponding question object
+              const question = questions.find(q => q.question === item.question);
+               // Get the aiScore from the question object
+               const aiScore = question?.aiScore;
+              return(
               <div
                 key={index}
                 className="p-4 bg-white border border-gray-200 rounded-xl shadow-sm"
@@ -160,9 +172,16 @@ const CompletedScreen: React.FC<CompletedScreenProps> = ({
                     <span className="emoji mr-2" aria-hidden="true">✅</span>
                     <span>Risposta corretta: {item.correctAnswer}</span>
                   </div>
+                   {aiScore !== undefined && (
+                    <div className="flex items-center text-blue-600">
+                      <span className="emoji mr-2" aria-hidden="true">🤖</span>
+                      Punteggio AI: {aiScore}/3
+                    </div>
+                  )}
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       ) : (

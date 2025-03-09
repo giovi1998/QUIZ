@@ -56,6 +56,7 @@ type OpenAnswerProps = {
   isLoadingAi: boolean;
   aiScore?: number;
   isDisabled: boolean;
+  correctAnswer?: string; // Add correctAnswer prop
 };
 
 type AiEvaluationProps = {
@@ -146,6 +147,7 @@ const OpenAnswer: React.FC<OpenAnswerProps> = ({
   isLoadingAi,
   aiScore,
   isDisabled,
+  correctAnswer // Add correctAnswer parameter
 }) => {
   return (
     <div className="mb-6 w-full">
@@ -159,7 +161,14 @@ const OpenAnswer: React.FC<OpenAnswerProps> = ({
         aria-label="Campo per risposta aperta"
       />
       <AiEvaluation aiScore={aiScore} isLoading={isLoadingAi} />
-
+      {showExplanation && (
+        <div className="bg-gray-50 p-4 rounded-xl">
+         <p className="text-green-600">
+            <span className="emoji mr-2" aria-hidden="true">✅</span>
+           Risposta corretta: <span className="font-normal">{correctAnswer}</span>
+          </p>
+        </div>
+      )}
       <div className="flex justify-end mt-4">
         <button
           onClick={nextQuestion}
@@ -224,7 +233,10 @@ const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
     if (currentQuestion.type === "multiple-choice" && selectedAnswer) {
       setShowExplanation(true);
     }
-  }, [selectedAnswer, currentQuestion.type,setShowExplanation]);
+    if (currentQuestion.type === "open" && showExplanation) {
+      setShowExplanation(false);
+    }
+  }, [selectedAnswer, currentQuestion.type,showExplanation,setShowExplanation]);
 
   if (!questions?.length) {
     return (
@@ -319,6 +331,7 @@ const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
           isLoadingAi={isLoadingAi}
           aiScore={aiScore}
           isDisabled={isDisabled}
+          correctAnswer={currentQuestion.correctAnswer} // Pass the correctAnswer
         />
       )}
     </div>
