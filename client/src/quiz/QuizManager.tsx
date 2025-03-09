@@ -262,11 +262,12 @@ const QuizManager: React.FC<QuizManagerProps> = ({
           isQuizCompleted={isQuizCompleted}
           setShowExplanation={setShowExplanation}
           isLoadingAi={isLoadingAi}
+          setScore={setScore}
         />
       )}
 
       {quizStatus === "completed" && report && (
-        <ReportQuiz report={report} onRestart={restartQuiz} />
+        <ReportQuiz report={report} backToSetup={restartQuiz} />
       )}
     </div>
   );

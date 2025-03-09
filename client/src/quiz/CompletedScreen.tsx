@@ -1,179 +1,195 @@
-// CompletedScreen.tsx migliorato
-import React, { useEffect } from "react";
-import { Smile, Download } from "lucide-react";
-import { Report } from "../components/type/Types";
+import React from "react";
+import { Smile, Download, FilePlus } from "lucide-react";
+import { Report } from "../components/type/Types.tsx";
 
-interface Props {
+interface CompletedScreenProps {
   quizName: string;
   report: Report;
-  resetQuiz: () => void;
   backToSetup: () => void;
 }
 
-export const CompletedScreen: React.FC<Props> = ({
+const CompletedScreen: React.FC<CompletedScreenProps> = ({
   quizName,
   report,
-  resetQuiz,
   backToSetup,
 }) => {
-  // Log when the component is rendered
-  useEffect(() => {
-    console.log(`CompletedScreen rendered for quiz: ${quizName}`);
-    console.log(
-      `Score: ${report.correctAnswers}/${report.totalQuestions} (${report.percentage}%)`
-    );
-  }, [quizName, report]);
+  const formattedDate = new Date().toLocaleDateString("it-IT", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
 
-  // Funzione per scaricare il report come PDF o CSV
-  const downloadReport = (format: "pdf" | "csv") => {
-    if (format === "csv") {
-      let csvContent = "data:text/csv;charset=utf-8,";
-      csvContent += "Quiz: " + quizName + "\n";
-      csvContent += "Completato il: " + new Date().toLocaleDateString() + "\n";
-      csvContent +=
-        "Punteggio: " +
-        report.correctAnswers +
-        "/" +
-        report.totalQuestions +
-        " (" +
-        report.percentage +
-        "%)\n\n";
-
-      if (report.missed.length > 0) {
-        csvContent += "Domande sbagliate:\n";
-        csvContent += "Domanda,Tua risposta,Risposta corretta\n";
-
-        report.missed.forEach((item) => {
-          csvContent += `"${item.question}","${item.yourAnswer}","${item.correctAnswer}"\n`;
-        });
-      }
-
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      link.setAttribute("download", `${quizName}_report.csv`);
-      document.body.appendChild(link);
-      link.click();
+  const handleDownloadCSV = () => {
+    const escapeCsv = (str: string) => `"${str.replace(/"/g, '""')}"`;
+  
+    const csvContent = [
+      ["Quiz", escapeCsv(quizName)],
+      ["Data completamento", formattedDate],
+      ["Punteggio", `${report.correctAnswers}/${report.totalQuestions} (${report.percentage}%)`],
+      [],
+      ["Domanda", "Tua risposta", "Risposta corretta"],
+      ...report.missed.map(item => [
+        escapeCsv(item.question),
+        escapeCsv(item.yourAnswer),
+        escapeCsv(item.correctAnswer)
+      ])
+    ]
+    .map(row => row.join(","))
+    .join("\r\n");
+  
+    const blob = new Blob(["\ufeff", csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    
+    link.href = url;
+    link.download = `${quizName.replace(/[^a-z0-9]/gi, "_")}_report.csv`;
+    document.body.appendChild(link);
+    link.click();
+    
+    setTimeout(() => {
       document.body.removeChild(link);
-    }
+      URL.revokeObjectURL(url);
+    }, 100);
   };
 
+  const getResultStatus = (percentage: number) => {
+    if (percentage >= 90) return { 
+      text: (
+        <>
+          <span>Eccellente </span>
+          <span className="emoji" aria-hidden="true">🎉</span>
+        </>
+      ),
+      color: "text-green-600" 
+    };
+    if (percentage >= 70) return { 
+      text: (
+        <>
+          <span>Ottimo </span>
+          <span className="emoji" aria-hidden="true">👍</span>
+        </>
+      ),
+      color: "text-blue-600" 
+    };
+    if (percentage >= 50) return { 
+      text: (
+        <>
+          <span>Sufficiente </span>
+          <span className="emoji" aria-hidden="true">👏</span>
+        </>
+      ),
+      color: "text-yellow-600" 
+    };
+    return { 
+      text: (
+        <>
+          <span>Da migliorare </span>
+          <span className="emoji" aria-hidden="true">💪</span>
+        </>
+      ),
+      color: "text-red-600" 
+    };
+  };
+
+  const status = getResultStatus(report.percentage);
+
   return (
-    <div className="bg-white p-4 md:p-8 rounded-lg shadow-2xl max-w-md mx-auto space-y-4 md:space-y-6">
-      <div className="flex items-center justify-center mb-2 md:mb-4">
-        <Smile
-          size={48}
-          className={`${
-            report.percentage >= 70 ? "text-green-500" : "text-red-500"
-          } 
-          ${
-            report.missed.length === 0 ? "animate-bounce" : "animate-pulse"
-          }`}
-          strokeWidth={2}
-        />
-      </div>
-      <div className="text-center space-y-1 md:space-y-2">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+    <div className="bg-white rounded-xl shadow-lg p-6 mx-4 max-w-2xl md:mx-auto space-y-8">
+      <div className="text-center space-y-4">
+        <div className="flex justify-center">
+          <Smile
+            size={64}
+            className={`lucide-icon ${status.color} ${report.missed.length === 0 ? "animate-bounce" : "animate-pulse"}`}
+            aria-hidden="true"
+          />
+        </div>
+        <h1 className="text-3xl font-bold text-gray-800">
           {quizName}
         </h1>
-        <div className="text-gray-600 text-sm">
-          Completato il: {new Date().toLocaleDateString()}
-        </div>
+        <p className="text-gray-600">Completato il: {formattedDate}</p>
       </div>
-      <div className="bg-gray-50 p-4 md:p-6 rounded-lg text-center space-y-3 md:space-y-4">
-        <div className="flex items-center justify-center space-x-2">
-          <span className="text-xl md:text-2xl font-semibold">
-            {report.correctAnswers}/{report.totalQuestions}
-          </span>
-          <span
-            className={`text-sm font-bold px-2 py-1 rounded ${
-              report.percentage >= 70
-                ? "bg-green-100 text-green-600"
-                : "bg-red-100 text-red-600"
-            }`}
-          >
-            {report.percentage >= 90
-              ? "Eccellente!"
-              : report.percentage >= 70
-              ? "Ottimo!"
-              : report.percentage >= 50
-              ? "Buono"
-              : "Da migliorare"}
-          </span>
+
+      <div className="bg-gray-50 p-6 rounded-xl space-y-4">
+        <div className="flex flex-col md:flex-row items-center justify-between">
+          <div className="flex items-center space-x-4 mb-4 md:mb-0">
+            <span className="text-4xl font-bold text-blue-600">
+              {report.percentage}%
+            </span>
+            <span className={`text-lg font-semibold ${status.color}`}>
+              {status.text}
+            </span>
+          </div>
+          <div className="text-xl text-gray-700">
+            <span className="font-bold">{report.correctAnswers}</span> su{" "}
+            <span className="font-bold">{report.totalQuestions}</span> corrette
+          </div>
         </div>
-        <div className="text-4xl md:text-5xl font-black text-blue-600">
-          {report.percentage}%
-        </div>
-        <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+        
+        <div 
+          className="w-full h-3 bg-gray-200 rounded-full overflow-hidden"
+          role="progressbar"
+          aria-valuenow={report.percentage}
+          aria-valuemin={0}
+          aria-valuemax={100}
+        >
           <div
-            className={`h-2 ${
-              report.percentage >= 70 ? "bg-green-500" : "bg-red-500"
-            } rounded-full`}
+            className={`h-full transition-all duration-500 ${status.color.replace("text", "bg")}`}
             style={{ width: `${report.percentage}%` }}
           />
         </div>
       </div>
 
-      {report.missed.length > 0 && (
-        <div className="space-y-3 md:space-y-4">
-          <h2 className="text-xl md:text-2xl font-bold text-center mb-2 md:mb-4">
-            Domande sbagliate ({report.missed.length})
+      {report.missed.length > 0 ? (
+        <div className="space-y-6">
+          <h2 className="text-2xl font-semibold text-center text-gray-800">
+            Domande da rivedere ({report.missed.length})
           </h2>
-          <div className="max-h-60 md:max-h-80 overflow-y-auto pr-2">
-            {report.missed.map((item, idx) => (
+          <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
+            {report.missed.map((item, index) => (
               <div
-                key={idx}
-                className="p-3 md:p-4 bg-gray-50 rounded-lg shadow-sm space-y-2 mb-3"
+                key={index}
+                className="p-4 bg-white border border-gray-200 rounded-xl shadow-sm"
               >
-                <div className="text-base md:text-lg font-medium mb-2">
-                  {item.question}
-                </div>
-                <div className="flex items-center mb-1 text-red-500 text-sm">
-                  ❌ Tua risposta: {item.yourAnswer}
-                </div>
-                <div className="flex items-center text-green-500 text-sm">
-                  ✅ Risposta corretta: {item.correctAnswer}
+                <p className="font-medium text-lg mb-3">{item.question}</p>
+                <div className="space-y-2">
+                  <div className="flex items-center text-red-600">
+                    <span className="emoji mr-2" aria-hidden="true">❌</span>
+                    <span>Tua risposta: {item.yourAnswer}</span>
+                  </div>
+                  <div className="flex items-center text-green-600">
+                    <span className="emoji mr-2" aria-hidden="true">✅</span>
+                    <span>Risposta corretta: {item.correctAnswer}</span>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         </div>
-      )}
-
-      {!report.missed.length && (
-        <div className="bg-green-100 p-4 rounded-lg text-center">
-          <span className="text-green-500 font-semibold">Perfetto!</span> Hai
-          risposto correttamente a tutte le domande!
+      ) : (
+        <div className="bg-green-100 p-4 rounded-xl text-center text-green-700 text-lg">
+          Perfetto! Hai risposto correttamente a tutte le domande! <span className="emoji" aria-hidden="true">🎉</span>
         </div>
       )}
 
-      <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4 mt-4 md:mt-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <button
-          className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all"
-          onClick={resetQuiz}
-        >
-          Riprova
-        </button>
-        <button
-          className="w-full sm:w-auto px-6 py-3 bg-gray-200 rounded-lg hover:bg-gray-300 transition-all"
           onClick={backToSetup}
+          className="flex items-center justify-center p-4 space-x-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl transition-colors"
         >
-          Nuovo Quiz
+          <FilePlus className="lucide-icon w-5 h-5" />
+          <span className="font-semibold">Nuovo Quiz</span>
         </button>
-      </div>
-
-      <div className="flex justify-center mt-2">
+        
         <button
-          onClick={() => {
-            console.log("Download report button clicked");
-            downloadReport("csv");
-          }}
-          className="flex items-center text-blue-600 text-sm hover:underline"
+          onClick={handleDownloadCSV}
+          className="flex items-center justify-center p-4 space-x-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors"
         >
-          <Download size={16} className="mr-1" />
-          Scarica Report CSV
+          <Download className="lucide-icon w-5 h-5" />
+          <span className="font-semibold">Scarica Report CSV</span>
         </button>
       </div>
     </div>
   );
 };
+
+export default CompletedScreen;
