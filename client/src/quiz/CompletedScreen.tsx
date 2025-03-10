@@ -104,9 +104,9 @@ const CompletedScreen: React.FC<CompletedScreenProps> = ({
     <div className="bg-white rounded-xl shadow-lg p-6 mx-4 max-w-2xl md:mx-auto space-y-8">
       <div className="text-center space-y-4">
         <div className="flex justify-center">
-          <Smile
+        <Smile
             size={64}
-            className={`lucide-icon ${status.color} ${report.missed.length === 0 ? "animate-bounce" : "animate-pulse"}`}
+            className={`${status.color} ${report.missed.length === 0 ? "animate-bounce" : "animate-pulse"}`}
             aria-hidden="true"
           />
         </div>
@@ -190,23 +190,24 @@ const CompletedScreen: React.FC<CompletedScreenProps> = ({
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <button
-          onClick={backToSetup}
-          className="flex items-center justify-center p-4 space-x-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl transition-colors"
-        >
-          <FilePlus className="lucide-icon w-5 h-5" />
-          <span className="font-semibold">Nuovo Quiz</span>
-        </button>
-        
-        <button
-          onClick={handleDownloadCSV}
-          className="flex items-center justify-center p-4 space-x-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors"
-        >
-          <Download className="lucide-icon w-5 h-5" />
-          <span className="font-semibold">Scarica Report CSV</span>
-        </button>
-      </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <button
+            onClick={backToSetup}
+            className="flex items-center justify-center p-4 space-x-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl transition-colors"
+          >
+            <FilePlus className="w-5 h-5" />
+            <span className="font-semibold">Nuovo Quiz</span>
+          </button>
+          
+          <button
+            onClick={handleDownloadCSV}
+            className="flex items-center justify-center p-4 space-x-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors"
+          >
+            <Download className="w-5 h-5" />
+            <span className="font-semibold">Scarica Report CSV</span>
+          </button>
+        </div>
+
     </div>
   );
 };
