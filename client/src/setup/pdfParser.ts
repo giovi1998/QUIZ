@@ -119,6 +119,7 @@ export const extractQuestionsFromPdfContent = async (
               userAnswer: "",
             });
           } else if (currentQuestion.correctAnswer) {
+            console.log(`pdfParser: Multichoice question detected: ${currentQuestion.question}`);
             saveQuestion(currentQuestion, tempQuestions, invalidQuestions);
           }
         }
