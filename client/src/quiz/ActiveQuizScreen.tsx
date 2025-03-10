@@ -62,7 +62,7 @@ type OpenAnswerProps = {
   isLoadingAi: boolean;
   aiScore?: number;
   isDisabled: boolean;
-  correctAnswer?: string; // Add correctAnswer prop
+  correctAnswer?: string;
 };
 
 type AiEvaluationProps = {
@@ -165,16 +165,17 @@ const OpenAnswer: React.FC<OpenAnswerProps> = ({
   isLoadingAi,
   aiScore,
   isDisabled,
-  correctAnswer, // Add correctAnswer parameter
+  correctAnswer,
 }) => {
-  // Add the placeholder based on the correctAnswer
-    const placeholderText = `Scrivi qui la tua risposta ${correctAnswer ? "(Suggerimento: " + correctAnswer + ")" : ""}`;
+  const placeholderText = `Scrivi qui la tua risposta ${
+    correctAnswer ? "(Suggerimento: " + correctAnswer + ")" : ""
+  }`;
 
   return (
     <div className="mb-6 w-full">
       <textarea
         className="w-full p-4 border-2 border-gray-200 rounded-xl resize-none focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
-        placeholder={placeholderText} // Use the dynamically generated placeholder
+        placeholder={placeholderText}
         value={answer}
         onChange={(e) => handleAnswerChange(e.target.value)}
         rows={4}
@@ -253,7 +254,12 @@ const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
   const selectedAnswer = currentQuestion.userAnswer;
   const isLastQuestion = currentQuestionIndex === totalQuestions - 1;
   const aiScore = currentQuestion.aiScore;
-  const isDisabled = isQuizCompleted || (timerEnabled && timeRemaining === 0);
+    //check if the current question is multiple-choice for the timer
+  const isDisabled =
+    isQuizCompleted ||
+    (currentQuestion.type === "multiple-choice" &&
+      timerEnabled &&
+      timeRemaining === 0);
 
   useEffect(() => {
     if (currentQuestion.type === "multiple-choice" && selectedAnswer) {
@@ -374,7 +380,7 @@ const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
           isLoadingAi={isLoadingAi}
           aiScore={aiScore}
           isDisabled={isDisabled}
-          correctAnswer={currentQuestion.correctAnswer} // Pass the correctAnswer
+          correctAnswer={currentQuestion.correctAnswer}
         />
       )}
     </div>
