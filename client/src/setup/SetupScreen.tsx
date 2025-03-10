@@ -1,4 +1,29 @@
-// components/SetupScreen.tsx
+/**
+ * SetupScreen Component
+ *
+ * Questo componente rappresenta la schermata di configurazione del quiz.
+ * Permette all'utente di impostare il nome del quiz, scegliere tra modalità predefinita o personalizzata,
+ * abilitare il timer, impostare la durata del timer, caricare domande da file JSON o PDF,
+ * e avviare il quiz con le impostazioni configurate.
+ *
+ * @param {string} quizName - Il nome del quiz.
+ * @param {(name: string) => void} setQuizName - Funzione per aggiornare il nome del quiz.
+ * @param {"default" | "custom"} quizMode - La modalità del quiz (predefinita o personalizzata).
+ * @param {(mode: "default" | "custom") => void} setQuizMode - Funzione per aggiornare la modalità del quiz.
+ * @param {boolean} timerEnabled - Indica se il timer è abilitato.
+ * @param {(enabled: boolean) => void} setTimerEnabled - Funzione per abilitare/disabilitare il timer.
+ * @param {number} timerDuration - La durata del timer in secondi.
+ * @param {(duration: number) => void} setTimerDuration - Funzione per aggiornare la durata del timer.
+ * @param {React.RefObject<HTMLInputElement>} fileInputRef - Riferimento all'input file per il caricamento di file JSON.
+ * @param {React.RefObject<HTMLInputElement>} pdfInputRef - Riferimento all'input file per il caricamento di file PDF.
+ * @param {(file: File) => Promise<void>} onFileChangeJson - Funzione per gestire il caricamento di file JSON.
+ * @param {(file: File) => Promise<void>} onFileChangePdf - Funzione per gestire il caricamento di file PDF.
+ * @param {() => void} onSetupComplete - Funzione da chiamare quando la configurazione è completa.
+ * @param {boolean} showFormatInfo - Indica se mostrare le informazioni sui formati supportati.
+ * @param {(show: boolean) => void} setShowFormatInfo - Funzione per mostrare/nascondere le informazioni sui formati supportati.
+ * @param {boolean} loading - Indica se è in corso un'operazione di caricamento.
+ */
+
 import React, { useState, useEffect } from "react";
 import {
   RotateCcw,
@@ -71,12 +96,12 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
 
   // Use the props directly, no need for local state anymore.
   // useEffect(() => {
-  //   // Update the limits in the parent component when the local state changes
+  // Update the limits in the parent component when the local state changes
   //   setOpenQuestionsLimit(localOpenQuestionsLimit);
   // }, [localOpenQuestionsLimit, setOpenQuestionsLimit]);
 
   // useEffect(() => {
-  //   // Update the limits in the parent component when the local state changes
+  //Update the limits in the parent component when the local state changes
   //   setMultipleChoiceQuestionsLimit(localMultipleChoiceQuestionsLimit);
   // }, [localMultipleChoiceQuestionsLimit, setMultipleChoiceQuestionsLimit]);
 

@@ -1,3 +1,23 @@
+// QuizManager.tsx
+/**
+ * QuizManager Component
+ *
+ * Questo componente gestisce il flusso principale del quiz, dalla visualizzazione delle domande alla gestione del timer,
+ * del punteggio e del report finale.
+ *
+ * @param {string} quizName - Il nome del quiz.
+ * @param {Question[]} questions - L'array di domande del quiz.
+ * @param {QuizStatus} quizStatus - Lo stato attuale del quiz (setup, active, completed).
+ * @param {(status: QuizStatus) => void} setQuizStatus - Funzione per aggiornare lo stato del quiz.
+ * @param {boolean} timerEnabled - Indica se il timer è abilitato.
+ * @param {number} timerDuration - La durata del timer per ogni domanda.
+ * @param {(message: string) => void} showTemporaryAlert - Funzione per mostrare un messaggio temporaneo all'utente.
+ *
+ * Usage:
+ * Questo componente è utilizzato in QuizLoader per gestire l'intero ciclo di vita del quiz,
+ * dalla configurazione alla visualizzazione delle domande e alla generazione del report finale.
+ */
+
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import ActiveQuizScreen from "./ActiveQuizScreen.tsx";
 import CompletedScreen from "./CompletedScreen.tsx";

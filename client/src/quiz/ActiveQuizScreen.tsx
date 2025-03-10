@@ -1,3 +1,31 @@
+// ActiveQuizScreen.tsx
+/**
+ * ActiveQuizScreen Component
+ *
+ * Questo componente gestisce la visualizzazione e l'interazione con le domande durante un quiz attivo.
+ * Mostra la domanda corrente, le opzioni di risposta (per domande a scelta multipla),
+ * un campo di testo per le risposte aperte, un timer, una barra di progresso e altre informazioni relative al quiz.
+ *
+ * @param {string} quizName - Il nome del quiz.
+ * @param {Question[]} questions - L'array di domande del quiz.
+ * @param {number} currentQuestionIndex - L'indice della domanda corrente.
+ * @param {(questionId: string, answer: string | null, explanation: string | null) => void} handleAnswer - Funzione per gestire la risposta dell'utente.
+ * @param {boolean} showExplanation - Indica se mostrare o meno la spiegazione della risposta.
+ * @param {() => void} nextQuestion - Funzione per passare alla domanda successiva.
+ * @param {number} timeRemaining - Il tempo rimanente per la domanda corrente.
+ * @param {boolean} timerActive - Indica se il timer è attivo.
+ * @param {boolean} timerEnabled - Indica se il timer è abilitato.
+ * @param {number} score - Il punteggio attuale dell'utente.
+ * @param {(score: number) => void} setScore - Funzione per aggiornare il punteggio.
+ * @param {boolean} isQuizCompleted - Indica se il quiz è completato.
+ * @param {(show: boolean) => void} setShowExplanation - Funzione per mostrare/nascondere la spiegazione.
+ * @param {boolean} isLoadingAi - Indica se l'IA sta valutando la risposta.
+ * @param {() => void} onBackToSetup - Funzione per tornare alla schermata di configurazione.
+ *
+ * Usage:
+ * Questo componente è utilizzato in QuizManager quando il quiz è in stato "active".
+ */
+
 import React, { useEffect } from "react";
 import ProgressBar from "../components/common/ProgressBar.tsx";
 import TimerDisplay from "../components/common/TimerDisplay.tsx";

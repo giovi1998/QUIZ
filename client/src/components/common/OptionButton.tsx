@@ -1,6 +1,21 @@
-// components/common/OptionButton.tsx
-import React from "react";
+// OptionButton.tsx
+/**
+ * OptionButton Component
+ *
+ * Questo componente rappresenta un pulsante per una singola opzione di risposta in un quiz a scelta multipla.
+ * Viene utilizzato all'interno di ActiveQuizScreen per mostrare le opzioni di risposta disponibili per una domanda.
+ *
+ * @param {string} option - Il testo dell'opzione.
+ * @param {string | null} selectedAnswer - La risposta attualmente selezionata dall'utente.
+ * @param {boolean} showExplanation - Indica se mostrare o meno la spiegazione e la correttezza della risposta.
+ * @param {(answer: string) => void} setSelectedAnswer - Funzione per aggiornare la risposta selezionata.
+ * @param {string} correctAnswer - La risposta corretta per la domanda corrente.
+ *
+ * Usage:
+ * Questo componente è utilizzato in ActiveQuizScreen per visualizzare le opzioni di risposta per le domande a scelta multipla.
+ */
 
+import React from "react";
 interface OptionButtonProps {
   option: string;
   selectedAnswer: string | null;

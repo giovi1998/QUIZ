@@ -1,3 +1,19 @@
+// CompletedScreen.tsx
+/**
+ * CompletedScreen Component
+ *
+ * Questo componente visualizza la schermata di completamento del quiz, mostrando il report finale con i risultati.
+ * Include il punteggio totale, la percentuale di risposte corrette, un elenco delle domande errate con le risposte corrette,
+ * e la possibilità di scaricare un report in formato CSV.
+ *
+ * @param {string} quizName - Il nome del quiz.
+ * @param {Report} report - L'oggetto report contenente i risultati del quiz.
+ * @param {() => void} backToSetup - Funzione per tornare alla schermata di configurazione del quiz.
+ * @param {Question[]} questions - L'array di domande del quiz.
+ *
+ * Usage:
+ * Questo componente è utilizzato in QuizManager quando il quiz è in stato "completed".
+ */
 import React from "react";
 import { Smile, Download, FilePlus } from "lucide-react";
 import { Report, Question } from "../components/type/Types.tsx";

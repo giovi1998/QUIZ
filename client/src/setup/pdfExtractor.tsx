@@ -1,5 +1,14 @@
+// pdfExtractor.tsx
+/**
+ * pdfExtractor.tsx
+ *
+ * Questo modulo contiene la logica per l'estrazione di domande da un file PDF.
+ * Analizza il contenuto testuale del PDF, identifica le domande a scelta multipla e aperte,
+ * estrae le opzioni, le risposte corrette e le spiegazioni, e restituisce un array di oggetti QuestionFromPdf.
+ *
+ * @module pdfExtractor
+ */
 import * as pdfjsLib from 'pdfjs-dist';
-import { TextItem } from 'pdfjs-dist/types/src/display/api';
 import { getAiAnswer } from '../setup/aiService.ts'; // Assicurati che il path sia corretto
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjscd.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';

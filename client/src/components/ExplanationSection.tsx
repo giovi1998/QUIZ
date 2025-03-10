@@ -1,4 +1,18 @@
-// ExplanationSection.tsx
+/**
+ * ExplanationSection Component
+ *
+ * Questo componente visualizza una sezione di feedback e spiegazione dopo che l'utente ha risposto a una domanda.
+ * Mostra se la risposta è corretta o errata, fornisce una spiegazione e offre un pulsante per passare alla domanda successiva.
+ *
+ * @param {string | null} selectedAnswer - La risposta selezionata dall'utente.
+ * @param {string} correctAnswer - La risposta corretta alla domanda.
+ * @param {string} explanation - La spiegazione della risposta corretta.
+ * @param {() => void} nextQuestion - La funzione da chiamare per passare alla domanda successiva.
+ *
+ * Usage:
+ * Questo componente è utilizzato in ActiveQuizScreen per fornire feedback immediato all'utente dopo aver risposto a una domanda.
+ * Viene mostrato quando showExplanation è true.
+ */
 import React from "react";
 import { Check, X } from "lucide-react";
 

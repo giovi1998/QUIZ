@@ -1,4 +1,16 @@
-// components/AnswerButton.tsx
+/**
+ * AnswerButton Component
+ *
+ * Questo componente rappresenta un pulsante per inviare la risposta selezionata in un quiz.
+ * Il pulsante è abilitato solo se è stata selezionata una risposta.
+ *
+ * @param {string | null} selectedAnswer - La risposta selezionata dall'utente. Può essere null se nessuna risposta è stata selezionata.
+ * @param {(answer: string | null) => void} handleAnswer - La funzione da chiamare quando il pulsante viene cliccato, passando la risposta selezionata.
+ *
+ * Usage:
+ * Questo componente viene utilizzato in ActiveQuizScreen per permettere all'utente di inviare la risposta selezionata.
+ */
+
 import React from "react";
 
 export interface AnswerButtonProps {

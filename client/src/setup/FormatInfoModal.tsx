@@ -1,4 +1,14 @@
 // components/FormatInfoModal.tsx
+/**
+ * FormatInfoModal Component
+ *
+ * Questo componente visualizza un modale che fornisce informazioni sui formati di file supportati per il caricamento delle domande.
+ * Mostra esempi di formati JSON e PDF accettati.
+ *
+ * Usage:
+ * Questo componente è utilizzato in SetupScreen quando l'utente clicca sul pulsante "Formati supportati".
+ * Fornisce una guida visiva su come strutturare i file JSON e PDF per il caricamento delle domande.
+ */
 import React from 'react';
 import { X, FileText, Code } from "lucide-react";
 import {FormatInfoModalProps} from '../components/type/Types.tsx'

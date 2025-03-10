@@ -1,8 +1,12 @@
-// File: aiService.ts - Fixed version
-
+// aiService.ts
+/**
+ * Servizi per l'interazione con l'intelligenza artificiale.
+ * Questo file contiene le funzioni per valutare le risposte degli utenti e per ottenere risposte generate dall'IA.
+ *
+ * Usage:
+ * Questo file è utilizzato in QuizManager per valutare le risposte aperte degli utenti e per ottenere risposte generate dall'IA.
+ */
 import axios from 'axios';
-import { Question } from "../components/type/Types";
-
 // Environment variable for the backend URL
 const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
 

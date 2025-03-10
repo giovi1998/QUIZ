@@ -1,4 +1,13 @@
-// src/setup/pdfParser.ts
+// pdfParser.ts
+/**
+ * pdfParser.ts
+ *
+ * Questo modulo contiene la logica per l'estrazione di domande da un file PDF con le risposte già risposte da pdfExtractor.
+ * Analizza il contenuto testuale del PDF, identifica le domande a scelta multipla e aperte,
+ * estrae le opzioni, le risposte corrette e le spiegazioni, e restituisce un array di oggetti Question.
+ *
+ * @module pdfParser
+ */
 import { Question } from "../components/type/Types";
 import { getDocument } from "pdfjs-dist";
 import * as pdfjsLib from "pdfjs-dist";

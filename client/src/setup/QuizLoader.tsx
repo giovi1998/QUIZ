@@ -1,4 +1,17 @@
-// setup/QuizLoader.tsx
+// QuizLoader.tsx
+/**
+ * QuizLoader Component
+ *
+ * Questo componente è il punto di ingresso principale per la gestione del quiz.
+ * Gestisce lo stato del quiz, il caricamento delle domande, la configurazione del quiz e il passaggio tra le diverse fasi del quiz.
+ *
+ * @param {function} showTemporaryAlert - Funzione per mostrare un messaggio temporaneo all'utente.
+ *
+ * Usage:
+ * Questo componente è utilizzato come componente principale dell'applicazione, gestendo l'intero flusso del quiz.
+ */
+
+
 import React, {
   useState,
   useCallback,

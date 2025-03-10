@@ -1,4 +1,19 @@
-// components/EmptyScreen.tsx
+// EmptyScreen.tsx
+/**
+ * EmptyScreen Component
+ *
+ * Questo componente viene visualizzato quando non ci sono domande caricate nel quiz.
+ * Offre all'utente la possibilità di caricare domande tramite file JSON o PDF.
+ *
+ * @param {string} quizName - Il nome del quiz.
+ * @param {React.RefObject<HTMLInputElement>} fileInputRef - Riferimento all'elemento di input del file.
+ * @param {(show: boolean) => void} setShowFormatInfo - Funzione per mostrare/nascondere il modale delle informazioni sul formato.
+ * @param {(e: ChangeEvent<HTMLInputElement>) => void} handleFileUpload - Funzione per gestire il caricamento del file JSON.
+ * @param {(file: File) => Promise<void>} [handlePdfUpload] - Funzione opzionale per gestire il caricamento del file PDF.
+ *
+ * Usage:
+ * Questo componente è utilizzato in QuizLoader quando non ci sono domande caricate e il quiz è in stato "empty".
+ */
 import React, { ChangeEvent, useCallback } from "react";
 import { Upload, FileText, Info } from "lucide-react";
 import { EmptyScreenProps } from "../components/type/Types";
