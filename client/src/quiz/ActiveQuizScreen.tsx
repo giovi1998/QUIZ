@@ -4,7 +4,7 @@ import TimerDisplay from "../components/common/TimerDisplay.tsx";
 import QuestionInfo from "../components/common/QuestionInfo.tsx";
 import ExplanationSection from "../components/ExplanationSection.tsx";
 import type { Question } from "../components/type/Types.tsx";
-import { Loader2, ArrowRight, CheckCircle, XCircle } from "lucide-react";
+import { Loader2, ArrowRight, CheckCircle, XCircle, ArrowLeft  } from "lucide-react";
 
 const styles = `
   @keyframes highlightAnim {
@@ -203,6 +203,7 @@ type ActiveQuizScreenProps = {
   isQuizCompleted: boolean;
   setShowExplanation: (show: boolean) => void;
   isLoadingAi: boolean;
+  onBackToSetup: () => void;
 };
 
 const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
@@ -220,6 +221,7 @@ const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
   isQuizCompleted,
   setShowExplanation,
   isLoadingAi,
+  onBackToSetup,
 }) => {
   const totalQuestions = questions.length;
   const progress = (currentQuestionIndex / totalQuestions) * 100;
@@ -263,7 +265,15 @@ const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
   return (
     <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 space-y-6 max-w-2xl mx-4 sm:mx-auto">
       <style>{styles}</style>
-
+      <div className="absolute top-4 left-4 sm:top-6 sm:left-6">
+      <button
+        onClick={onBackToSetup}
+        className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+        aria-label="Torna alla configurazione del quiz"
+      >
+        <ArrowLeft className="w-6 h-6 text-gray-600" />
+      </button>
+    </div>
       <ProgressBar progress={progress} aria-label="Progresso del quiz" />
 
       <div className="flex flex-col sm:flex-row justify-between items-start gap-4 pb-4 border-b border-gray-200">

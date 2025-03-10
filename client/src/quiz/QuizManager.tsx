@@ -264,6 +264,7 @@ const QuizManager: React.FC<QuizManagerProps> = ({
           setShowExplanation={setShowExplanation}
           isLoadingAi={isLoadingAi}
           setScore={setScore}
+          onBackToSetup={restartQuiz} 
         />
       )}
 
