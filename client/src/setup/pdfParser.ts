@@ -1,3 +1,4 @@
+// src/setup/pdfParser.ts
 import { Question } from "../components/type/Types";
 import { getDocument } from "pdfjs-dist";
 import * as pdfjsLib from "pdfjs-dist";
@@ -16,7 +17,9 @@ function shuffleArray<T>(array: T[]): T[] {
 }
 
 export const extractQuestionsFromPdfContent = async (
-  file: File
+  file: File,
+  openQuestionsLimit: number, // Add openQuestionsLimit as a parameter
+  multipleChoiceQuestionsLimit: number // Add multipleChoiceQuestionsLimit as a parameter
 ): Promise<{
   validQuestions: Question[];
   skippedOpenQuestions: string[];
@@ -202,20 +205,20 @@ export const extractQuestionsFromPdfContent = async (
     }
   }
 
-  // Esegui lo shuffle e seleziona solo 2 domande aperte
-  const openQuestions = shuffleArray([...tempOpenQuestions]).slice(0, 2);
+  // Esegui lo shuffle e seleziona il numero corretto di domande aperte
+  const openQuestions = shuffleArray([...tempOpenQuestions]).slice(0, openQuestionsLimit);
   
-  // Per le domande multiple, mantieni la logica esistente
-  const validQuestions = shuffleArray(tempQuestions).slice(0, 24);
+  // Per le domande multiple, usa il limite appropriato
+  const validQuestions = shuffleArray(tempQuestions).slice(0, multipleChoiceQuestionsLimit);
 
   console.log(`
     📊 Risultati parsing:
     - Domande totali aperte rilevate: ${tempOpenQuestions.length}
-    - Domande aperte selezionate: ${openQuestions.length}/2
+    - Domande aperte selezionate: ${openQuestions.length}/${openQuestionsLimit}
     - Domande aperte scartate: ${tempOpenQuestions.length - openQuestions.length}
     - Domande non valide: ${invalidQuestions.length}
     - Domande multiple valide trovate: ${tempQuestions.length}
-    - Domande multiple selezionate per il quiz: ${validQuestions.length}/24
+    - Domande multiple selezionate per il quiz: ${validQuestions.length}/${multipleChoiceQuestionsLimit}
     - Domande multiple scartate per limite: ${tempQuestions.length - validQuestions.length}
   `);
 

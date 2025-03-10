@@ -42,8 +42,9 @@ function QuizLoader({ showTemporaryAlert }: QuizLoaderProps) {
   const [pdfLoading, setPdfLoading] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null!);
   const pdfInputRef = React.useRef<HTMLInputElement>(null!);
-  const openQuestionsLimit = 2;
-  const multipleChoiceQuestionsLimit = 24;
+  const [openQuestionsLimit, setOpenQuestionsLimit] = useState(2);
+  const [multipleChoiceQuestionsLimit, setMultipleChoiceQuestionsLimit] =
+    useState(24);
 
   const defaultQuestions = useMemo(() => {
     return shuffleArray(questionsDefaults)
@@ -54,7 +55,7 @@ function QuizLoader({ showTemporaryAlert }: QuizLoaderProps) {
         type: "multiple-choice",
         userAnswer: "",
       }));
-  }, []);
+  }, [multipleChoiceQuestionsLimit]);
 
   // Se non sono state caricate domande esterne, carica le domande di default
   useEffect(() => {
@@ -162,7 +163,12 @@ function QuizLoader({ showTemporaryAlert }: QuizLoaderProps) {
       // No need to readAsText for special files
       try {
         console.log("Calling extractQuestionsFromPdfContent"); // Added log
-        const extractedQuestions = await extractQuestionsFromPdfContent(file); // Pass the file object
+        // Pass the limits to the pdfParser
+        const extractedQuestions = await extractQuestionsFromPdfContent(
+          file,
+          openQuestionsLimit,
+          multipleChoiceQuestionsLimit
+        ); // Pass the file object
 
         console.log(
           "extractQuestionsFromPdfContent completed:",
@@ -181,23 +187,15 @@ function QuizLoader({ showTemporaryAlert }: QuizLoaderProps) {
           throw new Error("No questions extracted.");
         }
 
-        const validQuestions = extractedQuestions.validQuestions;
-        const openQuestions = extractedQuestions.openQuestions;
-
-        const shuffledQuestions = shuffleArray(validQuestions);
-        const selectedQuestions = shuffledQuestions.slice(
-          0,
-          multipleChoiceQuestionsLimit
-        );
-
+        //merge questions
         const completeQuestions: Question[] = [
-          ...selectedQuestions,
-          ...openQuestions,
+          ...extractedQuestions.validQuestions,
+          ...extractedQuestions.openQuestions,
         ];
         setQuestions(completeQuestions as Question[]);
         setExternalLoaded(true);
         showTemporaryAlert(
-          `Caricate ${selectedQuestions.length} domande multiple e ${openQuestions.length} domande aperte.`
+          `Caricate ${extractedQuestions.validQuestions.length} domande multiple e ${extractedQuestions.openQuestions.length} domande aperte.`
         );
       } catch (error) {
         console.error(
@@ -214,7 +212,10 @@ function QuizLoader({ showTemporaryAlert }: QuizLoaderProps) {
           setQuestions(defaultQuestions as Question[]);
           setExternalLoaded(false);
         } catch (fallbackError) {
-          console.error("Error during fallback PDF extraction:", fallbackError);
+          console.error(
+            "Error during fallback PDF extraction:",
+            fallbackError
+          );
           showTemporaryAlert(
             `Errore PDF (fallback): ${
               (fallbackError as Error).message || "Errore sconosciuto"
@@ -233,6 +234,7 @@ function QuizLoader({ showTemporaryAlert }: QuizLoaderProps) {
       showTemporaryAlert,
       multipleChoiceQuestionsLimit,
       quizName,
+      openQuestionsLimit,
     ]
   );
 
@@ -312,14 +314,24 @@ function QuizLoader({ showTemporaryAlert }: QuizLoaderProps) {
 
   function handleSetupComplete(): void {
     console.log("handleSetupComplete called");
-    if (quizMode === "custom" && questions.length === 0) {
-      console.log("Custom mode selected but no questions loaded.");
-      showTemporaryAlert("Carica almeno una domanda!");
-      return;
+    
+    if (quizMode === "custom") {
+      if (questions.length === 0) {
+        console.log("Custom mode selected but no questions loaded.");
+        showTemporaryAlert("Carica almeno una domanda!");
+        return;
+      }
+      if (openQuestionsLimit === 0 && multipleChoiceQuestionsLimit === 0) {
+        console.log("Custom mode selected but open questions limit and multiple choice question limit are zero");
+        showTemporaryAlert("Seleziona almeno una domanda aperta o a scelta multipla");
+        return;
+      }
     }
+
     setQuizStatus("active");
     console.log("Quiz status changed to active.");
   }
+
 
   return (
     <div>
@@ -341,6 +353,10 @@ function QuizLoader({ showTemporaryAlert }: QuizLoaderProps) {
           pdfInputRef={pdfInputRef}
           setShowFormatInfo={setShowFormatInfo}
           showFormatInfo={showFormatInfo}
+          openQuestionsLimit={openQuestionsLimit}
+          setOpenQuestionsLimit={setOpenQuestionsLimit}
+          multipleChoiceQuestionsLimit={multipleChoiceQuestionsLimit}
+          setMultipleChoiceQuestionsLimit={setMultipleChoiceQuestionsLimit}
         />
       )}
 
