@@ -1,32 +1,28 @@
 // ActiveQuizScreen.tsx
 /**
- * ActiveQuizScreen Component
- *
- * Questo componente gestisce la visualizzazione e l'interazione con le domande durante un quiz attivo.
- * Mostra la domanda corrente, le opzioni di risposta (per domande a scelta multipla),
- * un campo di testo per le risposte aperte, un timer, una barra di progresso e altre informazioni relative al quiz.
- *
- * @param {string} quizName - Il nome del quiz.
- * @param {Question[]} questions - L'array di domande del quiz.
- * @param {number} currentQuestionIndex - L'indice della domanda corrente.
- * @param {(questionId: string, answer: string | null, explanation: string | null) => void} handleAnswer - Funzione per gestire la risposta dell'utente.
- * @param {boolean} showExplanation - Indica se mostrare o meno la spiegazione della risposta.
- * @param {() => void} nextQuestion - Funzione per passare alla domanda successiva.
- * @param {number} timeRemaining - Il tempo rimanente per la domanda corrente.
- * @param {boolean} timerActive - Indica se il timer è attivo.
- * @param {boolean} timerEnabled - Indica se il timer è abilitato.
- * @param {number} score - Il punteggio attuale dell'utente.
- * @param {(score: number) => void} setScore - Funzione per aggiornare il punteggio.
- * @param {boolean} isQuizCompleted - Indica se il quiz è completato.
- * @param {(show: boolean) => void} setShowExplanation - Funzione per mostrare/nascondere la spiegazione.
- * @param {boolean} isLoadingAi - Indica se l'IA sta valutando la risposta.
- * @param {() => void} onBackToSetup - Funzione per tornare alla schermata di configurazione.
- *
- * Usage:
- * Questo componente è utilizzato in QuizManager quando il quiz è in stato "active".
+ * @component ActiveQuizScreen
+ * 
+ * A modern, responsive quiz interface that handles both multiple-choice and open-ended questions.
+ * Provides real-time feedback, progress tracking, and AI-assisted evaluation for open questions.
+ * 
+ * @param {string} quizName - The title of the current quiz
+ * @param {Question[]} questions - Array of quiz questions with their associated data
+ * @param {number} currentQuestionIndex - Zero-based index of the current question
+ * @param {Function} handleAnswer - Callback for when user submits an answer
+ * @param {boolean} showExplanation - Whether to display the explanation for the current question
+ * @param {Function} nextQuestion - Callback to advance to the next question
+ * @param {number} timeRemaining - Seconds remaining for timed questions
+ * @param {boolean} timerActive - Whether the timer is currently running
+ * @param {boolean} timerEnabled - Whether timing is enabled for this quiz
+ * @param {number} score - Current user score
+ * @param {Function} setScore - Callback to update the score
+ * @param {boolean} isQuizCompleted - Whether the quiz has been completed
+ * @param {Function} setShowExplanation - Callback to toggle explanation visibility
+ * @param {boolean} isLoadingAi - Whether AI evaluation is in progress
+ * @param {Function} onBackToSetup - Callback to return to quiz setup
  */
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import ProgressBar from "../components/common/ProgressBar.tsx";
 import TimerDisplay from "../components/common/TimerDisplay.tsx";
 import QuestionInfo from "../components/common/QuestionInfo.tsx";
@@ -38,21 +34,39 @@ import {
   CheckCircle,
   XCircle,
   ArrowLeft,
+  Clock,
+  Award,
+  HelpCircle
 } from "lucide-react";
 
+// CSS animations and styles
 const styles = `
+  /* Highlight animation for selected options */
   @keyframes highlightAnim {
     0% { background-size: 0% 100%; }
     100% { background-size: 100% 100%; }
   }
 
   .highlighted {
-    background-image: linear-gradient(to right, #fef08a 0%, #fef08a 100%);
+    background-image: linear-gradient(to right, rgba(254, 240, 138, 0.5) 0%, rgba(254, 240, 138, 0.5) 100%);
     background-repeat: no-repeat;
     background-position: left center;
-    animation: highlightAnim 0.3s ease-out;
+    animation: highlightAnim 0.3s ease-out forwards;
   }
 
+  /* Pulse animation for timer when time is running low */
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+  
+  .timer-warning {
+    animation: pulse 1s infinite;
+    color: #ef4444;
+  }
+
+  /* Responsive adjustments */
   @media (max-width: 640px) {
     .highlighted {
       background-size: 100% 100% !important;
@@ -62,15 +76,37 @@ const styles = `
 
   .question-text {
     font-weight: 700 !important;
+    line-height: 1.5;
   }
 
+  /* Focus states for accessibility */
   button:focus-visible, [role="button"]:focus-visible {
     outline: 2px solid #3b82f6;
     outline-offset: 2px;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
   }
+  
+  /* Card hover effects */
+  .option-card {
+    transition: all 0.2s ease;
+  }
+  
+  .option-card:hover:not(.selected) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+  
+  /* Quiz container styles */
+  .quiz-container {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
 `;
 
+/**
+ * @typedef OptionSquareProps
+ * Properties for the OptionSquare component
+ */
 type OptionSquareProps = {
   option: string;
   index: number;
@@ -80,6 +116,10 @@ type OptionSquareProps = {
   showExplanation: boolean;
 };
 
+/**
+ * @typedef OpenAnswerProps
+ * Properties for the OpenAnswer component
+ */
 type OpenAnswerProps = {
   answer: string;
   handleAnswerChange: (answer: string) => void;
@@ -93,15 +133,28 @@ type OpenAnswerProps = {
   correctAnswer?: string;
 };
 
+/**
+ * @typedef AiEvaluationProps
+ * Properties for the AiEvaluation component
+ */
 type AiEvaluationProps = {
   aiScore: number | undefined;
   isLoading: boolean;
 };
 
+/**
+ * Normalizes text by removing extra whitespace and trimming
+ * @param {string} text - The text to normalize
+ * @returns {string} Normalized text
+ */
 const normalizeText = (text: string): string => {
   return text.replace(/\s+/g, " ").trim();
 };
 
+/**
+ * @component OptionSquare
+ * Renders a selectable option for multiple-choice questions
+ */
 const OptionSquare: React.FC<OptionSquareProps> = ({
   option,
   index,
@@ -111,7 +164,7 @@ const OptionSquare: React.FC<OptionSquareProps> = ({
   showExplanation,
 }) => {
   const normalizedOption = normalizeText(option);
-  const letter = String.fromCharCode(65 + index);
+  const letter = String.fromCharCode(65 + index) + ") ";
 
   return (
     <div
@@ -123,21 +176,16 @@ const OptionSquare: React.FC<OptionSquareProps> = ({
       onKeyDown={(e) => e.key === "Enter" && onSelect(normalizedOption)}
     >
       <div
-        className={`flex items-center w-full p-4 rounded-lg transition-all duration-200 border-2
-          ${
-            selected
-              ? `highlighted ${
-                  correct ? "border-green-300" : "border-red-300"
-                } shadow-md`
-              : "border-gray-200 hover:border-blue-200"
-          }`}
+        className={`option-card flex items-center w-full p-4 rounded-lg transition-all duration-300 border-2
+          ${selected ? `selected highlighted ${correct ? "border-green-400" : "border-red-400"} shadow-md` 
+                    : "border-gray-200 hover:border-blue-300"}`}
       >
         <div className="flex items-center w-full">
-          <span className="text-lg font-medium mr-2 w-8">{letter}.</span>
+          <span className="flex items-center justify-center text-lg font-medium mr-3 w-8 h-8 rounded-full bg-gray-100 text-gray-700">
+            {letter}
+          </span>
           <span
-            className={`text-base sm:text-lg relative z-10 ${
-              selected ? "text-gray-800 font-medium" : "text-gray-700"
-            }`}
+            className={`text-base sm:text-lg relative z-10 ${selected ? "text-gray-800 font-medium" : "text-gray-700"}`}
           >
             {normalizedOption}
           </span>
@@ -146,13 +194,13 @@ const OptionSquare: React.FC<OptionSquareProps> = ({
               {correct ? (
                 <CheckCircle
                   className="text-green-500"
-                  size={20}
+                  size={22}
                   aria-hidden="true"
                 />
               ) : (
                 <XCircle
                   className="text-red-500"
-                  size={20}
+                  size={22}
                   aria-hidden="true"
                 />
               )}
@@ -164,25 +212,36 @@ const OptionSquare: React.FC<OptionSquareProps> = ({
   );
 };
 
+/**
+ * @component AiEvaluation
+ * Displays AI evaluation status and score for open-ended questions
+ */
 const AiEvaluation: React.FC<AiEvaluationProps> = ({ aiScore, isLoading }) => {
   return (
-    <div className="flex justify-between items-center mt-4" aria-live="polite">
+    <div className="flex justify-between items-center mt-4 bg-gray-50 p-3 rounded-lg" aria-live="polite">
       <div className="flex items-center">
-        {isLoading && (
-          <Loader2 className="animate-spin h-6 w-6 mr-2" aria-hidden="true" />
-        )}
-        <span className="text-gray-700">
-          {isLoading
-            ? "Valutazione AI in corso..."
-            : aiScore !== undefined
-            ? `Valutazione AI: ${aiScore}/3`
-            : ""}
-        </span>
+        {isLoading ? (
+          <>
+            <Loader2 className="animate-spin h-6 w-6 mr-2 text-blue-500" aria-hidden="true" />
+            <span className="text-gray-700 font-medium">Valutazione AI in corso...</span>
+          </>
+        ) : aiScore !== undefined ? (
+          <>
+            <Award className="h-6 w-6 mr-2 text-blue-500" aria-hidden="true" />
+            <span className="text-gray-700 font-medium">
+              Valutazione AI: <span className="text-blue-600 font-bold">{aiScore}/3</span>
+            </span>
+          </>
+        ) : null}
       </div>
     </div>
   );
 };
 
+/**
+ * @component OpenAnswer
+ * Renders a text area for open-ended questions
+ */
 const OpenAnswer: React.FC<OpenAnswerProps> = ({
   answer,
   handleAnswerChange,
@@ -195,37 +254,43 @@ const OpenAnswer: React.FC<OpenAnswerProps> = ({
   isDisabled,
   correctAnswer,
 }) => {
-  const placeholderText = `Scrivi qui la tua risposta ${
-    correctAnswer ? "(Suggerimento: " + correctAnswer + ")" : ""
-  }`;
+  const placeholderText = `Scrivi qui la tua risposta ${correctAnswer ? "(Suggerimento: " + correctAnswer + ")" : ""}`;
 
   return (
     <div className="mb-6 w-full">
-      <textarea
-        className="w-full p-4 border-2 border-gray-200 rounded-xl resize-none focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
-        placeholder={placeholderText}
-        value={answer}
-        onChange={(e) => handleAnswerChange(e.target.value)}
-        rows={4}
-        disabled={isDisabled}
-        aria-label="Campo per risposta aperta"
-      />
-      <AiEvaluation aiScore={aiScore} isLoading={isLoadingAi} />
+      <div className="relative">
+        <textarea
+          className="w-full p-4 border-2 border-gray-200 rounded-xl resize-none focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all min-h-[120px]"
+          placeholder={placeholderText}
+          value={answer}
+          onChange={(e) => handleAnswerChange(e.target.value)}
+          rows={4}
+          disabled={isDisabled}
+          aria-label="Campo per risposta aperta"
+        />
+        {answer.length === 0 && (
+          <HelpCircle className="absolute right-4 top-4 text-gray-300" size={20} />
+        )}
+      </div>
+      
+      {aiScore !== undefined || isLoadingAi ? (
+        <AiEvaluation aiScore={aiScore} isLoading={isLoadingAi} />
+      ) : null}
+      
       {showExplanation && (
-        <div className="bg-gray-50 p-4 rounded-xl">
-          <p className="text-green-600">
-            <span className="emoji mr-2" aria-hidden="true">
-              ✅
-            </span>
-            Risposta corretta:{" "}
-            <span className="font-normal">{correctAnswer}</span>
+        <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-xl mt-4 border-l-4 border-green-400">
+          <p className="text-green-700 flex items-center">
+            <CheckCircle className="mr-2" size={18} />
+            <span className="font-semibold">Risposta corretta:</span>{" "}
+            <span className="ml-1">{correctAnswer}</span>
           </p>
         </div>
       )}
+      
       <div className="flex justify-end mt-4">
         <button
           onClick={nextQuestion}
-          className="flex items-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors disabled:bg-gray-400"
+          className="flex items-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors disabled:bg-gray-400 shadow-md hover:shadow-lg"
           disabled={isLoadingAi || isDisabled}
           aria-label={isLastQuestion ? "Termina quiz" : "Prossima domanda"}
         >
@@ -237,6 +302,10 @@ const OpenAnswer: React.FC<OpenAnswerProps> = ({
   );
 };
 
+/**
+ * @typedef ActiveQuizScreenProps
+ * Properties for the ActiveQuizScreen component
+ */
 type ActiveQuizScreenProps = {
   quizName: string;
   questions: Question[];
@@ -259,6 +328,10 @@ type ActiveQuizScreenProps = {
   onBackToSetup: () => void;
 };
 
+/**
+ * @component ActiveQuizScreen
+ * Main component for the active quiz interface
+ */
 const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
   quizName,
   questions,
@@ -276,66 +349,90 @@ const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
   isLoadingAi,
   onBackToSetup,
 }) => {
+  // Track if timer is running low (less than 10 seconds)
+  const [isTimerWarning, setIsTimerWarning] = useState(false);
+  
   const totalQuestions = questions.length;
   const progress = (currentQuestionIndex / totalQuestions) * 100;
   const currentQuestion = questions[currentQuestionIndex];
-  const selectedAnswer = currentQuestion.userAnswer;
+  const selectedAnswer = currentQuestion?.userAnswer;
   const isLastQuestion = currentQuestionIndex === totalQuestions - 1;
-  const aiScore = currentQuestion.aiScore;
-    //check if the current question is multiple-choice for the timer
+  const aiScore = currentQuestion?.aiScore;
+  
+  // Determine if the question is disabled (quiz completed or time expired)
   const isDisabled =
     isQuizCompleted ||
-    (currentQuestion.type === "multiple-choice" &&
+    (currentQuestion?.type === "multiple-choice" &&
       timerEnabled &&
       timeRemaining === 0);
 
+  // Check if timer is running low
   useEffect(() => {
-    if (currentQuestion.type === "multiple-choice" && selectedAnswer) {
+    if (timerEnabled && timerActive && timeRemaining <= 10 && timeRemaining > 0) {
+      setIsTimerWarning(true);
+    } else {
+      setIsTimerWarning(false);
+    }
+  }, [timeRemaining, timerEnabled, timerActive]);
+
+  // Handle explanation visibility based on question type and answer status
+  useEffect(() => {
+    if (currentQuestion?.type === "multiple-choice" && selectedAnswer) {
       setShowExplanation(true);
     }
-    if (currentQuestion.type === "open" && showExplanation) {
+    if (currentQuestion?.type === "open" && showExplanation) {
       setShowExplanation(false);
     }
-  }, [selectedAnswer, currentQuestion.type, showExplanation, setShowExplanation]);
+  }, [selectedAnswer, currentQuestion?.type, showExplanation, setShowExplanation]);
 
+  // Show message if no questions are available
   if (!questions?.length) {
     return (
-      <div className="p-4 text-center text-lg font-semibold text-gray-700">
-        Nessuna domanda disponibile. Carica un file JSON o PDF per iniziare il
-        quiz.
+      <div className="p-8 text-center rounded-xl bg-gray-50 shadow-md max-w-md mx-auto mt-8">
+        <HelpCircle className="mx-auto mb-4 text-blue-500" size={48} />
+        <p className="text-lg font-semibold text-gray-700">
+          Nessuna domanda disponibile. Carica un file JSON o PDF per iniziare il quiz.
+        </p>
       </div>
     );
   }
 
+  // Handle option selection for multiple choice questions
   const handleOptionSelect = (value: string) => {
-    const isCorrect =
-      normalizeText(value) === normalizeText(currentQuestion.correctAnswer);
-
+    // Check if answer is correct and update score
+    const isCorrect = normalizeText(value) === normalizeText(currentQuestion.correctAnswer);
     if (isCorrect) {
       setScore(score + 1);
     }
 
+    // Submit answer and show explanation
     handleAnswer(currentQuestion.id, value, currentQuestion.explanation);
     setShowExplanation(true);
   };
 
+  // Check if an option is the correct answer
   const isOptionCorrect = (option: string) =>
     normalizeText(option) === normalizeText(currentQuestion.correctAnswer);
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 space-y-6 max-w-2xl mx-4 sm:mx-auto">
+    <div className="quiz-container bg-white rounded-xl shadow-lg p-5 sm:p-8 space-y-6 max-w-2xl mx-4 sm:mx-auto relative">
       <style>{styles}</style>
-      <div className="absolute top-4 left-4 sm:top-6 sm:left-6">
+      
+      {/* Back button */}
+      <div className="absolute top-4 left-4 sm:top-6 sm:left-6 z-10">
         <button
           onClick={onBackToSetup}
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          className="p-2 hover:bg-gray-100 rounded-full transition-colors flex items-center justify-center"
           aria-label="Torna alla configurazione del quiz"
         >
-          <ArrowLeft className="w-6 h-6 text-gray-600" />
+          <ArrowLeft className="w-5 h-5 text-gray-600" />
         </button>
       </div>
+      
+      {/* Progress bar */}
       <ProgressBar progress={progress} aria-label="Progresso del quiz" />
 
+      {/* Quiz header with title and timer */}
       <div className="flex flex-col sm:flex-row justify-between items-start gap-4 pb-4 border-b border-gray-200">
         <h1 className="text-xl sm:text-2xl font-bold text-gray-800 break-words max-w-[70%]">
           {quizName}
@@ -344,14 +441,16 @@ const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
         {timerEnabled &&
           timerActive &&
           currentQuestion.type === "multiple-choice" && (
-            <TimerDisplay
-              timerEnabled={timerEnabled}
-              timerActive={timerActive}
-              timeRemaining={timeRemaining}
-            />
+            <div className={`flex items-center ${isTimerWarning ? 'timer-warning' : ''}`}>
+              <Clock className={`w-5 h-5 mr-1 ${isTimerWarning ? 'text-red-500' : 'text-blue-500'}`} />
+              <span className={`font-medium ${isTimerWarning ? 'text-red-500' : 'text-blue-500'}`}>
+                {timeRemaining} sec
+              </span>
+            </div>
           )}
       </div>
 
+      {/* Question info (number and score) */}
       <QuestionInfo
         currentQuestionIndex={currentQuestionIndex}
         totalQuestions={totalQuestions}
@@ -359,16 +458,19 @@ const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
         score={score}
       />
 
+      {/* Question text */}
       <div
-        className="question-text text-lg sm:text-xl mb-6 leading-tight bg-gray-50 p-5 rounded-xl border-l-4 border-blue-500"
+        className="question-text text-lg sm:text-xl mb-6 leading-relaxed bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-xl border-l-4 border-blue-500"
         role="heading"
         aria-level={2}
       >
-        <strong>{currentQuestion.question}</strong>
+        {currentQuestion.question}
       </div>
 
+      {/* Question content - either multiple choice or open answer */}
       {currentQuestion.type === "multiple-choice" ? (
         <div className="space-y-4">
+          {/* Multiple choice options */}
           {currentQuestion.options.map((option, idx) => (
             <OptionSquare
               key={idx}
@@ -381,17 +483,18 @@ const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
             />
           ))}
 
-          {showExplanation &&
-            currentQuestion.type === "multiple-choice" && (
-              <ExplanationSection
-                selectedAnswer={selectedAnswer}
-                correctAnswer={normalizeText(currentQuestion.correctAnswer)}
-                explanation={normalizeText(currentQuestion.explanation)}
-                nextQuestion={nextQuestion}
-              />
-            )}
+          {/* Explanation section for multiple choice */}
+          {showExplanation && currentQuestion.type === "multiple-choice" && (
+            <ExplanationSection
+              selectedAnswer={selectedAnswer}
+              correctAnswer={normalizeText(currentQuestion.correctAnswer)}
+              explanation={normalizeText(currentQuestion.explanation)}
+              nextQuestion={nextQuestion}
+            />
+          )}
         </div>
       ) : (
+        /* Open answer textarea and controls */
         <OpenAnswer
           answer={selectedAnswer || ""}
           handleAnswerChange={(value) =>
