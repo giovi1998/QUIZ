@@ -1,17 +1,14 @@
 /**
  * ExplanationSection Component
  *
- * Questo componente visualizza una sezione di feedback e spiegazione dopo che l'utente ha risposto a una domanda.
- * Mostra se la risposta è corretta o errata, fornisce una spiegazione e offre un pulsante per passare alla domanda successiva.
+ * A modern, responsive feedback and explanation section displayed after a user answers a question.
+ * Provides visual feedback on correctness, detailed explanation, and navigation to the next question.
  *
- * @param {string | null} selectedAnswer - La risposta selezionata dall'utente.
- * @param {string} correctAnswer - La risposta corretta alla domanda.
- * @param {string} explanation - La spiegazione della risposta corretta.
- * @param {() => void} nextQuestion - La funzione da chiamare per passare alla domanda successiva.
- *
- * Usage:
- * Questo componente è utilizzato in ActiveQuizScreen per fornire feedback immediato all'utente dopo aver risposto a una domanda.
- * Viene mostrato quando showExplanation è true.
+ * @component
+ * @param selectedAnswer - The answer selected by the user (or null if none selected)
+ * @param correctAnswer - The correct answer to the question
+ * @param explanation - Detailed explanation of why the correct answer is right
+ * @param nextQuestion - Handler function to proceed to the next question
  */
 import React from "react";
 import { Check, X } from "lucide-react";
@@ -23,60 +20,59 @@ export interface ExplanationSectionProps {
   nextQuestion: () => void;
 }
 
-
-
-// Componente per la sezione di feedback e spiegazione dopo una risposta
 const ExplanationSection: React.FC<ExplanationSectionProps> = ({
   selectedAnswer,
   correctAnswer,
   explanation,
   nextQuestion,
 }) => {
-  // Calcola se la risposta è corretta per il condizionale
+  // Determine if the user selected the correct answer
   const isCorrect = selectedAnswer === correctAnswer;
 
   return (
-    <div className="mt-8">
-      {/* Contenitore principale del feedback */}
-      <div className="bg-gray-50 p-6 rounded-lg space-y-4">
-        {/* Sezione icona e stato risposta */}
+    <div className="mt-8 animate-fadeIn">
+      {/* Feedback container with enhanced visual design */}
+      <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 shadow-sm space-y-4 transition-all duration-300">
+        {/* Result indicator with icon */}
         <div className="flex items-center mb-4">
           {isCorrect ? (
-            // Feedback risposta corretta
-            <div className="flex items-center mr-3">
+            // Correct answer feedback
+            <div className="flex items-center gap-2 bg-green-50 px-4 py-2 rounded-lg">
               <Check 
-                size={40} 
-                color="#65a30d"  // Verde acceso per indicare successo
-                strokeWidth={2} 
-                className="mr-1" 
+                size={28} 
+                color="#16a34a"  
+                strokeWidth={2.5} 
+                className="animate-scaleIn" 
               />
-              <span className="text-green-600 font-semibold">Corretto!</span>
+              <span className="text-green-700 font-semibold text-lg">Corretto!</span>
             </div>
           ) : (
-            // Feedback risposta errata
-            <div className="flex items-center mr-3">
+            // Incorrect answer feedback
+            <div className="flex items-center gap-2 bg-red-50 px-4 py-2 rounded-lg">
               <X 
-                size={40} 
-                color="#ef4444"  // Rosso acceso per indicare errore
-                strokeWidth={2} 
-                className="mr-1" 
+                size={28} 
+                color="#dc2626"  
+                strokeWidth={2.5} 
+                className="animate-scaleIn" 
               />
-              <span className="text-red-600 font-semibold">Sbagliato!</span>
+              <span className="text-red-700 font-semibold text-lg">Sbagliato!</span>
             </div>
           )}
         </div>
 
-        {/* Testo esplicativo della risposta */}
-        <div className="text-gray-700 text-base">
+        {/* Explanation content with improved typography */}
+        <div className="text-gray-700 text-base leading-relaxed bg-white p-4 rounded-lg border border-gray-100">
           {explanation}
         </div>
       </div>
 
-      {/* Pulsante per proseguire al prossimo quesito */}
+      {/* Next question button with enhanced styling and hover effects */}
       <button
-        className="w-full py-3 mt-6 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-all"
+        className="w-full py-3 mt-6 rounded-lg bg-blue-600 text-white font-medium 
+                 hover:bg-blue-700 active:bg-blue-800 
+                 transition-all duration-300 transform hover:-translate-y-1"
         onClick={nextQuestion}
-        style={{ boxShadow: "0 8px 15px rgba(0, 100, 255, 0.1)" }}
+        style={{ boxShadow: "0 4px 14px rgba(59, 130, 246, 0.25)" }}
       >
         Prossima Domanda
       </button>
