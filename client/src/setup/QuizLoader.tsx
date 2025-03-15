@@ -67,6 +67,7 @@ function QuizLoader({ showTemporaryAlert }: QuizLoaderProps) {
         id: index.toString(),
         type: "multiple-choice",
         userAnswer: "",
+        explanation: q.explanation,
       }));
   }, [multipleChoiceQuestionsLimit]);
 
@@ -74,7 +75,16 @@ function QuizLoader({ showTemporaryAlert }: QuizLoaderProps) {
   useEffect(() => {
     if (!externalLoaded && questions.length === 0) {
       console.log("No external questions loaded. Loading default questions.");
-      setQuestions(defaultQuestions);
+      setQuestions(defaultQuestions.map((q) => ({
+        ...q,
+        id: q.id,
+        type: "multiple-choice",
+        userAnswer: "",
+        question: q.question,
+        options: q.options,
+        correctAnswer: q.correctAnswer,
+        explanation: q.explanation,
+      })));
       console.log(`Default questions loaded: ${defaultQuestions.length}`);
     }
   }, [externalLoaded, questions, setQuestions, defaultQuestions]);
@@ -234,7 +244,15 @@ function QuizLoader({ showTemporaryAlert }: QuizLoaderProps) {
               (fallbackError as Error).message || "Errore sconosciuto"
             }`
           );
-          setQuestions(defaultQuestions);
+          // Ricarica le domande di default con il tipo corretto
+          const defaultQuestionsWithType: Question[] = defaultQuestions.map(
+            (q) => ({
+              ...q,
+              type: "multiple-choice",
+              userAnswer: "",
+            })
+          ) as Question[];
+          setQuestions(defaultQuestionsWithType);
           setExternalLoaded(false);
         }
       } finally {
