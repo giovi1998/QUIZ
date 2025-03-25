@@ -46,7 +46,7 @@ app.post('/api/generate', async (req, res) => {
     ];
 
     const data = {
-      model: "gpt-4",
+      model: "gpt-3.5-turbo",
       messages: messages,
       max_tokens: 1000,
       temperature: 0.3,

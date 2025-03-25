@@ -172,7 +172,7 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({
                 </button>
                 <span className="w-8 text-center">{multipleChoiceQuestionsLimit}</span>
                 <button
-                  onClick={() => setMultipleChoiceQuestionsLimit(multipleChoiceQuestionsLimit + 1)}
+                  onClick={() => setMultipleChoiceQuestionsLimit(multipleChoiceQuestionsLimit + 5)}
                   className="px-3 py-1 text-gray-500 hover:bg-gray-100 transition-colors"
                   aria-label="Aumenta limite domande a scelta multipla"
                 >
