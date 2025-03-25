@@ -72,11 +72,21 @@ const QuizManager: React.FC<QuizManagerProps> = ({
       q.id === questionId ? { ...q, userAnswer: answer || "" } : q
     );
     setQuestions(updatedQuestions);
-  }, [questions]);
+    
+    // Ferma il timer quando l'utente risponde
+    if (timerEnabled && timerActive) {
+      setTimerActive(false);
+    }
+  }, [questions, timerEnabled, timerActive]);
 
   const nextQuestion = useCallback(() => {
     // Reset timer e indice
     setTimeRemaining(timerDuration);
+    
+    // Restart timer when moving to next question
+    if (timerEnabled) {
+      setTimerActive(true);
+    }
     
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
@@ -85,7 +95,7 @@ const QuizManager: React.FC<QuizManagerProps> = ({
       // Ultima domanda, calcola il report
       calculateReport();
     }
-  }, [currentQuestionIndex, questions, timerDuration]);
+  }, [currentQuestionIndex, questions, timerDuration, timerEnabled]);
 
   useEffect(() => {
     if (timerEnabled && timerActive && timeRemaining > 0) {

@@ -53,6 +53,8 @@ function QuizLoader({ showTemporaryAlert }: QuizLoaderProps) {
   const [loading, setLoading] = useState(false);
   const [jsonLoading, setJsonLoading] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState<{ name: string; type: "json" | "pdf" } | undefined>(undefined);
+  const [uploadError, setUploadError] = useState<string | undefined>(undefined);
   const fileInputRef = React.useRef<HTMLInputElement>(null!);
   const pdfInputRef = React.useRef<HTMLInputElement>(null!);
   const [openQuestionsLimit, setOpenQuestionsLimit] = useState(2);
@@ -109,6 +111,7 @@ function QuizLoader({ showTemporaryAlert }: QuizLoaderProps) {
 
       setJsonLoading(true);
       setQuestions([]); // Puliamo le domande correnti
+      setUploadedFile({ name: file.name, type: "json" }); // Set the uploaded file info
 
       const reader = new FileReader();
       reader.onload = async (event) => {
@@ -182,6 +185,7 @@ function QuizLoader({ showTemporaryAlert }: QuizLoaderProps) {
       }
       console.log(`Starting special PDF upload. File: ${file.name}`);
       setPdfLoading(true);
+      setUploadedFile({ name: file.name, type: "pdf" }); // Set the uploaded file info
       setQuestions([]);
       // No need to readAsText for special files
       try {
@@ -277,6 +281,7 @@ function QuizLoader({ showTemporaryAlert }: QuizLoaderProps) {
         console.log(
           "Detected special file type: invoking handleFileChangePdfSpecial"
         );
+        setUploadedFile({ name: file.name, type: "pdf" }); // Set the uploaded file info
         await handleFileChangePdfSpecial(file);
       } else {
         console.log(
@@ -288,6 +293,7 @@ function QuizLoader({ showTemporaryAlert }: QuizLoaderProps) {
         }
         console.log(`Starting PDF upload. File: ${file.name}`);
         setPdfLoading(true);
+        setUploadedFile({ name: file.name, type: "pdf" }); // Set the uploaded file info
         // Puliamo le domande correnti (non vogliamo mostrare quelle estratte)
         setQuestions([]);
 
@@ -384,6 +390,8 @@ function QuizLoader({ showTemporaryAlert }: QuizLoaderProps) {
           pdfInputRef={pdfInputRef}
           setShowFormatInfo={setShowFormatInfo}
           showFormatInfo={showFormatInfo}
+          uploadedFile={uploadedFile}
+          uploadError={uploadError}
           openQuestionsLimit={openQuestionsLimit}
           setOpenQuestionsLimit={setOpenQuestionsLimit}
           multipleChoiceQuestionsLimit={multipleChoiceQuestionsLimit}

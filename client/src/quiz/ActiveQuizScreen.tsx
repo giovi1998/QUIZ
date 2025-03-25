@@ -228,6 +228,9 @@ const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
         isTimerWarning={isTimerWarning}
         onBackToSetup={onBackToSetup}
         questionType={currentQuestion.type}
+        currentQuestionIndex={currentQuestionIndex}
+        totalQuestions={totalQuestions}
+        score={score}
       />
 
       {/* Question info (number and score) */}

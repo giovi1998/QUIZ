@@ -1,4 +1,43 @@
-/* src/index.css */
+/* Base styles */
+:root {
+  /* Colors */
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --primary-gradient: linear-gradient(to right, #3b82f6, #6366f1, #8b5cf6);
+  --primary-gradient-hover: linear-gradient(to right, #2563eb, #4f46e5, #7c3aed);
+  --success: #10b981;
+  --success-gradient: linear-gradient(to right, #10b981, #059669);
+  --error: #ef4444;
+  --error-gradient: linear-gradient(to right, #ef4444, #dc2626);
+  --warning: #f59e0b;
+  --warning-gradient: linear-gradient(to right, #f59e0b, #d97706);
+  --text-main: #1f2937;
+  --text-secondary: #6b7280;
+  --bg-main: #ffffff;
+  --bg-secondary: #f9fafb;
+  --border-color: #e5e7eb;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+  --shadow-glow: 0 0 15px rgba(59, 130, 246, 0.5);
+  
+  /* Border radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-full: 9999px;
+  
+  /* Transitions */
+  --transition: all 0.2s ease;
+  --transition-slow: all 0.3s ease-in-out;
+  --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
 body {
   font-family: 
     -apple-system, 
@@ -12,36 +51,182 @@ body {
     "Droid Sans", 
     "Helvetica Neue", 
     sans-serif;
-  
-  /* Aggiungi esplicitamente i font per le emoji */
-  font-family: 
-    "Apple Color Emoji", 
-    "Segoe UI Emoji", 
-    "Noto Color Emoji" !important;
-  
   margin: 0;
-  padding: 20px;
-  line-height: 1.6;
-  color: #212529;
+  padding: 1rem;
+  line-height: 1.5;
+  color: var(--text-main);
+  background-color: var(--bg-secondary);
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/* Classe specifica per le emoji */
+/* Typography */
+h1, h2, h3, h4 {
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--text-main);
+}
+
+/* Buttons */
+button {
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: white;
+  border: none;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+}
+
+.btn-outline {
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+}
+
+.btn-outline:hover {
+  background-color: var(--bg-secondary);
+}
+
+/* Utility classes */
+.flex {
+  display: flex;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.gap-4 {
+  gap: 1rem;
+}
+
+.p-4 {
+  padding: 1rem;
+}
+
+.p-6 {
+  padding: 1.5rem;
+}
+
+.rounded-lg {
+  border-radius: var(--radius-lg);
+}
+
+.shadow-lg {
+  box-shadow: var(--shadow-lg);
+}
+
+.bg-white {
+  background-color: var(--bg-main);
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+/* Animations */
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.pulse {
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.float {
+  animation: float 2s ease-in-out infinite;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+@keyframes shine {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-shine {
+  animation: shine 2s infinite linear;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-bounce {
+  animation: bounce 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes scale {
+  0% { transform: scale(0.95); }
+  70% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.animate-scale {
+  animation: scale 0.3s ease-out forwards;
+}
+
+/* Emoji and icons */
 .emoji {
   font-family: 
     "Apple Color Emoji", 
     "Segoe UI Emoji", 
     "Noto Color Emoji",
     sans-serif !important;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  
 }
 
-/* Stile per icone Lucide (assicura rendering corretto) */
 .lucide-icon {
   display: inline-block;
   fill: currentColor;

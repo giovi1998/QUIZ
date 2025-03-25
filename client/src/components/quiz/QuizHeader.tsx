@@ -27,6 +27,9 @@ interface QuizHeaderProps {
   isTimerWarning: boolean;
   onBackToSetup: () => void;
   questionType: "multiple-choice" | "open";
+  currentQuestionIndex?: number;
+  totalQuestions?: number;
+  score?: number;
 }
 
 const QuizHeader: React.FC<QuizHeaderProps> = ({
@@ -38,6 +41,9 @@ const QuizHeader: React.FC<QuizHeaderProps> = ({
   isTimerWarning,
   onBackToSetup,
   questionType,
+  currentQuestionIndex,
+  totalQuestions,
+  score,
 }) => {
   return (
     <>
@@ -61,16 +67,19 @@ const QuizHeader: React.FC<QuizHeaderProps> = ({
           {quizName}
         </h1>
 
-        {timerEnabled &&
-          timerActive &&
-          questionType === "multiple-choice" && (
-            <div className={`flex items-center ${isTimerWarning ? 'timer-warning' : ''}`}>
-              <Clock className={`w-5 h-5 mr-1 ${isTimerWarning ? 'text-red-500' : 'text-blue-500'}`} />
-              <span className={`font-medium ${isTimerWarning ? 'text-red-500' : 'text-blue-500'}`}>
-                {timeRemaining} sec
-              </span>
-            </div>
-          )}
+        <div className="flex flex-col items-end">
+          {timerEnabled &&
+            timerActive &&
+            questionType === "multiple-choice" && (
+              <div className={`flex items-center ${isTimerWarning ? 'timer-warning' : ''}`}>
+                <Clock className={`w-5 h-5 mr-1 ${isTimerWarning ? 'text-red-500' : 'text-blue-500'}`} />
+                <span className={`font-medium ${isTimerWarning ? 'text-red-500' : 'text-blue-500'}`}>
+                  {timeRemaining} sec
+                </span>
+              </div>
+            )}
+          {/* Timer only - removed duplicate question info */}
+        </div>
       </div>
     </>
   );
