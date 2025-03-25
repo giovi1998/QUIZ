@@ -122,7 +122,7 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
             <div className={`p-3 rounded-full ${quizMode === "custom" ? "bg-purple-100 shadow-md" : "bg-gray-100"} transition-colors duration-300`}>
               <Upload className={quizMode === "custom" ? "text-purple-500 animate-pulse" : "text-gray-400"} size={24} />
             </div>
-            <span className="text-xs text-gray-500">Carica le tue domande</span>
+            <span className="text-sm sm:text-base font-medium text-gray-700">Carica le tue domande</span>
           </button>
         </div>
       </div>
@@ -145,26 +145,26 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
 
       {/* File Upload Section (only for custom mode) */}
       {quizMode === "custom" && (
-        <div className="space-y-8 animate-fadeIn">
+        <div className="space-y-8 animate-fadeIn p-4 sm:p-0">
           <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-3 bg-gradient-to-r from-purple-50 to-purple-100 p-3 rounded-lg shadow-sm">
             <Upload className="text-purple-500" size={20} />
             Carica le tue domande
           </h2>
-
+          
           {/* File Upload Cards */}
-          <div className="flex flex-col space-y-6">
+          <div className="flex flex-col space-y-4 sm:space-y-6">
             {/* JSON Upload */}
-            <div className={`border-2 ${uploadedFile?.type === "json" ? "border-green-300 bg-green-50" : "border-gray-200"} rounded-lg p-5 hover:border-blue-300 transition-all hover:shadow-xl relative transform hover:scale-[1.02] duration-300`}>
-              <div className="flex items-center gap-4 mb-4">
-                <div className="p-3 bg-gradient-to-r from-blue-100 to-blue-200 rounded-full shadow-md">
-                  <FileText className="text-blue-600" size={20} />
+            <div className={`border-2 ${uploadedFile?.type === "json" ? "border-green-300 bg-green-50" : "border-gray-200"} rounded-lg p-4 sm:p-5 hover:border-blue-300 transition-all hover:shadow-xl relative transform hover:scale-[1.02] duration-300`}>
+              <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
+                <div className="p-2 sm:p-3 bg-gradient-to-r from-blue-100 to-blue-200 rounded-full shadow-md">
+                  <FileText className="text-blue-600" size={18} />
                 </div>
-                <h3 className="font-medium text-lg">Carica JSON</h3>
+                <h3 className="font-medium text-base sm:text-lg">Carica JSON</h3>
                 {uploadedFile?.type === "json" && (
-                  <CheckCircle className="ml-auto text-green-500 animate-scale" size={20} />
+                  <CheckCircle className="ml-auto text-green-500 animate-scale" size={18} />
                 )}
               </div>
-              <p className="text-gray-600 mb-5">
+              <p className="text-gray-600 mb-4 sm:mb-5 text-sm sm:text-base">
                 Formato strutturato per domande personalizzate
               </p>
               <input
@@ -176,34 +176,34 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
               />
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className={`w-full py-3 rounded-lg transition-all duration-300 font-medium flex items-center justify-center gap-2 ${uploadedFile?.type === "json" ? "bg-gradient-to-r from-green-100 to-green-200 text-green-700 hover:from-green-200 hover:to-green-300 shadow-md" : "bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-md hover:shadow-lg"}`}
+                className={`w-full py-2 sm:py-3 rounded-lg transition-all duration-300 font-medium flex items-center justify-center gap-2 text-sm sm:text-base ${uploadedFile?.type === "json" ? "bg-gradient-to-r from-green-100 to-green-200 text-green-700 hover:from-green-200 hover:to-green-300 shadow-md" : "bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 shadow-md hover:shadow-lg"}`}
               >
                 {uploadedFile?.type === "json" ? (
                   <>
-                    <CheckCircle className="text-green-600" size={18} />
+                    <CheckCircle className="text-green-600" size={16} />
                     {uploadedFile.name}
                   </>
                 ) : (
                   <>
-                    <Upload size={18} className="animate-bounce" />
+                    <Upload size={16} className="animate-bounce" />
                     Seleziona file
                   </>
                 )}
               </button>
             </div>
-
+            
             {/* PDF Upload */}
-            <div className={`border-2 ${uploadedFile?.type === "pdf" ? "border-green-300 bg-green-50" : "border-gray-200"} rounded-lg p-5 hover:border-purple-300 transition-all hover:shadow-xl relative transform hover:scale-[1.02] duration-300`}>
-              <div className="flex items-center gap-4 mb-4">
-                <div className="p-3 bg-gradient-to-r from-purple-100 to-purple-200 rounded-full shadow-md">
-                  <FileText className="text-purple-600" size={20} />
+            <div className={`border-2 ${uploadedFile?.type === "pdf" ? "border-green-300 bg-green-50" : "border-gray-200"} rounded-lg p-4 sm:p-5 hover:border-purple-300 transition-all hover:shadow-xl relative transform hover:scale-[1.02] duration-300`}>
+              <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
+                <div className="p-2 sm:p-3 bg-gradient-to-r from-purple-100 to-purple-200 rounded-full shadow-md">
+                  <FileText className="text-purple-600" size={18} />
                 </div>
-                <h3 className="font-medium text-lg">Carica PDF</h3>
+                <h3 className="font-medium text-base sm:text-lg">Carica PDF</h3>
                 {uploadedFile?.type === "pdf" && (
-                  <CheckCircle className="ml-auto text-green-500 animate-scale" size={20} />
+                  <CheckCircle className="ml-auto text-green-500 animate-scale" size={18} />
                 )}
               </div>
-              <p className="text-gray-600 mb-5">
+              <p className="text-gray-600 mb-4 sm:mb-5 text-sm sm:text-base">
                 Estrazione automatica delle domande dal documento
               </p>
               <input
@@ -215,16 +215,16 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({
               />
               <button
                 onClick={() => pdfInputRef.current?.click()}
-                className={`w-full py-3 rounded-lg transition-all duration-300 font-medium flex items-center justify-center gap-2 ${uploadedFile?.type === "pdf" ? "bg-gradient-to-r from-green-100 to-green-200 text-green-700 hover:from-green-200 hover:to-green-300 shadow-md" : "bg-gradient-to-r from-purple-500 to-purple-600 text-white hover:from-purple-600 hover:to-purple-700 shadow-md hover:shadow-lg"}`}
+                className={`w-full py-2 sm:py-3 rounded-lg transition-all duration-300 font-medium flex items-center justify-center gap-2 text-sm sm:text-base ${uploadedFile?.type === "pdf" ? "bg-gradient-to-r from-green-100 to-green-200 text-green-700 hover:from-green-200 hover:to-green-300 shadow-md" : "bg-gradient-to-r from-purple-500 to-purple-600 text-white hover:from-purple-600 hover:to-purple-700 shadow-md hover:shadow-lg"}`}
               >
                 {uploadedFile?.type === "pdf" ? (
                   <>
-                    <CheckCircle className="text-green-600" size={18} />
+                    <CheckCircle className="text-green-600" size={16} />
                     {uploadedFile.name}
                   </>
                 ) : (
                   <>
-                    <Upload size={18} className="animate-bounce" />
+                    <Upload size={16} className="animate-bounce" />
                     Seleziona file
                   </>
                 )}

@@ -233,3 +233,80 @@ button {
   vertical-align: middle;
   color: inherit !important;
 }
+
+/* Mobile-first media queries */
+@media (max-width: 640px) {
+  body {
+    padding: 0.5rem;
+  }
+
+  .quiz-container {
+    margin: 0.5rem;
+    padding: 1rem;
+  }
+
+  .btn {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+  }
+
+  .text-lg {
+    font-size: 1rem;
+  }
+
+  .p-6 {
+    padding: 1rem;
+  }
+
+  .space-y-6 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 1rem;
+  }
+
+  .space-y-8 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 1.5rem;
+  }
+
+  .gap-4 {
+    gap: 0.75rem;
+  }
+}
+
+/* Tablet and larger screens */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .quiz-container {
+    margin: 1rem auto;
+    max-width: 90%;
+  }
+
+  .space-y-6 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 1.5rem;
+  }
+}
+
+/* Ensure content is readable on very small screens */
+@media (max-width: 360px) {
+  body {
+    padding: 0.25rem;
+  }
+
+  .quiz-container {
+    margin: 0.25rem;
+    padding: 0.75rem;
+  }
+
+  .text-base {
+    font-size: 0.875rem;
+  }
+
+  .text-sm {
+    font-size: 0.75rem;
+  }
+}
