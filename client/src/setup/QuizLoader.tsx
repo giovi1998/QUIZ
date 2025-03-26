@@ -23,9 +23,9 @@ import { SetupScreen } from "./SetupScreen.tsx";
 import QuizManager from "../quiz/QuizManager.tsx";
 import questionsDefaults from "../Data/questionsDefaults.json";
 import { EmptyScreen } from "./EmptyScreen.tsx";
-import { generatePdf } from "./generatePdf.ts";
-import { extractFromPdf } from "./pdfExtractor.tsx";
-import { extractQuestionsFromPdfContent } from "./pdfParser.ts"; // Import pdfParser for the fallback
+import { generatePdf } from "../components/Gestione File/generatePdf.ts";
+import { extractFromPdf } from "../components/Gestione File/pdfExtractor.tsx";
+import { extractQuestionsFromPdfContent } from "../components/Gestione File/pdfParser.ts"; // Import pdfParser for the fallback
 import { QuizStatus, Question } from "../components/type/Types.tsx";
 
 function shuffleArray<T>(array: T[]): T[] {

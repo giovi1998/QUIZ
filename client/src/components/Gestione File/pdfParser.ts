@@ -8,7 +8,7 @@
  *
  * @module pdfParser
  */
-import { Question } from "../components/type/Types";
+import { Question } from "../type/Types";
 import { getDocument } from "pdfjs-dist";
 import * as pdfjsLib from "pdfjs-dist";
 

@@ -9,7 +9,7 @@
  * @module pdfExtractor
  */
 import * as pdfjsLib from 'pdfjs-dist';
-import { getAiAnswer } from '../setup/aiService.ts'; // Assicurati che il path sia corretto
+import { getAiAnswer } from '../../setup/aiService.ts'; // Assicurati che il path sia corretto
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjscd.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
