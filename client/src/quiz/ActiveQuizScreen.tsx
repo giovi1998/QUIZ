@@ -203,6 +203,11 @@ const ActiveQuizScreen: React.FC<ActiveQuizScreenProps> = ({
 
   // Handle option selection for multiple choice questions
   const handleOptionSelect = (value: string) => {
+    // Prevent selecting another answer if an answer is already selected
+    if (selectedAnswer) {
+      return;
+    }
+    
     // Check if answer is correct and update score
     const isCorrect = normalizeText(value) === normalizeText(currentQuestion.correctAnswer);
     if (isCorrect) {

@@ -72,12 +72,12 @@ const OptionSquare: React.FC<OptionSquareProps> = ({
 
   return (
     <div
-      className="flex items-center group w-full mb-4 transform transition-transform duration-200 hover:scale-[1.01]"
+      className={`flex items-center group w-full mb-4 transform transition-transform duration-200 ${!showExplanation ? 'hover:scale-[1.01]' : ''}`}
       role="button"
-      tabIndex={0}
+      tabIndex={showExplanation ? -1 : 0}
       aria-label={`Opzione ${letter}: ${normalizedOption}`}
-      onClick={() => onSelect(normalizedOption)}
-      onKeyDown={(e) => e.key === "Enter" && onSelect(normalizedOption)}
+      onClick={() => !showExplanation && onSelect(normalizedOption)}
+      onKeyDown={(e) => !showExplanation && e.key === "Enter" && onSelect(normalizedOption)}
     >
       <div
         className={`option-card flex items-center w-full p-4 rounded-lg transition-all duration-300 border-2
