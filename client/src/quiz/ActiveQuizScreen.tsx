@@ -27,11 +27,11 @@ import type { Question } from "../components/type/Types.tsx";
 import { HelpCircle } from "lucide-react";
 
 // Import the new components
-import QuizHeader from "../components/quiz/QuizHeader.tsx";
-import QuestionDisplay from "../components/quiz/QuestionDisplay.tsx";
-import MultipleChoiceQuestion from "../components/quiz/MultipleChoiceQuestion.tsx";
-import OpenAnswerQuestion from "../components/quiz/OpenAnswerQuestion.tsx";
-import QuestionInfo from "../components/common/QuestionInfo.tsx";
+import QuizHeader from "../components/quiz UI/QuizHeader.tsx";
+import QuestionDisplay from "../components/quiz UI/QuestionDisplay.tsx";
+import MultipleChoiceQuestion from "../components/quiz UI/MultipleChoiceQuestion.tsx";
+import OpenAnswerQuestion from "../components/quiz UI/OpenAnswerQuestion.tsx";
+import QuestionInfo from "../components/quiz UI/QuestionInfo.tsx";
 
 // CSS animations and styles
 const styles = `
