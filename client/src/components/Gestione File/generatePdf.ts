@@ -75,10 +75,12 @@ export async function generatePdf(questions: QuestionFromPdf[], quizName: string
     const pdfDoc = await PDFDocument.create();
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    const italicFont = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
+    const boldItalicFont = await pdfDoc.embedFont(StandardFonts.HelveticaBoldOblique);
     const pageWidth = 595;
     const pageHeight = 842;
-    const margin = 50; // Margine per lato e in alto
-    const bottomMargin = 50; // Margine extra in fondo al documento
+    const margin = 50; // Margine aumentato per migliore leggibilità
+    const bottomMargin = 40; // Margine inferiore aumentato
     let page = pdfDoc.addPage([pageWidth, pageHeight]);
     let y = pageHeight - margin; // Inizio dalla parte alta
     let currentPage = 1;
@@ -109,12 +111,16 @@ export async function generatePdf(questions: QuestionFromPdf[], quizName: string
       text: string,
       x: number,
       y: number,
-      bold = false,
+      style: 'normal' | 'bold' | 'italic' | 'boldItalic' = 'normal',
+      color: [number, number, number] = [0.1, 0.1, 0.1], // Colore più leggero per migliore leggibilità
       maxWidth: number = pageWidth - 2 * margin
     ) => {
       const lines = splitLines(text, maxWidth);
-      const fontToUse = bold ? boldFont : font;
-      const lineHeight = 18; // Altezza di ogni linea
+      const fontToUse = 
+        style === 'bold' ? boldFont :
+        style === 'italic' ? italicFont :
+        style === 'boldItalic' ? boldItalicFont : font;
+      const lineHeight = 18; // Altezza aumentata per migliore leggibilità
       const totalHeight = lines.length * lineHeight;
 
       lines.forEach((line, index) => {
@@ -123,7 +129,7 @@ export async function generatePdf(questions: QuestionFromPdf[], quizName: string
           y: y - index * lineHeight,
           size: 12,
           font: fontToUse,
-          color: rgb(0, 0, 0),
+          color: rgb(color[0], color[1], color[2]),
         });
       });
       return totalHeight;
@@ -147,19 +153,29 @@ export async function generatePdf(questions: QuestionFromPdf[], quizName: string
         lectureQuestionCount = 1;
       }
 
-      const spaceNeededForQuestion =
-        18 + // Spazio per il testo della domanda (prefisso + domanda)
-        (question.type === 'multiple-choice'
-          ? question.options.length * 18 + 18 + (question.explanation ? 18 : 0)
-          : 0) + // Spazio per opzioni, risposta ed eventuale spiegazione
-        (question.type === 'open' ? 18 + 54 : 0) + // Spazio per domande aperte
-        36 + // Spazio tra le domande
-        (question.lecture !== currentLecture ? 36 + 18 + 36 : 0); // Spazio per il titolo della lezione, se necessario
+      // Calculate space needed for complete question section (question, options, answer, explanation)
+      let spaceNeededForQuestion = 18 + // Space for question text
+        36; // Space between questions
 
-      // Modifica: verifica se c'è spazio sufficiente sulla pagina considerando anche il bottomMargin
+      if (question.type === 'multiple-choice') {
+        spaceNeededForQuestion += 
+          question.options.length * 18 + // Space for options
+          18 + // Space for correct answer
+          (question.explanation ? 
+            Math.ceil(question.explanation.length / 100) * 18 : 0); // Space for explanation (estimate 100 chars per line)
+      } else if (question.type === 'open') {
+        spaceNeededForQuestion += 54; // Space for open answer
+      }
+
+      // Add space for lecture title if new lecture
+      if (question.lecture !== currentLecture) {
+        spaceNeededForQuestion += 36 + 18 + 36;
+      }
+
+      // If not enough space for complete section, start new page
       if (y - spaceNeededForQuestion < margin + bottomMargin) {
         page = pdfDoc.addPage([pageWidth, pageHeight]);
-        y = pageHeight - margin; // Nuova pagina: inizia dall'alto
+        y = pageHeight - margin;
         currentPage++;
       }
 
@@ -167,19 +183,19 @@ export async function generatePdf(questions: QuestionFromPdf[], quizName: string
       if (!printedLectures.has(currentLecture)) {
         // Ad esempio, stampa "Lezione 001"
         const lessonText = `Lezione ${currentLecture.split(" ")[1]}`;
-        y -= addText(lessonText, margin, y, true) + 36;
+        y -= addText(lessonText, margin, y, 'bold', [0.2, 0.4, 0.8]) + 24;
         printedLectures.add(currentLecture);
       }
 
       // Unisce il prefisso e il testo della domanda in una sola stringa
       const fullQuestionText = `${question.type === "multiple-choice" ? `Domanda multipla ${lectureQuestionCount}:` : `Domanda aperta ${lectureQuestionCount}:`} ${question.question.replace(/^\d+\.?\s*/, '').trim()}`;
-      y -= addText(fullQuestionText, margin, y, true) + 18;
+      y -= addText(fullQuestionText, margin, y, 'bold', [0, 0.2, 0.5]) + 16; // Colore blu per le domande
 
       // Aggiunta delle opzioni (per domande a scelta multipla)
       if (question.type === 'multiple-choice') {
         question.options.forEach((option, i) => {
           const optText = `${String.fromCharCode(65 + i)}) ${option}`;
-          y -= addText(optText, margin + 20, y);
+          y -= addText(optText, margin + 20, y, 'normal', [0.3, 0.3, 0.3]);
         });
         y -= 18;
 
@@ -191,29 +207,29 @@ export async function generatePdf(questions: QuestionFromPdf[], quizName: string
           } else {
             answerDisplay = question.correctAnswer;
           }
-          y -= addText(`Risposta corretta: ${answerDisplay}`, margin, y, true) + 18;
+          y -= addText(`Risposta corretta: ${answerDisplay}`, margin, y, 'bold', [0, 0.6, 0.2]) + 16; // Verde più vivace per le risposte
           if (!question.answerLetter) {
-            y -= addText(`Risposta corretta: ${question.correctAnswer}`, margin, y, true) + 18;
+            y -= addText(`Risposta corretta: ${question.correctAnswer}`, margin, y, 'bold') + 18;
           }
           // Aggiunta della spiegazione, se presente
           if (question.explanation && !question.explanation.startsWith(question.correctAnswer)) {
-            y -= addText(`Spiegazione: ${question.explanation}`, margin, y) + 18;
+            y -= addText(`Spiegazione: ${question.explanation}`, margin, y, 'italic', [0.4, 0.4, 0.4]) + 14;
           }
         } else {
-          y -= addText('⚠️ Risposta non disponibile', margin, y, true) + 18;
+          y -= addText('⚠️ Risposta non disponibile', margin, y, 'bold', [0.8, 0.2, 0.2]) + 14;
         }
       } else if (question.type === 'open') {
         // Per domande aperte
         if (question.openAnswer) {
-          y -= addText(`Risposta: ${question.openAnswer}`, margin, y) + 18 + 36;
+          y -= addText(`Risposta: ${question.openAnswer}`, margin, y, 'normal', [0, 0, 0.6]) + 14 + 24;
         } else {
-          y -= addText('⚠️ Risposta aperta non disponibile', margin, y, true) + 18;
-          y -= 36;
+          y -= addText('⚠️ Risposta aperta non disponibile', margin, y, 'bold', [0.8, 0.2, 0.2]) + 14;
+          y -= 24;
         }
       }
 
       // Spaziatura tra domande
-      y -= 36;
+      y -= 24;
       lectureQuestionCount++;
     }
 
